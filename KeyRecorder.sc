@@ -282,7 +282,7 @@ KeyRecorderServer {
 	}
 	
 	
-	sendRecorded {|name|
+	sendRecorded {|name|
 	
 		var files = (this.userPath(name) ++ "*.aif").pathMatch;
 		
