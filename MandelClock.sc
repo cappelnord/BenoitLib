@@ -162,7 +162,7 @@ MandelClock {
 		// register with growl if this is osx
 		Platform.case(
 			\osx, {
-				("osascript " ++ this.pr_classPath("mcRegisterGrowl.applescript")).unixCmd(postOutput:false);
+				("osascript '" ++ this.pr_classPath("mcRegisterGrowl.applescript") ++ "'").unixCmd(postOutput:false);
 			}
 		);
 	}
@@ -353,7 +353,7 @@ MandelClock {
 	}
 	
 	// the most important method!
-	pr_receiveTick {|ser, bea, tem|
+	pr_receiveTick {|ser, bea, tem|
 		
 		var deviation;
 	
@@ -621,7 +621,7 @@ MandelClock {
 		
 		Platform.case(
 			\osx, {
-				("osascript " ++ this.pr_classPath("mcNotify.applescript") ++ " '" ++ name ++ "' '" ++ message ++ "'").unixCmd(postOutput:false);
+				("osascript '" ++ this.pr_classPath("mcNotify.applescript") ++ "' '" ++ name ++ "' '" ++ message ++ "'").unixCmd(postOutput:false);
 			},
 			\linux, {
 				("notify-send '" ++ name ++ "' '"++ message ++ "'").unixCmd(postOutput:false);
