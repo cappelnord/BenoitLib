@@ -517,7 +517,7 @@ MandelClock {
 		this.pr_clearResponders(oscFollowerResponders);
 	}
 	
-	pr_clearResponders {|list|
+	pr_clearResponders {|list|
 		list.do {|item| item.remove;};
 		list.clear;
 	}
