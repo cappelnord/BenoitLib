@@ -55,7 +55,7 @@ MandelClock {
 	
 	var <>helloAfterPorts = false;
 	
-	var <>tickFreq = 0.05;
+	var <>tickFreq = 0.1;
 	var <>latencyCompensation = 0.001;
 	var <>deviationThreshold = 0.01;
 	var <>quant = 4;
@@ -67,7 +67,10 @@ MandelClock {
 		
 	var clockDisplay;
 	var badTicks = 0;
-
+	
+	// to prevent shout flooding (which is kind of stupid but also dangerous)
+	var shoutCounter = 0;
+	var shoutCounterSJ;
 		
 	// Necessary: A TempoChange Counter + and a Process, that sets a leaderless system to the target tempo
 	// (because the adjust ticks won't get executed)
@@ -463,8 +466,8 @@ MandelClock {
 		
 		// a shout should be more visible than this.
 		this.pr_addResponder(oscGeneralResponders, "/shout", {|ti, tR, message, addr|
-			 (message[1].asString.toUpper ++ ":  " ++ message[2].asString.toUpper).postln;
-			 this.displayNotify(message[1].asString, message[2].asString);
+			 (message[1].asString ++ " (shout):  " ++ message[2].asString).postln;
+			 this.displayShout(message[1].asString, message[2].asString);
 		});
 		
 		this.pr_addResponder(oscGeneralResponders, "/hello", {|ti, tR, message, addr|
@@ -508,6 +511,10 @@ MandelClock {
 		this.pr_addResponder(oscGeneralResponders, "/takeLead", {|ti, tR, message, addr|
 				this.pr_receivedLeaderAnnouncement(message[1].asString);
 		});
+		
+		// ShoutCounter SkipJack
+		
+		shoutCounterSJ = SkipJack({shoutCounter = 0;},5, name:"ShoutCounterReset");
 	}
 	
 	
@@ -528,6 +535,7 @@ MandelClock {
 		lastTickSJ.stop;
 		tickSJ.stop;
 		tempoChangeSJ.stop;
+		shoutCounterSJ.stop;
 		
 		instance = nil;
 	}
@@ -613,20 +621,29 @@ MandelClock {
 		^MandelClock.filenameSymbol.asString.dirname ++ "/" ++ filename;
 	}
 	
-	displayNotify {|name, message|
+	displayShout {|name, message|
 		
-		// stupid sanity replacement, should be replaced by better escaping (or stuff)
-		name = name.tr($', $ );
-		message = message.tr($', $ );
+		(shoutCounter < 3).if({
+			// stupid sanity replacement, should be replaced by better escaping (or stuff)
+			name = name.tr($', $ );
+			message = message.tr($', $ );
 		
-		Platform.case(
-			\osx, {
-				("osascript '" ++ this.pr_classPath("mcNotify.applescript") ++ "' '" ++ name ++ "' '" ++ message ++ "'").unixCmd(postOutput:false);
-			},
-			\linux, {
-				("notify-send '" ++ name ++ "' '"++ message ++ "'").unixCmd(postOutput:false);
-			}
-		);
+			Platform.case(
+				\osx, {
+					("osascript '" ++ this.pr_classPath("mcNotify.applescript") ++ "' '" ++ name ++ "' '" ++ message ++ "'").unixCmd(postOutput:false);
+				},
+				\linux, {
+					("notify-send '" ++ name ++ "' '"++ message ++ "'").unixCmd(postOutput:false);
+				}
+			);
+		},{
+			(name == this.name).if ({
+				this.post("SHUT UP, " ++ name.toUpper ++ "!!! IT'S TOO LOUD IN HERE!");
+			},{
+				this.post("Too many shouts! Tell " ++ name ++ " to shut up!");
+			});	
+		});
 		
+		shoutCounter = shoutCounter + 1;
 	}
 }
