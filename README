@@ -1,0 +1,11 @@
+BenoitLib
+http://www.the-mandelbrots.de
+
+These are some extensions to SuperCollider used by the laptop band Benoît and
+the Mandelbrots. Most things aren't documented well and may be not stable, so
+use at your own risk.
+
+Contains:
+- KeyRecorder: A recording client/server.
+- MandelClock: A communication/tempo sync system.
+- MacroExpander: A Macro system for the Mac SuperCollider App
