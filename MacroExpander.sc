@@ -1,5 +1,5 @@
 /*
-	MandelClock
+	MacroExpander
 	(c) 2009 by Patrick Borgeat <patrick@borgeat.de>
 	http://www.cappel-nord.de
 	

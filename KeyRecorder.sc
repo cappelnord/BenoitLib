@@ -1,5 +1,5 @@
 /*
-	MacroExpander
+	KeyRecorder
 	(c) 2010 by Patrick Borgeat <patrick@borgeat.de>
 	http://www.cappel-nord.de
 	
