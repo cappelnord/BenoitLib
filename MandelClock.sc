@@ -72,10 +72,6 @@ MandelClock {
 	var shoutCounter = 0;
 	var shoutCounterSJ;
 		
-	// Necessary: A TempoChange Counter + and a Process, that sets a leaderless system to the target tempo
-	// (because the adjust ticks won't get executed)
-	// this will create a problem when a leader crashes in a tempo change.
-		
 	var <>postPrefix = "MandelClock: ";
 	
 	*startLeader {|name, startTempo = 2.0|
@@ -237,15 +233,15 @@ MandelClock {
 				delta = (tempo - internTempo) * 0.1 / time;
 				
 				(delta < 0.0).if ({
-					stopTest = {internTempo <= tempo};
+					stopTest = {((internTempo + delta) <= tempo).if({this.pr_setClockTempo(tempo);true;},{false;});};
 				},{
-					stopTest = {internTempo >= tempo};
-				});
+					stopTest = {((internTempo + delta) >= tempo).if({this.pr_setClockTempo(tempo);true;},{false;});};				});
 				
 				tempoChangeSJ = SkipJack({
 					// TO IMPROVE: Smoother curve, linear kinda sux
-					// TODO: Doesn't start on the right spot.
+					
 					this.pr_setClockTempo(internTempo + delta);
+					
 				},0.1, stopTest, name: "TempoChange");
 			});
 		};	
