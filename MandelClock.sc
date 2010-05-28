@@ -190,7 +190,6 @@ MandelClock {
 		this.sendMsgCmd("/shout", message);
 	}
 	
-	
 	systemPorts {
 		var intKeys = (addrDict.keys.collect{|i| i.asInteger}).asArray;
 		this.sendMsgCmd("/systemPorts", *intKeys);	
@@ -239,9 +238,7 @@ MandelClock {
 				
 				tempoChangeSJ = SkipJack({
 					// TO IMPROVE: Smoother curve, linear kinda sux
-					
 					this.pr_setClockTempo(internTempo + delta);
-					
 				},0.1, stopTest, name: "TempoChange");
 			});
 		};	
@@ -302,9 +299,7 @@ MandelClock {
 		lastTickSJ = nil;
 		lastTickTime = 0;
 		
-		
 		this.post("Starting leader tasks ...");
-		
 		
 		// start leader tasks
 		tickSJ = SkipJack({
@@ -333,7 +328,6 @@ MandelClock {
 		badTicks = 0;
 		
 		this.post("Starting follower tasks ...");
-		
 		
 		// start follower tasks
 		lastTickTime = thisThread.seconds;
