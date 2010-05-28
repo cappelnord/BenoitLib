@@ -115,12 +115,7 @@ KeyRecorder
 KeyRecorderWindow
 {
 	var window;
-	
-	var keyTable = #[
-		[$q, $w, $e, $r, $t, $z, $u, $i, $o, $p],
-		 [$a, $s, $d, $f, $g, $h, $j, $k, $l],
-		  [$y, $x, $c, $v, $b, $n, $m]];
-		  
+	  
 	var <buttonDict;
 	
 	var <status;
@@ -130,29 +125,47 @@ KeyRecorderWindow
 	
 	var updateButton;
 	
-	*new {|name|
-		^super.new.init(name);
+	*new {|name, keyboardLayout=\germany|
+		^super.new.init(name, keyboardLayout);
 	}
 	
 	
-	init {|name|
-		
+	init {|name, keyboardLayout=\germany|
+
+		var keyTable = (germany: #[
+		[$q, $w, $e, $r, $t, $z, $u, $i, $o, $p],
+		 [$a, $s, $d, $f, $g, $h, $j, $k, $l],
+		  [$y, $x, $c, $v, $b, $n, $m]],
+		neo2: #[
+		[$x, $v, $l, $c, $w, $k, $h, $g, $f, $q],
+		 [$u, $i, $a, $e, $o, $s, $n, $r, $t, $d, $y],
+		  [$_, $_, $_, $p, $z, $b, $m, $_, $_, $j]]
+		).at(keyboardLayout);
+
+		var rowSizes = keyTable.collect({ |item,i| item.size});
+		var maxRowSize = rowSizes.copy.sort.last;
+		var winWidth = (maxRowSize * 35) + (20 * (rowSizes.indicesOfEqual(maxRowSize).last + 1));
+
 		buttonDict = Dictionary.new;
-				
-		window = Window.new("Key " ++ name, Rect(100,100,370,145));
-		window.view.decorator = FlowLayout(Rect(0,0,370,145), 5@5, 5@5);
+
+		window = Window.new("Key " ++ name, Rect(100,100,winWidth,145));
+		window.view.decorator = FlowLayout(Rect(0,0,winWidth,145), 5@5, 5@5);
 		
 		keyTable.do {|list, i|
 			
 			CompositeView.new(window,Point(15*i+1,25)); // silly spacing
 			
 			list.do{|char|
-				var button = StaticText.new(window,30@30);
-				button.string = "    " ++ char.toUpper.asString;
-				button.background = Color.grey;
+				if(char == $_, {
+					CompositeView.new(window,Point(30,30)); // silly spacing
+				},
+				{
+					var button = StaticText.new(window,30@30);
+					button.string = "    " ++ char.toUpper.asString;
+					button.background = Color.grey;
 				
-				buttonDict.add(char -> button);
-				
+					buttonDict.add(char -> button);
+				});
 			};
 			window.view.decorator.nextLine;	
 		};
