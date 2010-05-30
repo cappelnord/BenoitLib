@@ -68,6 +68,9 @@ MandelClock {
 	var clockDisplay;
 	var badTicks = 0;
 	
+	var proxySpace;
+	var tempoProxy;	
+	
 	// to prevent shout flooding (which is kind of stupid but also dangerous)
 	var shoutCounter = 0;
 	var shoutCounterSJ;
@@ -404,7 +407,7 @@ MandelClock {
 		
 		internTempo = tempo;
 		clock.tempo_(tempo);
-		
+		this.pr_setTempoProxy(tempo);
 		leading.if {externTempo = tempo;};
 	}
 	
@@ -526,6 +529,7 @@ MandelClock {
 		tickSJ.stop;
 		tempoChangeSJ.stop;
 		shoutCounterSJ.stop;
+		this.clearTempoProxy;
 		
 		instance = nil;
 	}
@@ -635,5 +639,29 @@ MandelClock {
 		});
 		
 		shoutCounter = shoutCounter + 1;
+	}
+	
+	makeTempoProxy {|ps|
+		proxySpace = ps;
+		tempoProxy = NodeProxy.control(ps.server,1);
+		ps.put(\tempo,tempoProxy);
+		tempoProxy.source_(internTempo);
+		^tempoProxy;
+	}
+	
+	clearTempoProxy {
+		proxySpace.isNil.not.if {
+			proxySpace.removeAt(\tempo);
+		};
+		
+		tempoProxy.free;
+		tempoProxy = nil;
+		proxySpace = nil;
+	}
+	
+	pr_setTempoProxy {|tempo|
+		tempoProxy.isNil.not.if {
+			tempoProxy.source_(tempo);	
+		}
 	}
 }
