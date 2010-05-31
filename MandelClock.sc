@@ -642,11 +642,17 @@ MandelClock {
 	}
 	
 	makeTempoProxy {|ps|
-		proxySpace = ps;
-		tempoProxy = NodeProxy.control(ps.server,1);
-		ps.put(\tempo,tempoProxy);
-		tempoProxy.source_(internTempo);
-		^tempoProxy;
+		
+		// it's not very nice to check for a class (anti OO, a class COULD act as a ProxySpace)
+		(ps.class == ProxySpace).if({
+			proxySpace = ps;
+			tempoProxy = NodeProxy.control(ps.server,1);
+			ps.put(\tempo,tempoProxy);
+			tempoProxy.source_(internTempo);
+			^tempoProxy;
+		},{
+			"You need to specify your ProxySpace!".throw;
+		});
 	}
 	
 	clearTempoProxy {
