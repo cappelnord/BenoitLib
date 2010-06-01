@@ -43,7 +43,7 @@ TempoClockDisplay
 			beatText.string_(clock.beats % 4 + 1);
 		},0.1);
 		
-		window.onClose_({sj.stop;stillOpen=false;});
+		window.onClose_({this.pr_prepClose;});
 		window.front;
 		
 		this.pr_schedNextBeat;
@@ -51,8 +51,13 @@ TempoClockDisplay
 	}
 	
 	close {
-		sj.stop;
+		this.pr_prepClose;
 		window.close;	
+	}
+	
+	pr_prepClose {
+		sj.stop;
+		stillOpen = false;
 	}
 	
 	pr_clearBeats {
@@ -61,6 +66,7 @@ TempoClockDisplay
 		};
 	}
 	
+	// TODO: how can we SkipJack this too but keep total sync with our clock?
 	pr_schedNextBeat {
 		var nextBeat = clock.beats.ceil;
 		var color = Color.green;
