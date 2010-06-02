@@ -156,11 +156,13 @@ KeyRecorderWindow
 			CompositeView.new(window,Point(15*i+1,25)); // silly spacing
 			
 			list.do{|char|
+				var button;
+				
 				if(char == $_, {
 					CompositeView.new(window,Point(30,30)); // silly spacing
 				},
 				{
-					var button = StaticText.new(window,30@30);
+					button = StaticText.new(window,30@30);
 					button.string = "    " ++ char.toUpper.asString;
 					button.background = Color.grey;
 				
