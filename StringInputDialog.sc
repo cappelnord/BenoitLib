@@ -29,7 +29,7 @@ StringInputDialog {
 		// the keyDownAction is a little hacky, SCTextField doesn't seem to register Escape, which i neeeed :-(
 		// this could be improved some time later ...
 		
-		Button(window, Rect(width - 67,7,60,20))
+		Button(window, Rect(width - 67,7,57,20))
 			.states_([[msg,Color.black,Color.clear]])
 			.action_({|button| this.doAction;}).keyDownAction_({ |b, char, modifiers, unicode, keycode|
 				

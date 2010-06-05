@@ -24,7 +24,7 @@ MandelClockGUI
 		clock = mc.clock;
 		
 		// ToDo: Some smart place?
-		window = Window.new("MandelClockGUI", Rect(400,400,290,65), false);
+		window = Window.new("MandelClockGUI", Rect(400,400,285,65), false);
 		window.addFlowLayout(10@10,5@5);
 		
 		bpmText = StaticText(window, 50@20);
