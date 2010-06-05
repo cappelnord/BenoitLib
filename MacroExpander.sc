@@ -6,7 +6,6 @@
 	Part of BenoitLib
 	http://github.com/cappelnord/BenoitLib
 	http://www.the-mandelbrots.de
-	
 */
 
 MacroExpander

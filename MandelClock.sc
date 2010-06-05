@@ -65,7 +65,7 @@ MandelClock {
 	var <>maxTempo = 4.0;
 	var <>minTempo = 0.2;
 		
-	var clockDisplay;
+	var guiWindow;
 	var badTicks = 0;
 	
 	var proxySpace;
@@ -599,12 +599,13 @@ MandelClock {
 		^((message[1].asString == leaderName) && leading.not);	
 	}
 	
-	display {
-		clockDisplay.isNil.not.if {
-			clockDisplay.close;
+	gui {
+		guiWindow.isNil.not.if {
+			guiWindow.close;
 		};
 		
-		clockDisplay = TempoClockDisplay(clock);
+		guiWindow = MandelClockGUI(this);
+		^guiWindow;
 	}
 	
 	post {|message|
@@ -669,5 +670,15 @@ MandelClock {
 		tempoProxy.isNil.not.if {
 			tempoProxy.source_(tempo);	
 		}
+	}
+	
+	
+	
+	
+	
+	// deprecated
+	display {
+		this.deprecated(thisMethod, this.class.findRespondingMethodFor(\gui));
+		this.gui;
 	}
 }

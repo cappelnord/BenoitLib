@@ -1,22 +1,29 @@
 /*
-	messy and a hack, well ...
+	MandelClockGUI
+	(c) 2010 by Patrick Borgeat <patrick@borgeat.de>
+	http://www.cappel-nord.de
+	
+	Part of BenoitLib
+	http://github.com/cappelnord/BenoitLib
+	http://www.the-mandelbrots.de
 */
 
-TempoClockDisplay
+MandelClockGUI
 {
-	var window, bpmText, mesText, beatText, bpsText, beatArr, clock;
+	var window, bpmText, mesText, beatText, bpsText, beatArr, clock,mc;
 	var sj;
 	var stillOpen = true;
 	
-	*new {|clock|
-		^super.new.init(clock);	
+	*new {|mc|
+		^super.new.init(mc);	
 	}
 	
-	init {|a_clock|
-				
-		clock = a_clock;
+	init {|a_mc|
 		
-		window = Window.new("Clock Display", Rect(400,400,220,60));
+		mc = a_mc;		
+		clock = mc.clock;
+		
+		window = Window.new("MandelClockGUI", Rect(400,400,220,60));
 		window.addFlowLayout(10@10,5@2);
 		
 		bpmText = StaticText(window, 40@20);
