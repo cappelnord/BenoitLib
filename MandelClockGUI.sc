@@ -23,17 +23,18 @@ MandelClockGUI
 		mc = a_mc;		
 		clock = mc.clock;
 		
-		window = Window.new("MandelClockGUI", Rect(400,400,220,60));
+		// ToDo: Some smart place?
+		window = Window.new("MandelClockGUI", Rect(400,400,240,60));
 		window.addFlowLayout(10@10,5@2);
 		
-		bpmText = StaticText(window, 40@20);
+		bpmText = StaticText(window, 50@20);
 		StaticText(window,45@20).string_("BPM");
-		mesText = StaticText(window, 25@20);
-		beatText = StaticText(window, 70@20);
+		mesText = StaticText(window, 45@20);
+		beatText = StaticText(window, 45@20);
 		
 		window.view.decorator.nextLine;
 		
-		bpsText = StaticText(window, 40@20);
+		bpsText = StaticText(window, 50@20);
 		StaticText(window,45@20).string_("BPS");
 		
 		beatArr = nil.dup(4);
@@ -45,9 +46,9 @@ MandelClockGUI
 		this.pr_clearBeats;
 		
 		sj = SkipJack({
-			bpmText.string_((clock.tempo * 60));
-			bpsText.string_(clock.tempo);
-			beatText.string_(clock.beats % 4 + 1);
+			bpmText.string_((clock.tempo * 60).asString[0..5]);
+			bpsText.string_(clock.tempo.asString[0..5]);
+			beatText.string_((clock.beats % 4 + 1).asString[0..4]);
 		},0.1);
 		
 		window.onClose_({this.pr_prepClose;});
