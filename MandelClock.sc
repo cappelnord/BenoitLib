@@ -31,8 +31,8 @@ MandelClock {
 	var <clock;
 	var clockSerial = 0;
 	
-	var externTempo; // the tempo set by external clock
-	var internTempo; // the internal tempo, may differ because it does a correction
+	var <externTempo; // the tempo set by external clock
+	var <internTempo; // the internal tempo, may differ because it does a correction
 	
 	var lastTickTime = 0;
 	var lastTickSJ;
@@ -672,8 +672,13 @@ MandelClock {
 		}
 	}
 	
+	chatWindow {
+		StringInputDialog.new("MandelClock Chat", "Send", {|string| this.chat(string);});
+	}
 	
-	
+	shoutWindow {
+		StringInputDialog.new("MandelClock Shout", "Send", {|string| this.shout(string);});
+	}
 	
 	
 	// deprecated

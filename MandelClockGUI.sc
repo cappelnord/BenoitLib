@@ -24,13 +24,19 @@ MandelClockGUI
 		clock = mc.clock;
 		
 		// ToDo: Some smart place?
-		window = Window.new("MandelClockGUI", Rect(400,400,240,60));
-		window.addFlowLayout(10@10,5@2);
+		window = Window.new("MandelClockGUI", Rect(400,400,290,65), false);
+		window.addFlowLayout(10@10,5@5);
 		
 		bpmText = StaticText(window, 50@20);
 		StaticText(window,45@20).string_("BPM");
 		mesText = StaticText(window, 45@20);
 		beatText = StaticText(window, 45@20);
+		
+		CompositeView.new(window,Point(10,20)); // silly spacing
+
+		Button(window,45@20)
+			.states_([["Chat", Color.black, Color.clear]])
+			.action_({mc.chatWindow;});
 		
 		window.view.decorator.nextLine;
 		
@@ -43,11 +49,38 @@ MandelClockGUI
 			beatArr[i] = StaticText(window,20@20);
 		};
 		
+		CompositeView.new(window,Point(10,20)); // silly spacing
+		
+		Button(window,45@20)
+			.states_([["Shout", Color.black, Color.clear]])
+			.action_({mc.shoutWindow;});
+		
 		this.pr_clearBeats;
 		
 		sj = SkipJack({
-			bpmText.string_((clock.tempo * 60).asString[0..5]);
-			bpsText.string_(clock.tempo.asString[0..5]);
+			
+			var tempo = mc.externTempo;
+			var color = Color.black;
+			
+			MandelClock.debug.if {
+				tempo = mc.internTempo;
+			};
+			
+			(mc.internTempo > mc.externTempo).if {
+				color = Color(0.4,0,0);
+			};
+			
+			(mc.internTempo < mc.externTempo).if {
+				color = Color(0,0.4,0);
+			};
+			
+			bpmText.stringColor_(color);
+			bpsText.stringColor_(color);
+			
+			bpmText.string_((tempo * 60).asString[0..5]);
+			bpsText.string_(tempo.asString[0..5]);
+			
+			
 			beatText.string_((clock.beats % 4 + 1).asString[0..4]);
 		},0.1);
 		
