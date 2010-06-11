@@ -13,7 +13,6 @@ MandelClockGUI
 	var window, bpmText, mesText, beatText, bpsText, beatArr, clock,mc;
 	var sj;
 	var stillOpen = true;
-	var lastBeatTick = 0;
 	
 	*new {|mc|
 		^super.new.init(mc);	
