@@ -17,19 +17,26 @@ StringInputDialog {
 	}
 	
 	init {|title, msg, a_function, width|
+		
+		// used to make the text input a little bit larger when using swing
+		var swingBigger = 0;
+		(GUI.id == \swing).if {
+			swingBigger = 7;
+		};
+		
 		function = a_function;
 		
 		window = Window.new(title, Rect(	Window.screenBounds.width/2 - (width/2),
 									Window.screenBounds.height/2 - 10,
 									width,
-									35), false);
+									35 + swingBigger), false);
 		
-		txt = TextField(window, Rect(7,7,width-80,20));
+		txt = TextField(window, Rect(7,7,width-80,20 + swingBigger));
 		
 		// the keyDownAction is a little hacky, SCTextField doesn't seem to register Escape, which i neeeed :-(
 		// this could be improved some time later ...
 		
-		Button(window, Rect(width - 67,7,57,20))
+		Button(window, Rect(width - 67,7,57,20 + swingBigger))
 			.states_([[msg,Color.black,Color.clear]])
 			.action_({|button| this.doAction;}).keyDownAction_({ |b, char, modifiers, unicode, keycode|
 				
