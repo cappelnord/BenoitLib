@@ -13,6 +13,7 @@ MandelClockGUI
 	var window, bpmText, mesText, beatText, bpsText, beatArr, clock,mc;
 	var sj;
 	var stillOpen = true;
+	var lastBeatTick = 0;
 	
 	*new {|mc|
 		^super.new.init(mc);	
@@ -80,16 +81,17 @@ MandelClockGUI
 			bpmText.string_((tempo * 60).asString[0..5]);
 			bpsText.string_(tempo.asString[0..5]);
 			
-			
 			beatText.string_((clock.beats % 4 + 1).asString[0..4]);
 		},0.1);
 		
 		window.onClose_({this.pr_prepClose;});
 		window.front;
 		
+		this.pr_addCmdPeriod ;
 		this.pr_schedNextBeat;
 		
 	}
+	
 	
 	close {
 		this.pr_prepClose;
@@ -107,7 +109,6 @@ MandelClockGUI
 		};
 	}
 	
-	// TODO: how can we SkipJack this too but keep total sync with our clock?
 	pr_schedNextBeat {
 		var nextBeat = clock.beats.ceil;
 		var color = Color.green;
@@ -124,6 +125,13 @@ MandelClockGUI
 				}.defer;
 			};
 		});	
+	}
+	
+	pr_addCmdPeriod {
+		stillOpen.if {
+			CmdPeriod.doOnce({this.pr_addCmdPeriod ;});
+			this.pr_schedNextBeat;
+		};	
 	}
 	
 }
