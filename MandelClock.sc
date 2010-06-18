@@ -25,8 +25,10 @@ MandelClock {
 	
 	classvar <instance;
 	classvar <>oscPrefix = "/mc";
-	classvar <>debug = false;
 	classvar bStrapResponder;
+	
+	classvar <>debug = false;
+	classvar <>dumpOSC = false;
 	
 	var <clock;
 	var clockSerial = 0;
@@ -58,7 +60,7 @@ MandelClock {
 	var <>tickFreq = 0.1;
 	var <>latencyCompensation = 0.001;
 	var <>deviationThreshold = 0.01;
-	var <>quant = 4;
+	var <>quant = 16;
 	
 	var <>allowTempoRequests = true;
 	
@@ -284,7 +286,7 @@ MandelClock {
 	// sendMessage delivers to NetAddr
 	sendMsg {|... args|
 		
-		debug.if {args.postcs;};
+		dumpOSC.if {args.postcs;};
 		
 		addrDict.do {|addr|
 				addr.sendMsg(*args);
@@ -365,10 +367,12 @@ MandelClock {
 			
 			// update internal state
 			clockSerial = ser;
-			externTempo = tem;
 			lastTickTime = thisThread.seconds;
 			
 			listenToTicks.if {
+				
+				externTempo = tem;
+
 				// compensate network latency (stupid)
 				bea = bea - (latencyCompensation * tem);
 				
