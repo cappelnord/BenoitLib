@@ -67,11 +67,11 @@ MandelClockGUI
 			};
 			
 			(mc.internTempo > mc.externTempo).if {
-				color = Color(0.4,0,0);
+				color = Color(0,0.4,0);
 			};
 			
 			(mc.internTempo < mc.externTempo).if {
-				color = Color(0,0.4,0);
+				color = Color(0.4,0,0);
 			};
 			
 			bpmText.stringColor_(color);
