@@ -397,7 +397,8 @@ MandelClock {
 					((badTicks > 3) || (deviation.abs > (deviationThreshold * 5))).if {
 						// TODO: This is really rough and may work. But it also could fail badly ...
 						// Someone should do some serious thinking ...
-						this.pr_setClockTempo(externTempo + (deviation * 0.3 * -1));
+						this.pr_setClockTempo((internTempo * 0.9) + ( externTempo + (deviation * 0.2 * -1) * 0.1));
+
 					};
 					
 					badTicks = badTicks + 1;
@@ -414,6 +415,10 @@ MandelClock {
 	}
 	
 	pr_setClockTempo {|tempo|
+		
+		(tempo < (minTempo / 4)).if {
+			tempo = minTempo / 4;
+		};
 		
 		internTempo = tempo;
 		clock.tempo_(tempo);
