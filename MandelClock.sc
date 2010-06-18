@@ -124,11 +124,16 @@ MandelClock {
 	}
 	
 	*new {|name, startBeat, startTempo, leaderName, ports, leading=false|
+		
+		name.isNil.if {
+			name = "RandomUser" ++ 100000.rand;	
+		};
+		
 		^super.new.init(name, startBeat, startTempo, leaderName, ports, leading);
 	}
 	
 	init {|a_name, startBeat, startTempo, a_leaderName, ports, a_leading|
-	
+		
 		name = a_name;
 		leaderName = a_leaderName;
 		leading = a_leading;
