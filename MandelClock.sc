@@ -60,7 +60,7 @@ MandelClock {
 	var <>tickFreq = 0.1;
 	var <>latencyCompensation = 0.001;
 	var <>deviationThreshold = 0.01;
-	var <>quant = 16;
+	var <>quant = 16; // may be nil
 	
 	var <>allowTempoRequests = true;
 	
@@ -380,9 +380,11 @@ MandelClock {
 				deviation = clock.beats - bea;
 				
 				// snap to next quant if necessary
-				(deviation.abs > (quant / 2)).if {
-					// this may not work. brain damage!
-					deviation = deviation - ((deviation / quant).floor * quant);
+				quant.isNil.not.if {
+					(deviation.abs > (quant / 2)).if {
+						// this may not work. brain damage!
+						deviation = deviation - ((deviation / quant).floor * quant);
+					};
 				};
 				
 				(deviation.abs > deviationThreshold).if ({
