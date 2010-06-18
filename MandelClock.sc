@@ -64,6 +64,8 @@ MandelClock {
 	
 	var <>maxTempo = 4.0;
 	var <>minTempo = 0.2;
+	
+	var <>listenToTicks = true;
 		
 	var guiWindow;
 	var badTicks = 0;
@@ -366,40 +368,42 @@ MandelClock {
 			externTempo = tem;
 			lastTickTime = thisThread.seconds;
 			
-			// compensate network latency (stupid)
-			bea = bea - (latencyCompensation * tem);
-			
-			// calculate the beat we want to snap on.
-			deviation = clock.beats - bea;
-			
-			// snap to next quant if necessary
-			(deviation.abs > (quant / 2)).if {
-				// this may not work. brain damage!
-				deviation = deviation - ((deviation / quant).floor * quant);
+			listenToTicks.if {
+				// compensate network latency (stupid)
+				bea = bea - (latencyCompensation * tem);
+				
+				// calculate the beat we want to snap on.
+				deviation = clock.beats - bea;
+				
+				// snap to next quant if necessary
+				(deviation.abs > (quant / 2)).if {
+					// this may not work. brain damage!
+					deviation = deviation - ((deviation / quant).floor * quant);
+				};
+				
+				(deviation.abs > deviationThreshold).if ({
+					
+					debug.if {
+						this.post("Deviation: " ++ deviation);
+					};
+					
+					// if three ticks were bad OR timing is really off
+					((badTicks > 3) || (deviation.abs > (deviationThreshold * 5))).if {
+						// TODO: This is really rough and may work. But it also could fail badly ...
+						// Someone should do some serious thinking ...
+						this.pr_setClockTempo(externTempo + (deviation * 0.3 * -1));
+					};
+					
+					badTicks = badTicks + 1;
+					
+				},{ // if our timing is good at the moment
+					(externTempo != internTempo).if {
+						this.pr_setClockTempo(externTempo);
+					};
+					
+					badTicks = 0;
+				});
 			};
-			
-			(deviation.abs > deviationThreshold).if ({
-				
-				debug.if {
-					this.post("Deviation: " ++ deviation);
-				};
-				
-				// if three ticks were bad OR timing is really off
-				((badTicks > 3) || (deviation.abs > (deviationThreshold * 5))).if {
-					// TODO: This is really rough and may work. But it also could fail badly ...
-					// Someone should do some serious thinking ...
-					this.pr_setClockTempo(externTempo + (deviation * 0.3 * -1));
-				};
-				
-				badTicks = badTicks + 1;
-				
-			},{ // if our timing is good at the moment
-				(externTempo != internTempo).if {
-					this.pr_setClockTempo(externTempo);
-				};
-				
-				badTicks = 0;
-			});
 		};
 	}
 	
