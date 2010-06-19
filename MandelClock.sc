@@ -689,10 +689,16 @@ MandelClock {
 		
 		// it's not very nice to check for a class (anti OO, a class COULD act as a ProxySpace)
 		(ps.isKindOf(ProxySpace)).if({
+			
 			proxySpace = ps;
-			tempoProxy = NodeProxy.control(ps.server,1);
-			ps.put(\tempo,tempoProxy);
-			tempoProxy.source_(internTempo);
+			
+			tempoProxy = ps.envir[\tempo];
+			tempoProxy.isNil.if {
+				tempoProxy = NodeProxy.control(ps.server,1);
+				ps.envir.put(\tempo,tempoProxy);
+			};
+			tempoProxy.put(0, {|tempo = 2.0| tempo}, 0, [\tempo, internTempo]);
+			// tempoProxy.fadeTime = 0;
 			^tempoProxy;
 		},{
 			"You need to specify your ProxySpace!".throw;
@@ -701,17 +707,17 @@ MandelClock {
 	
 	clearTempoProxy {
 		proxySpace.isNil.not.if {
-			proxySpace.removeAt(\tempo);
+			proxySpace.envir.removeAt(\tempo);
 		};
 		
-		tempoProxy.free;
+		tempoProxy.clear;
 		tempoProxy = nil;
 		proxySpace = nil;
 	}
 	
 	pr_setTempoProxy {|tempo|
 		tempoProxy.isNil.not.if {
-			tempoProxy.source_(tempo);	
+			tempoProxy.set(\tempo, tempo);	
 		}
 	}
 	
