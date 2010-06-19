@@ -407,7 +407,7 @@ MandelClock {
 					thisDeviationTreshold = thisDeviationTreshold / 4;
 				};
 				
-				((deviation.abs > thisDeviationTreshold) ||ÊtempoHasChanged) .if ({
+				((deviation.abs > thisDeviationTreshold) || tempoHasChanged) .if ({
 					
 					debug.if {
 						this.post("Deviation: " ++ deviation);
@@ -683,8 +683,12 @@ MandelClock {
 	
 	makeTempoProxy {|ps|
 		
+		((ps == nil) && (currentEnvironment.isKindOf(ProxySpace))).if {
+			ps = currentEnvironment;	
+		};
+		
 		// it's not very nice to check for a class (anti OO, a class COULD act as a ProxySpace)
-		(ps.class == ProxySpace).if({
+		(ps.isKindOf(ProxySpace)).if({
 			proxySpace = ps;
 			tempoProxy = NodeProxy.control(ps.server,1);
 			ps.put(\tempo,tempoProxy);
