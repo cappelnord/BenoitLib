@@ -17,7 +17,7 @@ m.metro(1); // right
 	0.5.wait;
 	m.listenToTicks = false;
 	a.changeTempo(4);
-	5.wait;
+	0.2.wait;
 	a.changeTempo(2);
 	m.listenToTicks = true; // now m should resync
 	
@@ -25,4 +25,4 @@ m.metro(1); // right
 )
 
 // accelerando
-a.changeTempo(3,30);
+a.changeTempo(2);

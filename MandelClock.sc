@@ -57,10 +57,12 @@ MandelClock {
 	
 	var <>helloAfterPorts = false;
 	
-	var <>tickFreq = 0.1;
-	var <>latencyCompensation = 0.001;
-	var <>deviationThreshold = 0.01;
-	var <>quant = 16; // may be nil
+	var <>tickFreq = 0.1; // in s
+	var <>latencyCompensation = 0.005; // in s
+	var <>deviationThreshold = 0.005; // in beats
+	var <>quant = 16; // may be nil, in beats
+	
+	var deviationGate = false;
 	
 	var <>allowTempoRequests = true;
 	
@@ -360,9 +362,12 @@ MandelClock {
 	}
 	
 	// the most important method!
+	// it is a mess :-)
 	pr_receiveTick {|ser, bea, tem|
 		
 		var deviation;
+		var tempoHasChanged = false;
+		var thisDeviationTreshold = deviationThreshold;
 	
 		// only interpret a tick if it's a new one.
 		(ser > clockSerial).if {
@@ -378,10 +383,13 @@ MandelClock {
 			
 			listenToTicks.if {
 				
-				externTempo = tem;
+				if(externTempo != tem) {
+					externTempo = tem;
+					tempoHasChanged = true;
+				};
 
 				// compensate network latency (stupid)
-				bea = bea - (latencyCompensation * tem);
+				bea = bea + (latencyCompensation * tem);
 				
 				// calculate the beat we want to snap on.
 				deviation = clock.beats - bea;
@@ -394,20 +402,28 @@ MandelClock {
 					};
 				};
 				
-				(deviation.abs > deviationThreshold).if ({
+				// if the deviationGate is open it should be more difficult to close it again
+				deviationGate.if {
+					thisDeviationTreshold = thisDeviationTreshold / 4;
+				};
+				
+				((deviation.abs > thisDeviationTreshold) ||ÊtempoHasChanged) .if ({
 					
 					debug.if {
 						this.post("Deviation: " ++ deviation);
 					};
 					
-					// if three ticks were bad OR timing is really off
-					((badTicks > 3) || (deviation.abs > (deviationThreshold * 5))).if {
-						// TODO: This is really rough and may work. But it also could fail badly ...
-						// Someone should do some serious thinking ...
+					// warning, crappy case syntax!
+					case
+					{ tempoHasChanged == true } {
+						this.pr_setClockTempo(externTempo);
+					}
+					// if five ticks were bad OR timing is really off
+					{(badTicks > 5) || (deviation.abs > (deviationThreshold * 5))} {
 						this.pr_setClockTempo((internTempo * 0.7) + ( externTempo + (deviation * 0.2 * -1) * 0.3));
-
 					};
 					
+					deviationGate = true;
 					badTicks = badTicks + 1;
 					
 				},{ // if our timing is good at the moment
@@ -416,6 +432,7 @@ MandelClock {
 					};
 					
 					badTicks = 0;
+					deviationGate = false;
 				});
 			};
 		};
