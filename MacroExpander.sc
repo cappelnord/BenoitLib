@@ -43,10 +43,10 @@ MacroExpander
 		var replacement = this.parseAndProcess(cmd);
 		var cursorPos;
 				
-		(replacement.isNil.not).if {
+		(replacement.notNil).if {
 			cursorPos = replacement.find("%");
 			
-			cursorPos.isNil.not.if {
+			cursorPos.notNil.if {
 				replacement = replacement.replace("%", "");
 			};
 			

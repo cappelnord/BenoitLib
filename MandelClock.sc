@@ -87,7 +87,7 @@ MandelClock {
 	
 	*startLeader {|name, startTempo = 2.0|
 		
-		instance.isNil.not.if {
+		instance.notNil.if {
 			"THERE IS ALREADY A MANDELCLOCK INSTANCE".postln;
 			^instance;	
 		};
@@ -100,7 +100,7 @@ MandelClock {
 		
 		var addr;
 		
-		instance.isNil.not.if {
+		instance.notNil.if {
 			"THERE IS ALREADY A MANDELCLOCK INSTANCE".postln;
 			^instance;	
 		};
@@ -395,7 +395,7 @@ MandelClock {
 				deviation = clock.beats - bea;
 				
 				// snap to next quant if necessary
-				quant.isNil.not.if {
+				quant.notNil.if {
 					(deviation.abs > (quant / 2)).if {
 						// this may not work. brain damage!
 						deviation = deviation - ((deviation / quant).floor * quant);
@@ -574,7 +574,7 @@ MandelClock {
 	}
 	
 	*clear {
-		instance.isNil.not.if {
+		instance.notNil.if {
 			instance.clear;
 		};
 		
@@ -639,7 +639,7 @@ MandelClock {
 	}
 	
 	gui {
-		guiWindow.isNil.not.if {
+		guiWindow.notNil.if {
 			guiWindow.close;
 		};
 		
@@ -706,7 +706,7 @@ MandelClock {
 	}
 	
 	clearTempoProxy {
-		proxySpace.isNil.not.if {
+		proxySpace.notNil.if {
 			proxySpace.envir.removeAt(\tempo);
 		};
 		
@@ -716,7 +716,7 @@ MandelClock {
 	}
 	
 	pr_setTempoProxy {|tempo|
-		tempoProxy.isNil.not.if {
+		tempoProxy.notNil.if {
 			tempoProxy.set(\tempo, tempo);	
 		}
 	}
