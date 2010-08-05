@@ -82,9 +82,9 @@ MandelClock {
 	var shoutCounterSJ;
 		
 	var <>postPrefix = "MandelClock: ";
-	
+		
 	var metro;
-	
+		
 	*startLeader {|name, startTempo = 2.0|
 		
 		instance.notNil.if {
@@ -363,16 +363,23 @@ MandelClock {
 	
 	// the most important method!
 	// it is a mess :-)
-	pr_receiveTick {|ser, bea, tem|
-		
+	pr_receiveTick {|ser, bea, tem, force=false|
+				
 		var deviation;
 		var tempoHasChanged = false;
 		var thisDeviationTreshold = deviationThreshold;
+		
+		// (ser + "\n" + bea + "\n" + tem + "\n").postln;
+		
+		force.if {
+			externTempo = tem;	
+		};
+
 	
 		// only interpret a tick if it's a new one.
-		(ser > clockSerial).if {
+		((ser > clockSerial) || force).if {
 			debug.if {
-				((clockSerial + 1) != ser).if {
+				(((clockSerial + 1) != ser) && (force.not)).if {
 					this.post("A tick was lost or too late!");
 				};
 			};
