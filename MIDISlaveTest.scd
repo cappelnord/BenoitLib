@@ -5,7 +5,7 @@
 	var lastTick;
 	var tempo;
 	
-	s.latency = nil
+	s.latency = nil;
 	
 	// init MIDI
 	MIDIClient.initialized.not.if({
