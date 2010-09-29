@@ -57,12 +57,12 @@ MandelClock {
 	
 	var <>helloAfterPorts = false;
 	
-	var <>tickFreq = 0.1; // in s
+	var <>tickFreq = 0.02; // in s
 	var <>latencyCompensation = 0.005; // in s
-	var <>deviationThreshold = 0.005; // in beats
+	var <>deviationThreshold = 0.02; // in beats
 	var <>quant = 16; // may be nil, in beats
 	
-	var deviationGate = false;
+	var deviationGate = true;
 	
 	var <>allowTempoRequests = true;
 	
@@ -427,7 +427,7 @@ MandelClock {
 					}
 					// if five ticks were bad OR timing is really off
 					{(badTicks > 5) || (deviation.abs > (deviationThreshold * 5))} {
-						this.pr_setClockTempo((internTempo * 0.7) + ( externTempo + (deviation * 0.2 * -1) * 0.3));
+						this.pr_setClockTempo((internTempo * 0.5) + ( externTempo + (deviation * 0.3 * -1) * 0.5));
 					};
 					
 					deviationGate = true;
