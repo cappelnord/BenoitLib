@@ -14,8 +14,8 @@
 
 Plkr : Pfunc {
 	*new {|proxy, init=0|
-		var last = first;
-		p.bus.get({|v| last = v;});
-		^Pfunc({p.bus.get({|v| last = v;}); last;});
+		var last = init;
+		proxy.bus.get({|v| last = v;});
+		^Pfunc({proxy.bus.get({|v| last = v;}); last;});
 	}	
 }
