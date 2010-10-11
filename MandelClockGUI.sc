@@ -119,7 +119,7 @@ MandelClockGUI
 				{
 					this.pr_clearBeats;
 					beatArr[nextBeat%4].background = color;
-					mesText.string_((clock.beats / 4).ceil);
+					mesText.string_((clock.beats / 4).floor);
 					this.pr_schedNextBeat;
 				}.defer;
 			};

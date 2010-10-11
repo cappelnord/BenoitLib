@@ -69,6 +69,9 @@ MandelClock {
 	var <>maxTempo = 4.0;
 	var <>minTempo = 0.2;
 	
+	// TODO: really use this!
+	var beatsPerBar = 4;
+	
 	var <>listenToTicks = true;
 		
 	var guiWindow;
@@ -84,6 +87,8 @@ MandelClock {
 	var <>postPrefix = "MandelClock: ";
 		
 	var metro;
+	
+	var dropSchedDict;
 		
 	*startLeader {|name, startTempo = 2.0|
 		
@@ -149,10 +154,13 @@ MandelClock {
 		addrDict = IdentityDictionary.new;
 		this.pr_managePorts(ports);
 		
-		// bookeeping for responders
+		// bookkeeping for responders
 		oscGeneralResponders = Dictionary.new;
 		oscLeaderResponders = Dictionary.new;
 		oscFollowerResponders = Dictionary.new;
+		
+		// bookkeeping for scheduling
+		dropSchedDict = Dictionary.new;
 		
 		// start the clock
 		clock = TempoClock.new(startTempo, startBeat);
@@ -755,6 +763,27 @@ MandelClock {
 	
 	stopMetro {
 		metro.stop;
+	}
+	
+	drop {|bar, function|
+	
+		var schedBeat = bar * beatsPerBar;
+		
+		(schedBeat > clock.beats).if ({
+			dropSchedDict.at(bar).isNil.if {
+				clock.schedAbs(schedBeat - 0.0000001 ,{
+					dropSchedDict.at(bar).value;
+					dropSchedDict.removeAt(bar);
+					nil;
+				});
+			};
+						
+			dropSchedDict.removeAt(bar); // does nothing on first time
+			dropSchedDict.put(bar, function);
+			
+		}, {
+			("Bar " ++ bar ++ " is in the past! Didn't do anything.").warn;
+		});
 	}
 	
 	
