@@ -7,8 +7,7 @@
 	http://github.com/cappelnord/BenoitLib
 	http://www.the-mandelbrots.de
 	
-	Like Pstutter but holds a value for a specified
-	duration in beats or seconds.
+	A time based sample-and-hold pattern.
 	
 */
 
@@ -90,7 +89,6 @@ Phold : Pholds {
 	pr_curTimeInstance {
 		^clock.beats;
 	}
-	
 }
 
 Pholda : Phold {
@@ -98,5 +96,4 @@ Pholda : Phold {
 	pr_newTimeInstance {
 		^this.nextPoll ? this.pr_curTimeInstance;	
 	}
-	
 }
