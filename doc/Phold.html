@@ -1,0 +1,90 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<title></title>
+<meta name="Generator" content="Cocoa HTML Writer">
+<meta name="CocoaVersion" content="949.54">
+<style type="text/css">
+p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
+p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
+p.p3 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; color: #0021e7}
+p.p4 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco; color: #bf0000}
+p.p5 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco; color: #000000; min-height: 12.0px}
+p.p6 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco; color: #000000}
+span.s1 {font: 18.0px Helvetica}
+span.s2 {text-decoration: underline}
+span.s3 {color: #000000}
+span.s4 {color: #0000bf}
+span.s5 {color: #007300}
+span.Apple-tab-span {white-space:pre}
+</style>
+</head>
+<body>
+<p class="p1"><span class="s1"><b>Phold, Pholda, Pholds, Pholdas</b></span> <span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><b>time based sample-and-hold pattern</b></p>
+<p class="p1">Part of BenoitLib: <span class="s2">http://github.com/cappelnord/BenoitLib</span></p>
+<p class="p2"><br></p>
+<p class="p3"><span class="s3"><b>superclass: </b><a href="FilterPattern.html"><span class="s2">FilterPattern</span></a></span></p>
+<p class="p2"><br></p>
+<p class="p1"><b>Phold, Pholda(dur, pattern, [clock = TempoClock.default])</b></p>
+<p class="p1"><b>Pholds, Pholdas(dur, pattern)</b></p>
+<p class="p2"><br></p>
+<p class="p1">repeat each element for a specific duration. <b>Pholds</b>/<b>Pholdas</b> uses seconds instead of beats. <b>Phold</b>/<b>Pholds</b> uses the current time/beat as a reference point for the retreival of the next new value.<b> Pholda</b>/<b>Pholdas</b> uses the last point in time. Therefore effects as undersampling or aliasing can occur with <b>Pholda</b>/<b>Pholdas</b>.</p>
+<p class="p2"><br></p>
+<p class="p1">dur may be a pattern, so the durations can vary each iteration</p>
+<p class="p2"><br></p>
+<p class="p4">// examples</p>
+<p class="p5"><br></p>
+<p class="p5"><br></p>
+<p class="p4">// Phold used for harmonic progression</p>
+<p class="p6">(</p>
+<p class="p6">x = <span class="s4">Pbind</span>(</p>
+<p class="p6"><span class="Apple-tab-span">	</span><span class="s5">\degree</span>, <span class="s4">Pseq</span>([0,2,4,7],<span class="s4">inf</span>),</p>
+<p class="p6"><span class="Apple-tab-span">	</span><span class="s5">\dur</span>, <span class="s4">Pseq</span>([4,2,1],<span class="s4">inf</span>) / 8,</p>
+<p class="p6"><span class="Apple-tab-span">	</span><span class="s5">\mtranspose</span>, <span class="s4">Phold</span>(4, <span class="s4">Pseq</span>([0,2],<span class="s4">inf</span>)),</p>
+<p class="p6"><span class="Apple-tab-span">	</span><span class="s5">\scale</span>, <span class="s4">Phold</span>(8, <span class="s4">Pseq</span>([<span class="s4">Scale</span>.minor, <span class="s4">Scale</span>.major],<span class="s4">inf</span>))</p>
+<p class="p6">).play;</p>
+<p class="p6">)</p>
+<p class="p5"><br></p>
+<p class="p4">// Phold doesn't allow aliasing/undersampling</p>
+<p class="p6">(</p>
+<p class="p6">x = <span class="s4">Pbind</span>(</p>
+<p class="p6"><span class="Apple-tab-span">	</span><span class="s5">\degree</span>, <span class="s4">Phold</span>(1/16, <span class="s4">Pseq</span>([0,2,4,7],<span class="s4">inf</span>)),</p>
+<p class="p6"><span class="Apple-tab-span">	</span><span class="s5">\dur</span>, 1/8</p>
+<p class="p6">).play;</p>
+<p class="p6">)</p>
+<p class="p5"><br></p>
+<p class="p4">// Pholda drops every second value</p>
+<p class="p6">(</p>
+<p class="p6">x = <span class="s4">Pbind</span>(</p>
+<p class="p6"><span class="Apple-tab-span">	</span><span class="s5">\degree</span>, <span class="s4">Pholda</span>(1/16, <span class="s4">Pseq</span>([0,2,4,7],<span class="s4">inf</span>)),</p>
+<p class="p6"><span class="Apple-tab-span">	</span><span class="s5">\dur</span>, 1/8</p>
+<p class="p6">).play;</p>
+<p class="p6">)</p>
+<p class="p5"><br></p>
+<p class="p4">// now it's getting funky :-)</p>
+<p class="p6">(</p>
+<p class="p6">x = <span class="s4">Pbind</span>(</p>
+<p class="p6"><span class="Apple-tab-span">	</span><span class="s5">\degree</span>, <span class="s4">Pholda</span>(1/15, <span class="s4">Pseq</span>([0,2,4,7],<span class="s4">inf</span>)),</p>
+<p class="p6"><span class="Apple-tab-span">	</span><span class="s5">\dur</span>, 1/8</p>
+<p class="p6">).play;</p>
+<p class="p6">)</p>
+<p class="p5"><br></p>
+<p class="p4">// also works this way</p>
+<p class="p6">(</p>
+<p class="p6">x = <span class="s4">Pbind</span>(</p>
+<p class="p6"><span class="Apple-tab-span">	</span><span class="s5">\degree</span>, <span class="s4">Pholda</span>(1/7, <span class="s4">Pseq</span>([0,2,4,7],<span class="s4">inf</span>)),</p>
+<p class="p6"><span class="Apple-tab-span">	</span><span class="s5">\dur</span>, 1/8</p>
+<p class="p6">).play;</p>
+<p class="p6">)</p>
+<p class="p5"><br></p>
+<p class="p4">// random sample-and-hold</p>
+<p class="p6">(</p>
+<p class="p6">x = <span class="s4">Pbind</span>(</p>
+<p class="p6"><span class="Apple-tab-span">	</span><span class="s5">\degree</span>, <span class="s4">Phold</span>(<span class="s4">Pseq</span>([4,2,1],<span class="s4">inf</span>) / 2,<span class="s4">Prand</span>((0..13),<span class="s4">inf</span>)),</p>
+<p class="p6"><span class="Apple-tab-span">	</span><span class="s5">\dur</span>, 1/8</p>
+<p class="p6">).play;</p>
+<p class="p6">)</p>
+</body>
+</html>

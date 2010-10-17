@@ -1,4 +1,5 @@
 *** warning, the network code is kind of buggy at the moment ***
+***       works OK on a decent WiFi, sucks on a bad one      ***
 
 BenoitLib
 http://www.the-mandelbrots.de
@@ -12,3 +13,4 @@ Contains:
 - MandelClock: A communication/tempo sync system.
 - MacroExpander: A Macro system for the Mac SuperCollider App
 - Plkr: Use the last retreived value from a kr NodeProxy as a value in a Pattern.
+- Phold, Pholda, Pholds, Pholdas: Time based sample-and-hold Patterns.
