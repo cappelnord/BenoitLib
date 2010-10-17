@@ -39,7 +39,7 @@ Pholds : FilterPattern {
 				thisEvent = stream.next(event);
 				thisDur = durStream.next(event);
 				
-				(thisEvent.isNil ||ÊthisDur.isNil).if {
+				(thisEvent.isNil || thisDur.isNil).if {
 					^event;
 				};
 				nextPoll = this.pr_newTimeInstance + thisDur.abs;
