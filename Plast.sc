@@ -24,7 +24,7 @@ Plast : Pattern {
 		var ret;
 		
 		while {true} {
-			ret = last ?? event.use({event.at(key).value});
+			ret = last ?? {event.use({event.at(key).value})};
 			last = event.use({event.at(key).value});
 			last.yield;
 		};
