@@ -23,6 +23,8 @@ StringInputDialog {
 		var x;
 		var y;
 		
+		var xPos = 0.5;
+		
 		// used to make the text input a little bit larger when using swing
 		var swingBigger = 0;
 		(GUI.id == \swing).if {
@@ -37,7 +39,6 @@ StringInputDialog {
 		
 		pos.isNil.if ({
 			
-			var xPos = 0.5;
 			
 			(defaultPos == \center).if { xPos = 0.5}; // explicit center
 			(defaultPos == \left).if   { xPos = 1/3};
