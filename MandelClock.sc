@@ -74,7 +74,7 @@ MandelClock {
 	
 	var <>listenToTicks = true;
 		
-	var guiWindow;
+	var <guiInstance;
 	var badTicks = 0;
 	
 	var proxySpace;
@@ -653,13 +653,19 @@ MandelClock {
 		^((message[1].asString == leaderName) && leading.not);	
 	}
 	
-	gui {
-		guiWindow.notNil.if {
-			guiWindow.close;
+	gui {|pos|
+		guiInstance.notNil.if {
+			this.closeGUI;
 		};
 		
-		guiWindow = MandelClockGUI(this);
-		^guiWindow;
+		guiInstance = MandelClockGUI(this, pos);
+		^guiInstance;
+	}
+	
+	closeGUI {
+		guiInstance.notNil.if {
+			guiInstance.close;
+		}	
 	}
 	
 	post {|message|

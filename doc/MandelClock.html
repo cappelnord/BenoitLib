@@ -12,18 +12,19 @@ p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
 p.p3 {margin: 0.0px 0.0px 0.0px 0.0px; font: 18.0px Helvetica; min-height: 22.0px}
 p.p4 {margin: 0.0px 0.0px 0.0px 0.0px; font: 18.0px Helvetica}
 p.p5 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
-p.p6 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco; color: #492e25}
-p.p7 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco}
-p.p8 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco; min-height: 12.0px}
-p.p9 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco; color: #31508d}
-p.p10 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px Helvetica; min-height: 17.0px}
-p.p11 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px Helvetica}
+p.p6 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco; color: #bf0000}
+p.p7 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco; color: #000000}
+p.p8 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco; color: #000000; min-height: 12.0px}
+p.p9 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco; color: #0000bf}
+p.p10 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco; min-height: 12.0px}
+p.p11 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px Helvetica; min-height: 17.0px}
+p.p12 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px Helvetica}
 span.s1 {font: 18.0px Helvetica}
 span.s2 {text-decoration: underline}
-span.s3 {color: #31508d}
-span.s4 {color: #606060}
-span.s5 {color: #000000}
-span.s6 {color: #224996}
+span.s3 {color: #0000ff}
+span.s4 {color: #0000bf}
+span.s5 {color: #606060}
+span.s6 {color: #000000}
 span.Apple-tab-span {white-space:pre}
 </style>
 </head>
@@ -33,22 +34,22 @@ span.Apple-tab-span {white-space:pre}
 <p class="p3"><br></p>
 <p class="p4"><b>Basic Setup</b></p>
 <p class="p5"><br></p>
-<p class="p2">MandelClock does registier its internal clock as the <span class="s3">TempoClock</span>.default. To allow fast access to some MandelClock functions it is a good strategy to set the global variable m to the instance. As the process to follow a MandelClock system is asynchronous it must be done after connecting to a system (or by passing a action, which is performed after connection).</p>
+<p class="p2">MandelClock does registier its internal clock as the <a href="SC://TempoClock"><span class="s3">TempoClock</span></a>.default. To allow fast access to some MandelClock functions it is a good strategy to set the global variable m to the instance. As the process to follow a MandelClock system is asynchronous it must be done after connecting to a system (or by passing a action, which is performed after connection).</p>
 <p class="p3"><br></p>
 <p class="p6">// Start a System as a leader</p>
-<p class="p7">m = <span class="s3">MandelClock</span>.startLeader(<span class="s4">"YourName"</span>);</p>
+<p class="p7">m = <span class="s4">MandelClock</span>.startLeader(<span class="s5">"YourName"</span>);</p>
 <p class="p8"><br></p>
 <p class="p6">// Follow a System</p>
-<p class="p7"><span class="s3">MandelClock</span>.startFollower(<span class="s4">"YourName"</span>, action: {m = <span class="s3">MandelClock</span>.instance;});</p>
+<p class="p7"><span class="s4">MandelClock</span>.startFollower(<span class="s5">"YourName"</span>, action: {m = <span class="s4">MandelClock</span>.instance;});</p>
 <p class="p8"><br></p>
 <p class="p6">// If you know, that the current leader doesn't listen on port 57120 you</p>
 <p class="p6">// have to add the port as an argument.</p>
-<p class="p7"><span class="s3">MandelClock</span>.startFollower(<span class="s4">"YourName"</span>, 57121, action: {m = <span class="s3">MandelClock</span>.instance;});</p>
+<p class="p7"><span class="s4">MandelClock</span>.startFollower(<span class="s5">"YourName"</span>, 57121, action: {m = <span class="s4">MandelClock</span>.instance;});</p>
 <p class="p8"><br></p>
 <p class="p6">// Before reconnecting you should either quickly recompile sclang or clear any previous instance.</p>
 <p class="p6">// This also stops the process of looking for a leader (if you tried to follow a system)</p>
-<p class="p9">MandelClock<span class="s5">.clear;</span></p>
-<p class="p8"><br></p>
+<p class="p9">MandelClock<span class="s6">.clear;</span></p>
+<p class="p10"><br></p>
 <p class="p4"><b>Methods</b></p>
 <p class="p3"><br></p>
 <p class="p2"><span class="Apple-tab-span">	</span>This isn't a complete list of all available methods but these are all methods you should care for at the moment. Please look in the source for more details and more options.<span class="Apple-converted-space"> </span></p>
@@ -103,11 +104,11 @@ span.Apple-tab-span {white-space:pre}
 <p class="p5"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></p>
 <p class="p2"><span class="Apple-tab-span">	</span><b>sendMsg(...)</b></p>
 <p class="p5"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></p>
-<p class="p2"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>Same as the method in <span class="s6">NetAddr</span>, but sends to the broadcast address to all registered ports.</p>
+<p class="p2"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>Same as the method in <a href="SC://NetAddr"><span class="s3">NetAddr</span></a>, but sends to the broadcast address to all registered ports.</p>
 <p class="p5"><b><span class="Apple-tab-span">	</span></b></p>
-<p class="p2"><b><span class="Apple-tab-span">	</span>gui</b></p>
+<p class="p2"><b><span class="Apple-tab-span">	</span>gui([pos])</b></p>
 <p class="p5"><b><span class="Apple-tab-span">	</span></b></p>
-<p class="p2"><b><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></b>Displays the MandelClockGUI with information on timing and timing and other options.</p>
+<p class="p2"><b><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></b>Displays the MandelClockGUI with information on timing and timing and other options. A position can be specified as a <a href="SC://Point"><span class="s3">Point</span></a><span class="s3">.</span> If no position is given (or nil) a default position will be choosen by <b>MandelClockGUI</b>.</p>
 <p class="p5"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></p>
 <p class="p2"><span class="Apple-tab-span">	</span><b>makeTempoProxy(ps)</b></p>
 <p class="p5"><b><span class="Apple-tab-span">	</span></b></p>
@@ -132,19 +133,19 @@ span.Apple-tab-span {white-space:pre}
 <p class="p5"><b><span class="Apple-tab-span">	</span></b></p>
 <p class="p3"><br></p>
 <p class="p4"><b>Protocol Specification</b></p>
-<p class="p10"><br></p>
+<p class="p11"><br></p>
 <p class="p2">All OSC messages are prefixed. This can be set in MandelClock.sc or as an argument on startup. The /mc/ is the default value which is also used in this specification. All messages are sent over the broadcast address. Some are just important for leaders and other are just important for followers. If not noted otherwise a message has to be send to all known ports.</p>
 <p class="p5"><br></p>
 <p class="p2">Each message starts with a String, which identifies a follower/leader with a name.</p>
 <p class="p5"><br></p>
 <p class="p2">Message arguments are notated in the form [type]:[name] where type is one of the four basic OSC message argument types (i: int32, f: float32, s: OSC-string, b: OSC-blob).<span class="Apple-converted-space"> </span></p>
 <p class="p5"><br></p>
-<p class="p11"><b>Starting up and connecting to a MandelClock System</b></p>
-<p class="p10"><br></p>
+<p class="p12"><b>Starting up and connecting to a MandelClock System</b></p>
+<p class="p11"><br></p>
 <p class="p2"><span class="Apple-tab-span">	</span>Setting up a system should be easy. One has to start as a leader and all other clients should do a /mc/requestPorts message (to announce their listening port to the system) and then initialize their clock with the first /mc/clock signal they receive.</p>
 <p class="p5"><span class="Apple-tab-span">	</span></p>
-<p class="p11"><b>Timing</b></p>
-<p class="p10"><br></p>
+<p class="p12"><b>Timing</b></p>
+<p class="p11"><br></p>
 <p class="p2"><span class="Apple-tab-span">	</span><b>/mc/clock s:ID, i:serial, f:beats, f:currentTempo</b></p>
 <p class="p5"><b><span class="Apple-tab-span">	</span></b></p>
 <p class="p2"><b><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></b>This message is the main timing message. It publishs the current timing state of the leader, so any client can adjust to that.<span class="Apple-converted-space"> </span></p>
@@ -160,7 +161,7 @@ span.Apple-tab-span {white-space:pre}
 <p class="p5"><b><span class="Apple-tab-span">	</span></b></p>
 <p class="p2"><b><span class="Apple-tab-span">	</span></b>Any client can request a tempo change from the leader. The tempo and time is given in seconds (as noted above). A Leader may decide to deny the tempo change. Clients should ignore this message, as they get the new timing with the /bc/clock message. if time is 0 the tempo change is instant. Otherwise the tempo will gradually change. An instant tempo change may introduce timing jitter, clients may have to resynchroinze afterwards.</p>
 <p class="p5"><br></p>
-<p class="p11"><b>Communication</b></p>
+<p class="p12"><b>Communication</b></p>
 <p class="p5"><br></p>
 <p class="p2"><span class="Apple-tab-span">	</span><b>/mc/chat s:ID, s:message</b></p>
 <p class="p5"><span class="Apple-tab-span">	</span></p>
@@ -178,9 +179,9 @@ span.Apple-tab-span {white-space:pre}
 <p class="p5"><b><span class="Apple-tab-span">	</span></b></p>
 <p class="p2"><b><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></b>Every client should answer with a /mc/hello message.</p>
 <p class="p5"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></p>
-<p class="p10"><br></p>
-<p class="p11"><b>Leader Management</b></p>
-<p class="p10"><br></p>
+<p class="p11"><br></p>
+<p class="p12"><b>Leader Management</b></p>
+<p class="p11"><br></p>
 <p class="p2">The leader has to send the clock signal and it is his responsibility to answer to certain messages to manage the complete system. Any participant can become the leader at any time, even if the current leader is still leader or isn't there anymore. As this is not realy secured by the protocol you should secure your network.</p>
 <p class="p5"><br></p>
 <p class="p2">A client who doesn't know who the leader is can determine it by one simple rule: Whoever sends the /mc/clock message is the leader.</p>
@@ -191,7 +192,7 @@ span.Apple-tab-span {white-space:pre}
 <p class="p2"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>This message also allows a client to take lead in a leaderless system.</p>
 <p class="p5"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></p>
 <p class="p5"><br></p>
-<p class="p11"><b>Port Management</b></p>
+<p class="p12"><b>Port Management</b></p>
 <p class="p5"><br></p>
 <p class="p2">As SuperCollider on Linux may not receive on port 57120 (also there is other Software) any future client may request his port to be part of the system. A leader must relay this port request to all ports he sends to. After following a leader a client must ask the leader for all the ports the leader sends to. Any client must keep book of the current ports, so that he can take on the lead without loosing clients.</p>
 <p class="p5"><br></p>

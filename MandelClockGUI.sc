@@ -10,21 +10,21 @@
 
 MandelClockGUI
 {
-	var window, bpmText, mesText, beatText, bpsText, beatArr, clock,mc;
+	var <window, bpmText, mesText, beatText, bpsText, beatArr, clock,mc;
 	var sj;
 	var stillOpen = true;
 	
-	*new {|mc|
-		^super.new.init(mc);	
+	*new {|mc, pos|
+		^super.new.init(mc,pos);	
 	}
 	
-	init {|a_mc|
+	init {|a_mc, pos|
 		
 		mc = a_mc;		
 		clock = mc.clock;
+		pos = pos ? (400@400);
 		
-		// ToDo: Some smart place?
-		window = Window.new("MandelClockGUI", Rect(400,400,285,65), false);
+		window = Window.new("MandelClockGUI", Rect(pos.x,pos.y,285,65), false);
 		window.addFlowLayout(10@10,5@5);
 		
 		bpmText = StaticText(window, 50@20);
