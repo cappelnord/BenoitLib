@@ -12,11 +12,16 @@ StringInputDialog {
 
 	var window, txt, function;
 	
-	*new {|title, msg, function, width=400|
-		^super.new.init(title, msg, function,width);	
+	classvar <>defaultPos = \center;
+	
+	*new {|title, msg, function, width=400, pos|
+		^super.new.init(title, msg, function,width, pos);	
 	}
 	
-	init {|title, msg, a_function, width|
+	init {|title, msg, a_function, width, pos|
+		
+		var x;
+		var y;
 		
 		// used to make the text input a little bit larger when using swing
 		var swingBigger = 0;
@@ -26,8 +31,27 @@ StringInputDialog {
 		
 		function = a_function;
 		
-		window = Window.new(title, Rect(	Window.screenBounds.width/2 - (width/2),
-									Window.screenBounds.height/2 - 10,
+		defaultPos.isKindOf(Point).if {
+			pos = pos ? defaultPos;	
+		};
+		
+		pos.isNil.if ({
+			
+			var xPos = 0.5;
+			
+			(defaultPos == \left).if  { xPos = 1/3};
+			(defaultPos == \right).if { xPos = 2/3};
+			
+			x = Window.screenBounds.width * xPos - (width / 2);
+			y = Window.screenBounds.height / 2 - 10;
+			
+		}, {
+			x = pos.x;
+			y = pos.y;
+		});
+		
+		window = Window.new(title, Rect( x,
+									y,
 									width,
 									35 + swingBigger), false);
 		
