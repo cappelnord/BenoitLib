@@ -39,8 +39,9 @@ StringInputDialog {
 			
 			var xPos = 0.5;
 			
-			(defaultPos == \left).if  { xPos = 1/3};
-			(defaultPos == \right).if { xPos = 2/3};
+			(defaultPos == \center).if { xPos = 0.5}; // explicit center
+			(defaultPos == \left).if   { xPos = 1/3};
+			(defaultPos == \right).if  { xPos = 2/3};
 			
 			x = Window.screenBounds.width * xPos - (width / 2);
 			y = Window.screenBounds.height / 2 - 10;
