@@ -28,7 +28,7 @@ MandelClockGUI
 		// well, 400@400 is quite random :-)
 		pos = pos ? defaultPos ? (400@400);
 		
-		window = Window.new("MandelClockGUI", Rect(pos.x,pos.y,285,65), false);
+		window = Window.new("MandelClockGUI", Rect(pos.x,pos.y,288,65), false);
 		window.addFlowLayout(10@10,5@5);
 		
 		bpmText = StaticText(window, 50@20);
