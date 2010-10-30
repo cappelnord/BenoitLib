@@ -19,3 +19,10 @@ Plkr : Pfunc {
 		^Pfunc({proxy.bus.get({|v| last = v;}); last;});
 	}	
 }
+
+// allows the usage of kr NodeProxies in Patterns directly
++ NodeProxy {
+	asStream {
+		^Plkr(this).asStream;
+	}
+}
