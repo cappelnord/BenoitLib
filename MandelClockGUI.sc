@@ -14,6 +14,8 @@ MandelClockGUI
 	var sj;
 	var stillOpen = true;
 	
+	classvar <>defaultPos;
+	
 	*new {|mc, pos|
 		^super.new.init(mc,pos);	
 	}
@@ -22,7 +24,9 @@ MandelClockGUI
 		
 		mc = a_mc;		
 		clock = mc.clock;
-		pos = pos ? (400@400);
+		
+		// well, 400@400 is quite random :-)
+		pos = pos ? defaultPos ? (400@400);
 		
 		window = Window.new("MandelClockGUI", Rect(pos.x,pos.y,285,65), false);
 		window.addFlowLayout(10@10,5@5);
