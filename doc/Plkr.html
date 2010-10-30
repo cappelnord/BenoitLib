@@ -9,14 +9,14 @@
 <style type="text/css">
 p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
 p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
-p.p3 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco; min-height: 12.0px}
+p.p3 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco; color: #000000; min-height: 12.0px}
 p.p4 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco; color: #bf0000}
-p.p5 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco; color: #000000; min-height: 12.0px}
-p.p6 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco; color: #000000}
+p.p5 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco; color: #000000}
 span.s1 {font: 18.0px Helvetica}
 span.s2 {text-decoration: underline}
-span.s3 {color: #0000bf}
-span.s4 {color: #007300}
+span.s3 {color: #0000ff}
+span.s4 {color: #0000bf}
+span.s5 {color: #007300}
 span.Apple-tab-span {white-space:pre}
 </style>
 </head>
@@ -24,9 +24,12 @@ span.Apple-tab-span {white-space:pre}
 <p class="p1"><span class="s1"><b>Plkr<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></b></span><b>use the last retreived value from a NodeProxy in a pattern</b></p>
 <p class="p1">Part of BenoitLib: <span class="s2">http://github.com/cappelnord/BenoitLib</span></p>
 <p class="p2"><br></p>
-<p class="p1">superclass: Pfunc</p>
+<p class="p1">superclass: <a href="SC://Pfunc"><span class="s3">Pfunc</span></a></p>
 <p class="p2"><br></p>
 <p class="p1"><b>Plkr(proxy, init=0)</b></p>
+<p class="p2"><b></b><br></p>
+<p class="p1"><b>proxy </b>- a kr NodeProxy.</p>
+<p class="p1"><b>init </b>-<span class="Apple-converted-space">  </span>this value is set as the first retreived value.<span class="Apple-converted-space"> </span></p>
 <p class="p2"><br></p>
 <p class="p1">Queries the NodeProxy each time a value is requested. The next time this value is returned</p>
 <p class="p1">by the stream. It retreives its first value after instantiation. Plkr is just a wrapper for Pfunc.</p>
@@ -37,25 +40,22 @@ span.Apple-tab-span {white-space:pre}
 <p class="p2"><br></p>
 <p class="p1">Remember: This is just a cheap trick. NodeProxy values and Plkr values are not synchronized.</p>
 <p class="p2"><br></p>
-<p class="p1"><b>proxy </b>- a kr NodeProxy.</p>
-<p class="p1"><b>init </b>-<span class="Apple-converted-space">  </span>this value is set as the first retreived value.<span class="Apple-converted-space"> </span></p>
-<p class="p2"><br></p>
 <p class="p3"><br></p>
 <p class="p4">// examples</p>
-<p class="p5"><br></p>
-<p class="p6"><span class="s3">ProxySpace</span>.push(s.boot);</p>
-<p class="p5"><br></p>
-<p class="p6">~a = {<span class="s3">SinOsc</span>.kr(0.1, mul:800).abs}</p>
-<p class="p5"><br></p>
-<p class="p6"><span class="s3">Pbind</span>(<span class="s4">\dur</span>, 0.1, <span class="s4">\freq</span>, <span class="s3">Plkr</span>(~a)).play</p>
-<p class="p5"><br></p>
+<p class="p3"><br></p>
+<p class="p5"><span class="s4">ProxySpace</span>.push(s.boot);</p>
+<p class="p3"><br></p>
+<p class="p5">~a = {<span class="s4">SinOsc</span>.kr(0.1, mul:800).abs}</p>
+<p class="p3"><br></p>
+<p class="p5"><span class="s4">Pbind</span>(<span class="s5">\dur</span>, 0.1, <span class="s5">\freq</span>, <span class="s4">Plkr</span>(~a)).play</p>
+<p class="p3"><br></p>
 <p class="p4">// this works</p>
-<p class="p6"><span class="s3">Pbind</span>(<span class="s4">\dur</span>, 0.1, <span class="s4">\freq</span>, ~a).play</p>
-<p class="p5"><br></p>
+<p class="p5"><span class="s4">Pbind</span>(<span class="s5">\dur</span>, 0.1, <span class="s5">\freq</span>, ~a).play</p>
+<p class="p3"><br></p>
 <p class="p4">// this doesn't</p>
-<p class="p6"><span class="s3">Pbind</span>(<span class="s4">\dur</span>, 0.1, <span class="s4">\freq</span>, ~a + 400).play</p>
-<p class="p5"><br></p>
+<p class="p5"><span class="s4">Pbind</span>(<span class="s5">\dur</span>, 0.1, <span class="s5">\freq</span>, ~a + 400).play</p>
+<p class="p3"><br></p>
 <p class="p4">// this works, so Plkr is better than the shortcut</p>
-<p class="p6"><span class="s3">Pbind</span>(<span class="s4">\dur</span>, 0.1, <span class="s4">\freq</span>, <span class="s3">Plkr</span>(~a) + 400).play</p>
+<p class="p5"><span class="s4">Pbind</span>(<span class="s5">\dur</span>, 0.1, <span class="s5">\freq</span>, <span class="s4">Plkr</span>(~a) + 400).play</p>
 </body>
 </html>
