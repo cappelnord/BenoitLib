@@ -97,6 +97,14 @@ MandelClock {
 			^instance;	
 		};
 		
+		(NetAddr.langPort != 57120).if {
+			"*** Warning! ***".postln;
+			("Your sclang port is not 57120, it's " ++ NetAddr.langPort ++ "!").postln;
+			"This isn't a problem, but followers must use this port as".postln;
+			"second argument in the startFollower call.".postln;
+			"".postln; 	
+		};
+		
 		instance = MandelClock.new(name, 0, startTempo, name, [NetAddr.langPort], leading:true);
 		^instance;
 	}
@@ -660,6 +668,10 @@ MandelClock {
 		
 		guiInstance = MandelClockGUI(this, pos);
 		^guiInstance;
+	}
+	
+	tap {
+		MandelClockTap.new(this);	
 	}
 	
 	closeGUI {
