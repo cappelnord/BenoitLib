@@ -670,9 +670,11 @@ MandelClock {
 		^guiInstance;
 	}
 	
+	/* not yet implemented
 	tap {
 		MandelClockTap.new(this);	
 	}
+	*/
 	
 	closeGUI {
 		guiInstance.notNil.if {
