@@ -281,7 +281,7 @@ MandelClock {
 			newTempo = minTempo;	
 		};
 		
-		(tempo > maxTempo).if {
+		(newTempo > maxTempo).if {
 			this.post("Tempo out of range. Set tempo to maxTempo=" ++ maxTempo);
 			newTempo = maxTempo;
 		};
