@@ -33,8 +33,8 @@ MandelClock {
 	var <clock;
 	var clockSerial = 0;
 	
-	var <externTempo; // the tempo set by external clock
-	var <internTempo; // the internal tempo, may differ because it does a correction
+	var <externalTempo; // the tempo set by external clock
+	var <tempo; // the internal tempo, may differ because it does a correction
 	
 	var lastTickTime = 0;
 	var lastTickSJ;
@@ -176,8 +176,8 @@ MandelClock {
 		
 		TempoClock.default = clock;
 		
-		externTempo = startTempo;
-		internTempo = startTempo;
+		externalTempo = startTempo;
+		tempo = startTempo;
 		
 		// build responders
 		this.pr_generalResponders;
@@ -232,63 +232,61 @@ MandelClock {
 	}
 	
 	tick {
-		this.sendMsgCmd("/clock", clockSerial, clock.beats, internTempo.asFloat);
+		this.sendMsgCmd("/clock", clockSerial, clock.beats, tempo.asFloat);
 		clockSerial = clockSerial + 1;
 	}
 	
 	// of course it could be the same method for a leader and a follower
 	// but I think normally only a leader should change the tempo, so making
 	// this cut enforces this somehow.
-	requestTempo {|tempo, time=0|
+	requestTempo {|newTempo, time=0|
 		leading.not.if {
-			
-			tempo = this.pr_safeTempo(tempo);
-			
-			this.sendMsgCmd("/requestTempo", tempo.asFloat, time.asFloat);
+			newTempo = this.pr_safeTempo(newTempo);
+			this.sendMsgCmd("/requestTempo", newTempo.asFloat, time.asFloat);
 		};
 	}
 	
-	changeTempo {|tempo, time=0|
+	changeTempo {|newTempo, time=0|
 		
 		var delta, stopTest;
 		
-		tempo = this.pr_safeTempo(tempo);
+		newTempo = this.pr_safeTempo(newTempo);
 		
 		leading.if {
 			tempoChangeSJ.stop;
 			
-			((time <= 0) || (tempo == internTempo)).if ({
-				this.pr_setClockTempo(tempo);
+			((time <= 0) || (newTempo == tempo)).if ({
+				this.pr_setClockTempo(newTempo);
 				this.tick;
 			},{
-				delta = (tempo - internTempo) * 0.1 / time;
+				delta = (newTempo - tempo) * 0.1 / time;
 				
 				(delta < 0.0).if ({
-					stopTest = {((internTempo + delta) <= tempo).if({this.pr_setClockTempo(tempo);true;},{false;});};
+					stopTest = {((tempo + delta) <= newTempo).if({this.pr_setClockTempo(newTempo);true;},{false;});};
 				},{
-					stopTest = {((internTempo + delta) >= tempo).if({this.pr_setClockTempo(tempo);true;},{false;});};				});
+					stopTest = {((tempo + delta) >= newTempo).if({this.pr_setClockTempo(newTempo);true;},{false;});};				});
 				
 				tempoChangeSJ = SkipJack({
 					// TO IMPROVE: Smoother curve, linear kinda sux
-					this.pr_setClockTempo(internTempo + delta);
+					this.pr_setClockTempo(tempo + delta);
 				},0.1, stopTest, name: "TempoChange");
 			});
 		};	
 	}
 	
-	pr_safeTempo {|tempo|
+	pr_safeTempo {|newTempo|
 		
-		(tempo < minTempo).if {
+		(newTempo < minTempo).if {
 			this.post("Tempo out of range. Set tempo to minTempo=" ++ minTempo);
-			tempo = minTempo;	
+			newTempo = minTempo;	
 		};
 		
 		(tempo > maxTempo).if {
 			this.post("Tempo out of range. Set tempo to maxTempo=" ++ maxTempo);
-			tempo = maxTempo;
+			newTempo = maxTempo;
 		};
 		
-		^tempo;
+		^newTempo;
 	}
 	
 	// sendMessageCmd adds name and oscPrefix
@@ -368,7 +366,7 @@ MandelClock {
 				this.post("WARNING, did not receive clock signals from the leader!");
 				this.post("Someone else should take the lead ...");
 				
-				this.pr_setClockTempo(externTempo);
+				this.pr_setClockTempo(externalTempo);
 				
 			};
 		},5, name: "LeaderCheck");
@@ -388,7 +386,7 @@ MandelClock {
 		// (ser + "\n" + bea + "\n" + tem + "\n").postln;
 		
 		force.if {
-			externTempo = tem;	
+			externalTempo = tem;	
 		};
 
 	
@@ -406,8 +404,8 @@ MandelClock {
 			
 			listenToTicks.if {
 				
-				if(externTempo != tem) {
-					externTempo = tem;
+				if(externalTempo != tem) {
+					externalTempo = tem;
 					tempoHasChanged = true;
 				};
 
@@ -439,19 +437,19 @@ MandelClock {
 					// warning, crappy case syntax!
 					case
 					{ tempoHasChanged == true } {
-						this.pr_setClockTempo(externTempo);
+						this.pr_setClockTempo(externalTempo);
 					}
 					// if five ticks were bad OR timing is really off
 					{(badTicks > 5) || (deviation.abs > (deviationThreshold * 5))} {
-						this.pr_setClockTempo((internTempo * 0.5) + ( externTempo + (deviation * 0.3 * -1) * 0.5));
+						this.pr_setClockTempo((tempo * 0.5) + ( externalTempo + (deviation * 0.3 * -1) * 0.5));
 					};
 					
 					deviationGate = true;
 					badTicks = badTicks + 1;
 					
 				},{ // if our timing is good at the moment
-					(externTempo != internTempo).if {
-						this.pr_setClockTempo(externTempo);
+					(externalTempo != tempo).if {
+						this.pr_setClockTempo(externalTempo);
 					};
 					
 					badTicks = 0;
@@ -461,16 +459,16 @@ MandelClock {
 		};
 	}
 	
-	pr_setClockTempo {|tempo|
+	pr_setClockTempo {|newTempo|
 		
-		(tempo < (minTempo / 4)).if {
-			tempo = minTempo / 4;
+		(newTempo < (minTempo / 4)).if {
+			newTempo = minTempo / 4;
 		};
 		
-		internTempo = tempo;
-		clock.tempo_(tempo);
-		this.pr_setTempoProxy(tempo);
-		leading.if {externTempo = tempo;};
+		tempo = newTempo;
+		clock.tempo_(newTempo);
+		this.pr_setTempoProxy(newTempo);
+		leading.if {externalTempo = newTempo;};
 	}
 	
 	pr_addResponder {|dict, cmd, function|
@@ -732,7 +730,7 @@ MandelClock {
 				tempoProxy = NodeProxy.control(ps.server,1);
 				ps.envir.put(\tempo,tempoProxy);
 			};
-			tempoProxy.put(0, {|tempo = 2.0| tempo}, 0, [\tempo, internTempo]);
+			tempoProxy.put(0, {|t = 2.0| t}, 0, [\tempo, tempo]);
 			// tempoProxy.fadeTime = 0;
 			^tempoProxy;
 		},{
@@ -750,9 +748,9 @@ MandelClock {
 		proxySpace = nil;
 	}
 	
-	pr_setTempoProxy {|tempo|
+	pr_setTempoProxy {|newTempo|
 		tempoProxy.notNil.if {
-			tempoProxy.set(\tempo, tempo);	
+			tempoProxy.set(\tempo, newTempo);	
 		}
 	}
 	

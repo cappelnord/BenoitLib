@@ -63,18 +63,18 @@ MandelClockGUI
 		
 		sj = SkipJack({
 			
-			var tempo = mc.externTempo;
+			var tempo = mc.externalTempo;
 			var color = Color.black;
 			
 			MandelClock.debug.if {
-				tempo = mc.internTempo;
+				tempo = mc.tempo;
 			};
 			
-			(mc.internTempo > mc.externTempo).if {
+			(mc.tempo > mc.externalTempo).if {
 				color = Color(0,0.4,0);
 			};
 			
-			(mc.internTempo < mc.externTempo).if {
+			(mc.tempo < mc.externalTempo).if {
 				color = Color(0.4,0,0);
 			};
 			

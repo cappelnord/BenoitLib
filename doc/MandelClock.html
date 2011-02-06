@@ -12,17 +12,16 @@ p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
 p.p3 {margin: 0.0px 0.0px 0.0px 0.0px; font: 18.0px Helvetica; min-height: 22.0px}
 p.p4 {margin: 0.0px 0.0px 0.0px 0.0px; font: 18.0px Helvetica}
 p.p5 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
-p.p6 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco; color: #bf0000}
-p.p7 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco; color: #000000}
-p.p8 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco; color: #000000; min-height: 12.0px}
-p.p9 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco; color: #0000bf}
-p.p10 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco; min-height: 12.0px}
-p.p11 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px Helvetica; min-height: 17.0px}
-p.p12 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px Helvetica}
+p.p6 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco; color: #ad140d}
+p.p7 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco}
+p.p8 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco; min-height: 12.0px}
+p.p9 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco; color: #001bb9}
+p.p10 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px Helvetica; min-height: 17.0px}
+p.p11 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px Helvetica}
 span.s1 {font: 18.0px Helvetica}
 span.s2 {text-decoration: underline}
-span.s3 {color: #0000ff}
-span.s4 {color: #0000bf}
+span.s3 {color: #0024f8}
+span.s4 {color: #001bb9}
 span.s5 {color: #606060}
 span.s6 {color: #000000}
 span.Apple-tab-span {white-space:pre}
@@ -49,7 +48,7 @@ span.Apple-tab-span {white-space:pre}
 <p class="p6">// Before reconnecting you should either quickly recompile sclang or clear any previous instance.</p>
 <p class="p6">// This also stops the process of looking for a leader (if you tried to follow a system)</p>
 <p class="p9">MandelClock<span class="s6">.clear;</span></p>
-<p class="p10"><br></p>
+<p class="p8"><br></p>
 <p class="p4"><b>Methods</b></p>
 <p class="p3"><br></p>
 <p class="p2"><span class="Apple-tab-span">	</span>This isn't a complete list of all available methods but these are all methods you should care for at the moment. Please look in the source for more details and more options.<span class="Apple-converted-space"> </span></p>
@@ -90,11 +89,11 @@ span.Apple-tab-span {white-space:pre}
 <p class="p5"><b><span class="Apple-tab-span">	</span></b></p>
 <p class="p2"><b><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></b>Only as a follower. Release the leader from his duties. You will take the role as the new leader. This also may be necessary if the leader has crashed or isn't available anymore.<span class="Apple-converted-space"> </span></p>
 <p class="p5"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></p>
-<p class="p2"><span class="Apple-tab-span">	</span><b>requestTempo(tempo, time)</b></p>
+<p class="p2"><span class="Apple-tab-span">	</span><b>requestTempo(newTempo, time)</b></p>
 <p class="p5"><b><span class="Apple-tab-span">	</span></b></p>
 <p class="p2"><b><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></b>Only as a follwer.<i> </i>Requests a tempo change in <i>time</i> seconds. If <i>time</i> is set to 0 (or not given at all) the tempo change will be instant. Tempo is given in BPS (2.0 = 120 BPM). The leader will follow the request, unless allowTempoRequests is set to false.</p>
 <p class="p5"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></p>
-<p class="p2"><span class="Apple-tab-span">	</span><b>changeTempo(tempo, time)</b></p>
+<p class="p2"><span class="Apple-tab-span">	</span><b>changeTempo(newTempo, time)</b></p>
 <p class="p5"><b><span class="Apple-tab-span">	</span></b></p>
 <p class="p2"><b><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></b>Only as a leader. Same as <i>requestTempo</i>, but on the leader side.</p>
 <p class="p5"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></p>
@@ -133,19 +132,19 @@ span.Apple-tab-span {white-space:pre}
 <p class="p5"><b><span class="Apple-tab-span">	</span></b></p>
 <p class="p3"><br></p>
 <p class="p4"><b>Protocol Specification</b></p>
-<p class="p11"><br></p>
+<p class="p10"><br></p>
 <p class="p2">All OSC messages are prefixed. This can be set in MandelClock.sc or as an argument on startup. The /mc/ is the default value which is also used in this specification. All messages are sent over the broadcast address. Some are just important for leaders and other are just important for followers. If not noted otherwise a message has to be send to all known ports.</p>
 <p class="p5"><br></p>
 <p class="p2">Each message starts with a String, which identifies a follower/leader with a name.</p>
 <p class="p5"><br></p>
 <p class="p2">Message arguments are notated in the form [type]:[name] where type is one of the four basic OSC message argument types (i: int32, f: float32, s: OSC-string, b: OSC-blob).<span class="Apple-converted-space"> </span></p>
 <p class="p5"><br></p>
-<p class="p12"><b>Starting up and connecting to a MandelClock System</b></p>
-<p class="p11"><br></p>
+<p class="p11"><b>Starting up and connecting to a MandelClock System</b></p>
+<p class="p10"><br></p>
 <p class="p2"><span class="Apple-tab-span">	</span>Setting up a system should be easy. One has to start as a leader and all other clients should do a /mc/requestPorts message (to announce their listening port to the system) and then initialize their clock with the first /mc/clock signal they receive.</p>
 <p class="p5"><span class="Apple-tab-span">	</span></p>
-<p class="p12"><b>Timing</b></p>
-<p class="p11"><br></p>
+<p class="p11"><b>Timing</b></p>
+<p class="p10"><br></p>
 <p class="p2"><span class="Apple-tab-span">	</span><b>/mc/clock s:ID, i:serial, f:beats, f:currentTempo</b></p>
 <p class="p5"><b><span class="Apple-tab-span">	</span></b></p>
 <p class="p2"><b><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></b>This message is the main timing message. It publishs the current timing state of the leader, so any client can adjust to that.<span class="Apple-converted-space"> </span></p>
@@ -161,7 +160,7 @@ span.Apple-tab-span {white-space:pre}
 <p class="p5"><b><span class="Apple-tab-span">	</span></b></p>
 <p class="p2"><b><span class="Apple-tab-span">	</span></b>Any client can request a tempo change from the leader. The tempo and time is given in seconds (as noted above). A Leader may decide to deny the tempo change. Clients should ignore this message, as they get the new timing with the /bc/clock message. if time is 0 the tempo change is instant. Otherwise the tempo will gradually change. An instant tempo change may introduce timing jitter, clients may have to resynchroinze afterwards.</p>
 <p class="p5"><br></p>
-<p class="p12"><b>Communication</b></p>
+<p class="p11"><b>Communication</b></p>
 <p class="p5"><br></p>
 <p class="p2"><span class="Apple-tab-span">	</span><b>/mc/chat s:ID, s:message</b></p>
 <p class="p5"><span class="Apple-tab-span">	</span></p>
@@ -179,9 +178,9 @@ span.Apple-tab-span {white-space:pre}
 <p class="p5"><b><span class="Apple-tab-span">	</span></b></p>
 <p class="p2"><b><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></b>Every client should answer with a /mc/hello message.</p>
 <p class="p5"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></p>
-<p class="p11"><br></p>
-<p class="p12"><b>Leader Management</b></p>
-<p class="p11"><br></p>
+<p class="p10"><br></p>
+<p class="p11"><b>Leader Management</b></p>
+<p class="p10"><br></p>
 <p class="p2">The leader has to send the clock signal and it is his responsibility to answer to certain messages to manage the complete system. Any participant can become the leader at any time, even if the current leader is still leader or isn't there anymore. As this is not realy secured by the protocol you should secure your network.</p>
 <p class="p5"><br></p>
 <p class="p2">A client who doesn't know who the leader is can determine it by one simple rule: Whoever sends the /mc/clock message is the leader.</p>
@@ -192,7 +191,7 @@ span.Apple-tab-span {white-space:pre}
 <p class="p2"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>This message also allows a client to take lead in a leaderless system.</p>
 <p class="p5"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></p>
 <p class="p5"><br></p>
-<p class="p12"><b>Port Management</b></p>
+<p class="p11"><b>Port Management</b></p>
 <p class="p5"><br></p>
 <p class="p2">As SuperCollider on Linux may not receive on port 57120 (also there is other Software) any future client may request his port to be part of the system. A leader must relay this port request to all ports he sends to. After following a leader a client must ask the leader for all the ports the leader sends to. Any client must keep book of the current ports, so that he can take on the lead without loosing clients.</p>
 <p class="p5"><br></p>
