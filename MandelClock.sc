@@ -159,6 +159,12 @@ MandelClock {
 		
 		// start networking
 		ports = ports ? [57120];
+		
+		// this is a workaround, check if ports are publishhed correctly
+		ports.include(57120).not.if {
+			ports = ports ++ 57120;
+		};
+		
 		addrDict = IdentityDictionary.new;
 		this.pr_managePorts(ports);
 		
