@@ -57,31 +57,13 @@ StringInputDialog {
 									width,
 									35 + swingBigger), false);
 		
-		txt = TextField(window, Rect(7,7,width-80,20 + swingBigger)).canFocus_(false);
-		
-		// the keyDownAction is a little hacky, SCTextField doesn't seem to register Escape, which i neeeed :-(
-		// this could be improved some time later ...
+		txt = TextField(window, Rect(7,7,width-80,20 + swingBigger));
 		
 		Button(window, Rect(width - 67,7,57,20 + swingBigger))
 			.states_([[msg,Color.black,Color.clear]])
 			.action_({|button| this.doAction;});
 			
 		window.view.keyDownAction_({ |b, char, modifiers, unicode, keycode|
-				
-			(char.isPrint).if {
-				txt.string_(txt.string ++ char);	
-			};
-						
-			// backspace
-			(unicode == 127).if {
-				
-				(txt.string.size > 1).if({
-					txt.string_(txt.string[0..(txt.string.size-2)]);
-				},{
-					txt.string_("");
-				});
-
-			};
 			
 			// return
 			(unicode == 13).if {
