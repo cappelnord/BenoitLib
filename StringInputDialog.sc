@@ -63,7 +63,7 @@ StringInputDialog {
 			.states_([[msg,Color.black,Color.clear]])
 			.action_({|button| this.doAction;});
 			
-		window.view.keyDownAction_({ |b, char, modifiers, unicode, keycode|
+		txt.keyDownAction_({ |b, char, modifiers, unicode, keycode|
 			
 			// return
 			(unicode == 13).if {
