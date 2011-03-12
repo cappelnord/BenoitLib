@@ -30,6 +30,8 @@ MandelClock {
 	classvar <>debug = false;
 	classvar <>dumpOSC = false;
 	
+	var <>tapInstance;
+	
 	var <clock;
 	var clockSerial = 0;
 	
@@ -674,11 +676,11 @@ MandelClock {
 		^guiInstance;
 	}
 	
-	/* not yet implemented
 	tap {
-		MandelClockTap.new(this);	
+		tapInstance.isNil.if {
+			^tapInstance = MandelClockTap.new(this);
+		};
 	}
-	*/
 	
 	closeGUI {
 		guiInstance.notNil.if {
