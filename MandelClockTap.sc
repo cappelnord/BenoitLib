@@ -3,6 +3,7 @@ MandelClockTap {
 	var instance, clock, myClock;
 	var window;
 	var tempo, bpm, beat;
+	var origTempo;
 	
 	var button, bpmText;
 	
@@ -16,8 +17,12 @@ MandelClockTap {
 	
 	var status = 0;
 	
+	var <tempoMul = 1;
+	
+	var <listeners;
+	
 	var <>open = true;
-		
+			
 	*new {|instance|
 		^super.new.init(instance);
 	}
@@ -53,6 +58,8 @@ MandelClockTap {
 		this.setBPM(instance.clock.tempo * 60);
 		this.setBeat(instance.clock.beats);
 		
+		listeners = List.new;
+		
 		window.front;
 		
 		window.onClose_({
@@ -65,7 +72,8 @@ MandelClockTap {
 	
 	setBPM {|a_bpm|
 		bpm = a_bpm;
-		tempo = bpm / 60.0;
+		origTempo = bpm / 60.0;
+		tempo = origTempo * tempoMul;
 		
 		myClock.tempo_(tempo);
 		
@@ -101,11 +109,23 @@ MandelClockTap {
 		beat = beat + delta;	
 	}
 	
+	tempoMul_ {|value|
+		tempoMul = value;
+		this.setBPM(origTempo * 60.0);	
+	}
+	
+	cancelTap {
+		status = 0;
+		tapNum = 0;
+		{button.value_(status);}.defer;
+	}
+	
 	tap {
 		var newStatus = 0;
 		var delta;
 		(status == 0).if({
 			newStatus = 1;
+			this.tempoMul_(1);
 			
 			/*
 			delta = beat % 4 + 1;
@@ -141,6 +161,10 @@ MandelClockTap {
 		});
 		
 		status = newStatus;
-		button.value_(status);		
+		button.value_(status);
+		
+		listeners.do {|item|
+			item.value(this);	
+		};		
 	}
 }

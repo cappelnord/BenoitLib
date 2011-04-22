@@ -91,6 +91,9 @@ MandelClock {
 	var metro;
 	
 	var dropSchedDict;
+	
+	var <>hardness = 0.5;
+	var <>deviationMul = 0.3;
 		
 	*startLeader {|name, startTempo = 2.0|
 		
@@ -449,7 +452,7 @@ MandelClock {
 					}
 					// if five ticks were bad OR timing is really off
 					{(badTicks > 5) || (deviation.abs > (deviationThreshold * 5))} {
-						this.pr_setClockTempo((tempo * 0.5) + ( externalTempo + (deviation * 0.3 * -1) * 0.5));
+						this.pr_setClockTempo((tempo * (1.0 - hardness)) + ( externalTempo + (deviation * deviationMul * -1) * hardness));
 					};
 					
 					deviationGate = true;
