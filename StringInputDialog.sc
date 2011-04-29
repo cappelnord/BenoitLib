@@ -62,20 +62,51 @@ StringInputDialog {
 		Button(window, Rect(width - 67,7,57,20 + swingBigger))
 			.states_([[msg,Color.black,Color.clear]])
 			.action_({|button| this.doAction;});
-			
-		txt.keyDownAction_({ |b, char, modifiers, unicode, keycode|
-			
+		
+		(GUI.scheme == CocoaGUI).not.if({	
+			txt.keyDownAction_({ |b, char, modifiers, unicode, keycode|
+				
+				// return
+				(unicode == 13).if {
+					this.doAction;
+					this.close;
+				};
+				
+				// escape
+				(unicode == 27).if {
+					this.close;
+				};
+					 
+			});
+		}, {
+			window.view.keyDownAction_({ |b, char, modifiers, unicode, keycode|
+
+			(char.isPrint).if {
+				txt.string_(txt.string ++ char);	
+			};
+
+			// backspace
+			(unicode == 127).if {
+
+				(txt.string.size > 1).if({
+					txt.string_(txt.string[0..(txt.string.size-2)]);
+				},{
+					txt.string_("");
+				});
+
+			};
+
 			// return
 			(unicode == 13).if {
 				this.doAction;
 				this.close;
 			};
-			
+
 			// escape
 			(unicode == 27).if {
 				this.close;
 			};
-				 
+			});
 		});
 
 				
