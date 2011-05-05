@@ -26,3 +26,12 @@ Pman : Pattern {
 		^event;
 	}
 }
+
+PmanScale : Pman {
+	embedInStream {|event|		
+		while {true} {
+			ScaleInfo.at(MandelClock.instance.getValue(\scale)).yield;
+		};
+		^event;
+	}	
+}
