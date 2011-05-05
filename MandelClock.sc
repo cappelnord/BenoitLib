@@ -505,7 +505,8 @@ MandelClock {
 	pr_leaderResponders {
 		
 		this.pr_addResponder(oscLeaderResponders, "/requestValueSync", {|ti, tR, message, addr|
-			bdlDict.do {|key, value|
+			bdlDict.keys.do {|key|
+				var value = bdlDict.at(key);
 				this.sendMsgCmd("/value", key.asString, value.value(), 0.0);
 				value.list.do {|item|
 					this.sendMsgCmd("/value", key.asString, item[1], item[0]);
