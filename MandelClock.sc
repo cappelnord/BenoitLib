@@ -94,6 +94,8 @@ MandelClock {
 	
 	var <>hardness = 0.5;
 	var <>deviationMul = 0.3;
+	
+	var bdlDict;
 		
 	*startLeader {|name, startTempo = 2.0|
 		
@@ -186,6 +188,9 @@ MandelClock {
 		clock.permanent_(true);
 		
 		TempoClock.default = clock;
+		
+		// BDL
+		this.pr_initBDL();
 		
 		externalTempo = startTempo;
 		tempo = startTempo;
@@ -522,8 +527,16 @@ MandelClock {
 	// responders for leaders and followers
 	pr_generalResponders {
 		
-		// chat and shout responders
+		// value responder
 		
+		this.pr_addResponder(oscGeneralResponders, "/value", {|ti, tR, message, addr|
+			(message[1].asString != name).if {
+				this.pr_setBDL(message[2].asSymbol, message[3], message[4].asFloat);
+			};
+		});
+		
+		// chat and shout responders
+				
 		this.pr_addResponder(oscGeneralResponders, "/chat", {|ti, tR, message, addr|
 			 (message[1].asString ++ ":  " ++ message[2].asString).postln;
 		});
@@ -813,6 +826,35 @@ MandelClock {
 		}, {
 			("Bar " ++ bar ++ " is in the past! Didn't do anything.").warn;
 		});
+	}
+	
+	getValue {|key|
+		^bdlDict.at(key.asSymbol).value();
+	}
+	
+	setValue {|key, value, schedBeats=0.0|
+		this.sendMsgCmd("/value", key.asString, value, schedBeats.asFloat);
+		^this.pr_setBDL(key, value, schedBeats);
+	}
+	
+	pr_setBDL {|key, value, schedBeats|
+		var bdl = bdlDict.at(key.asSymbol);
+		
+		bdl.isNil.if ({
+			bdl = BeatDependentValue(value);
+			bdlDict.put(key, bdl);
+			^value;	
+		}, {
+			^bdl.schedule(value, schedBeats);
+		});		
+	}
+	
+	pr_initBDL {
+		bdlDict = Dictionary.new;
+		
+		bdlDict.put(\scale, BeatDependentValue(\minor));
+		bdlDict.put(\mtranspose, BeatDependentValue(0));
+		bdlDict.put(\ctranspose, BeatDependentValue(0));
 	}
 	
 	
