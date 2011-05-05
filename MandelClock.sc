@@ -866,6 +866,17 @@ MandelClock {
 		bdlDict.put(\scale, BeatDependentValue(\minor));
 		bdlDict.put(\mtranspose, BeatDependentValue(0));
 		bdlDict.put(\ctranspose, BeatDependentValue(0));
+		
+		Event.addEventType(\mandelspace, {
+			var schedBeats;
+			~deltaSched = ~deltaSched ? 0.0;
+			schedBeats = MandelClock.instance.clock.beats + ~deltaSched;
+			currentEnvironment.keys.do {|key|
+				((key != \type) && (key != \dur)).if {
+					MandelClock.instance.setValue(key, currentEnvironment.at(key), schedBeats);
+				};
+			};
+		});
 	}
 	
 	
