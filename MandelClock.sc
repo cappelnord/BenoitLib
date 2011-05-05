@@ -142,6 +142,7 @@ MandelClock {
 			("... you are now following " ++ message[1].asString ++ "!").postln;
 			
 			action.value(instance);
+			instance.sendMsgCmd("/requestValueSync");
 			
 		}).add;
 		
@@ -502,6 +503,15 @@ MandelClock {
 	
 	// responders only for leaders
 	pr_leaderResponders {
+		
+		this.pr_addResponder(oscLeaderResponders, "/requestValueSync", {|ti, tR, message, addr|
+			bdlDict.do {|key, value|
+				this.sendMsgCmd("/value", key.asString, value.value(), 0.0);
+				value.list.do {|item|
+					this.sendMsgCmd("/value", key.asString, item[1], item[0]);
+				};
+			};
+		});
 		
 		this.pr_addResponder(oscLeaderResponders, "/requestPort", {|ti, tR, message, addr|
 			this.pr_addPort(message[2].asInteger);
