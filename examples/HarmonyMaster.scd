@@ -1,5 +1,5 @@
 /*
-	Beeing Harmony Master is quite simple but needs some explanation.
+	Being Harmony Master is quite simple but needs some explanation.
 	
 	You can use the event type \mandelspace after MandelClock is started.
 	Each key other than \dur and \deltaSched will be set in the Shared
