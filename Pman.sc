@@ -27,10 +27,10 @@ Pman : Pattern {
 	}
 }
 
-PmanScale : Pman {
+PmanScale : Pattern {
 	embedInStream {|event|		
 		while {true} {
-			ScaleInfo.at(MandelClock.instance.getValue(\scale)).yield;
+			Scale.newFromKey(MandelClock.instance.getValue(\scale), MandelClock.instance.getValue(\tuning)).yield;
 		};
 		^event;
 	}	

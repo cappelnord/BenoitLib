@@ -864,6 +864,7 @@ MandelClock {
 		bdlDict = Dictionary.new;
 		
 		bdlDict.put(\scale, BeatDependentValue(\minor));
+		bdlDict.put(\tuning, BeatDependentValue(\et12));
 		bdlDict.put(\mtranspose, BeatDependentValue(0));
 		bdlDict.put(\ctranspose, BeatDependentValue(0));
 		

@@ -21,7 +21,8 @@ Pdef(\harmonyMaster, Pbind(
 	\deltaSched, 1,
 	\dur, 4,
 	\mtranspose, Pseq([0,3,1,4],inf),
-	\scale, Pseq([\minor, \minor, \minor, \major],inf)
+	\scale, Pseq([\major, \minor, \minor, \major],inf)
+	// \tuning, Pseq([\et12, \reinhard],inf)
 ));
 
 Pdef(\harmonyMaster).play;
@@ -32,9 +33,10 @@ Pdef(\test).quant = [4];
 
 Pdef(\test, Pbind(
 	\dur, 1/4,
+	\degree, Pseq([0,1,2,3], inf),
 	\degree, Pseq([0,2,4,7], inf),
 	\mtranspose, Pman(\mtranspose),
-	\scale, PmanScale()
+	\scale, PmanScale() // combines scale and tuning
 ));
 
 Pdef(\test).play;
