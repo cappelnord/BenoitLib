@@ -28,9 +28,34 @@ Pman : Pattern {
 }
 
 PmanScale : Pattern {
-	embedInStream {|event|		
+	
+	// this is a bad design decision but more practiable. As MandelClock and MandelSpace
+	// can be seen as a Singleton every PmanScale instance should behave the same at a given time.
+	
+	// Saving this as a classvar doesn't reset the scale at instantiation.
+	classvar lastScaleKey = \minor;
+	
+	embedInStream {|event|
+		var scaleKey, tuningKey, scale;		
 		while {true} {
-			Scale.newFromKey(MandelClock.instance.getValue(\scale), MandelClock.instance.getValue(\tuning)).yield;
+			scaleKey = MandelClock.instance.getValue(\scale);
+			tuningKey  = MandelClock.instance.getValue(\tuning);
+			
+			TuningInfo.tunings.at(tuningKey).isNil.if {
+				("Unknown Tuning " ++ tuningKey.asString).warn;
+				"PmanScale: Falling back to default tuning ...".postln;
+				tuningKey = nil;
+			};
+			
+			scale = Scale.newFromKey(scaleKey, tuningKey);
+			scale.isNil.if ({
+				scale = Scale.newFromKey(lastScaleKey, tuningKey);
+				("PmanScale: Falling back to last valid scale in this stream: " ++ lastScaleKey.asString).postln;
+			}, {
+				lastScaleKey = scaleKey;	
+			});	
+					
+			scale.yield;
 		};
 		^event;
 	}	
