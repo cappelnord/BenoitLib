@@ -867,6 +867,7 @@ MandelClock {
 		bdlDict.put(\tuning, BeatDependentValue(\et12));
 		bdlDict.put(\mtranspose, BeatDependentValue(0));
 		bdlDict.put(\ctranspose, BeatDependentValue(0));
+		bdlDict.put(\root, BeatDependentValue(0));
 		
 		Event.addEventType(\mandelspace, {
 			var schedBeats;
