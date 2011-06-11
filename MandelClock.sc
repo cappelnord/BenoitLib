@@ -80,7 +80,7 @@ MandelClock {
 	var badTicks = 0;
 	
 	var proxySpace;
-	var tempoProxy;	
+	var <tempoProxy;	
 	
 	// to prevent shout flooding (which is kind of stupid but also dangerous)
 	var shoutCounter = 0;
@@ -765,7 +765,7 @@ MandelClock {
 				tempoProxy = NodeProxy.control(ps.server,1);
 				ps.envir.put(\tempo,tempoProxy);
 			};
-			tempoProxy.put(0, {|t = 2.0| t}, 0, [\tempo, tempo]);
+			tempoProxy.put(0, {|tempo = 2.0| tempo}, 0, [\tempo, tempo]);
 			// tempoProxy.fadeTime = 0;
 			^tempoProxy;
 		},{
