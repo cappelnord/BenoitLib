@@ -96,7 +96,9 @@ MandelClock {
 	var <>deviationMul = 0.3;
 	
 	var bdlDict;
-		
+	
+	var <>dropFunc = nil; 
+			
 	*startLeader {|name, startTempo = 2.0|
 		
 		instance.notNil.if {
@@ -538,6 +540,14 @@ MandelClock {
 	// responders for leaders and followers
 	pr_generalResponders {
 		
+		// drop responder
+		
+		this.pr_addResponder(oscGeneralResponders, "/drop", {|ti, tR, message, addr|
+			(message[1].asString != name).if {
+				this.pr_receiveDrop(message[2].asInteger, message[3].asFloat);
+			};
+		});
+		
 		// value responder
 		
 		this.pr_addResponder(oscGeneralResponders, "/value", {|ti, tR, message, addr|
@@ -837,6 +847,37 @@ MandelClock {
 		}, {
 			("Bar " ++ bar ++ " is in the past! Didn't do anything.").warn;
 		});
+	}
+	
+	startDrop {|quant=0|
+		this.sendMsgCmd("/drop", quant.asInteger, clock.beats.asFloat);
+		this.pr_receiveDrop(quant.asInteger, clock.beats.asFloat);
+	}
+	
+	pr_receiveDrop {|quant, referenceBeat|
+		var schedBeat;
+		
+		((quant == 0) && dropFunc.isNil.not).if {
+			dropFunc.value();
+			dropFunc = nil;
+		};
+				
+		(dropFunc != nil).if {
+			schedBeat = ceil(referenceBeat / quant) * quant;
+			
+			(schedBeat < clock.beats).if ({
+				dropFunc.value();
+				dropFunc = nil;	
+			}, {
+				clock.schedAbs(schedBeat - 0.0000001 ,{
+					dropFunc.isNil.not.if {
+						dropFunc.value;
+					};
+					dropFunc = nil;
+					nil;
+				});
+			});
+		};
 	}
 	
 	getValue {|key|
