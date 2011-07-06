@@ -857,27 +857,32 @@ MandelClock {
 	pr_receiveDrop {|quant, referenceBeat|
 		var schedBeat;
 		
-		((quant == 0) && dropFunc.isNil.not).if {
-			dropFunc.value();
-			dropFunc = nil;
+		(quant == 0).if {
+			this.runDropFunc;
 		};
 				
 		(dropFunc != nil).if {
 			schedBeat = ceil(referenceBeat / quant) * quant;
 			
 			(schedBeat < clock.beats).if ({
-				dropFunc.value();
-				dropFunc = nil;	
+				this.runDropFunc;
 			}, {
 				clock.schedAbs(schedBeat - 0.0000001 ,{
-					dropFunc.isNil.not.if {
-						dropFunc.value;
-					};
-					dropFunc = nil;
+					this.runDropFunc;
 					nil;
 				});
 			});
 		};
+	}
+	
+	runDropFunc {
+		dropFunc.isNil.not.if ({
+			dropFunc.value;
+			this.displayShout("", "Hot Drop!");
+		}, {
+			this.displayShout("", "Cold Drop!");
+		});
+		dropFunc = nil;
 	}
 	
 	getValue {|key|
