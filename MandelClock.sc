@@ -879,8 +879,10 @@ MandelClock {
 		dropFunc.isNil.not.if ({
 			dropFunc.value;
 			this.displayShout("", "Hot Drop!");
+			"Hot Drop!".postln;
 		}, {
 			this.displayShout("", "Cold Drop!");
+			"Cold Drop!".postln;
 		});
 		dropFunc = nil;
 	}
