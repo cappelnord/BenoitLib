@@ -29,7 +29,6 @@ BeatDependentValue {
 	}
 	
 	schedule {|newValue, beats|
-		var val = this.value();
 		(beats <= clock.beats).if({
 			value = newValue;
 			this.callOnChange();
@@ -40,7 +39,7 @@ BeatDependentValue {
 			// even if this is a little bit problematic ...
 			onChangeFunc.notNil.if { clock.schedAbs(beats, {this.callOnChange}); };
 		});
-		^val;
+		^this.value;
 	}
 	
 	// actually a value reset also could be done through scheduling, but i think, that
@@ -60,7 +59,7 @@ BeatDependentValue {
 	
 	callOnChange {
 		onChangeFunc.notNil.if {
-			onChangeFunc.value(this);	
+			onChangeFunc.value(this.value, this);	
 		};	
 	}
 }
