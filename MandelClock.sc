@@ -1,6 +1,6 @@
 /*
 	MandelClock
-	(c) 2010 by Patrick Borgeat <patrick@borgeat.de>
+	(c) 2010-11 by Patrick Borgeat <patrick@borgeat.de>
 	http://www.cappel-nord.de
 	
 	Part of BenoitLib
@@ -94,10 +94,11 @@ MandelClock {
 	
 	var <>hardness = 0.5;
 	var <>deviationMul = 0.3;
-	
-	var bdlDict;
-	
+		
 	var <>dropFunc = nil; 
+	
+	var <space;
+	var plugs;
 			
 	*startLeader {|name, startTempo = 2.0|
 		
@@ -186,17 +187,20 @@ MandelClock {
 		// bookkeeping for scheduling
 		dropSchedDict = Dictionary.new;
 		
+		plugs = List.new;
+		
 		// start the clock
 		clock = TempoClock.new(startTempo, startBeat);
 		clock.permanent_(true);
 		
 		TempoClock.default = clock;
 		
-		// BDL
-		this.pr_initBDL();
+		space = MandelSpace(this);
 		
 		externalTempo = startTempo;
 		tempo = startTempo;
+		
+		plugs.do {|p| p.onStartup(this) };
 		
 		// build responders
 		this.pr_generalResponders;
@@ -358,6 +362,8 @@ MandelClock {
 		// start leader responders
 		this.pr_leaderResponders;
 		
+		plugs.do {|p| p.onBecomeLeader(this) };
+		
 		this.post("You are now the leader!");
 	}
 	
@@ -392,6 +398,8 @@ MandelClock {
 		
 		// start follower responders
 		this.pr_followerResponders;	
+		
+		plugs.do {|p| p.onBecomeFollower(this) };
 	}
 	
 	// the most important method!
@@ -490,6 +498,22 @@ MandelClock {
 		leading.if {externalTempo = newTempo;};
 	}
 	
+	addResponder {|key, cmd, function |
+	
+		var d = (\general: oscGeneralResponders,
+				\leader: oscLeaderResponders,
+				\follower: oscFollowerResponders);
+				
+		var dict = d[key];
+		
+		key.notNil.if ({
+			this.pr_addResponder(dict, cmd, function);
+		}, {
+			("Key " ++ key.asString ++ " not found!").postln;
+		});
+	}
+	
+	// this function should go sometimes
 	pr_addResponder {|dict, cmd, function|
 		dict.add(cmd -> OSCresponder(nil, oscPrefix ++ cmd, function).add);
 	}
@@ -505,16 +529,6 @@ MandelClock {
 	
 	// responders only for leaders
 	pr_leaderResponders {
-		
-		this.pr_addResponder(oscLeaderResponders, "/requestValueSync", {|ti, tR, message, addr|
-			bdlDict.keys.do {|key|
-				var value = bdlDict.at(key);
-				this.sendMsgCmd("/value", key.asString, value.value(), 0.0);
-				value.list.do {|item|
-					this.sendMsgCmd("/value", key.asString, item[1], item[0]);
-				};
-			};
-		});
 		
 		this.pr_addResponder(oscLeaderResponders, "/requestPort", {|ti, tR, message, addr|
 			this.pr_addPort(message[2].asInteger);
@@ -545,14 +559,6 @@ MandelClock {
 		this.pr_addResponder(oscGeneralResponders, "/drop", {|ti, tR, message, addr|
 			(message[1].asString != name).if {
 				this.pr_receiveDrop(message[2].asInteger, message[3].asFloat);
-			};
-		});
-		
-		// value responder
-		
-		this.pr_addResponder(oscGeneralResponders, "/value", {|ti, tR, message, addr|
-			(message[1].asString != name).if {
-				this.pr_setBDL(message[2].asSymbol, message[3], message[4].asFloat);
 			};
 		});
 		
@@ -888,47 +894,12 @@ MandelClock {
 	}
 	
 	getValue {|key|
-		^bdlDict.at(key.asSymbol).value();
+		^space.getValue(key);
 	}
 	
 	setValue {|key, value, schedBeats=0.0|
-		this.sendMsgCmd("/value", key.asString, value, schedBeats.asFloat);
-		^this.pr_setBDL(key, value, schedBeats);
+		^space.setValue(key, value, schedBeats);
 	}
-	
-	pr_setBDL {|key, value, schedBeats|
-		var bdl = bdlDict.at(key.asSymbol);
-		
-		bdl.isNil.if ({
-			bdl = BeatDependentValue(value);
-			bdlDict.put(key, bdl);
-			^value;	
-		}, {
-			^bdl.schedule(value, schedBeats);
-		});		
-	}
-	
-	pr_initBDL {
-		bdlDict = Dictionary.new;
-		
-		bdlDict.put(\scale, BeatDependentValue(\minor));
-		bdlDict.put(\tuning, BeatDependentValue(\et12));
-		bdlDict.put(\mtranspose, BeatDependentValue(0));
-		bdlDict.put(\ctranspose, BeatDependentValue(0));
-		bdlDict.put(\root, BeatDependentValue(0));
-		
-		Event.addEventType(\mandelspace, {
-			var schedBeats;
-			~deltaSched = ~deltaSched ? 0.0;
-			schedBeats = MandelClock.instance.clock.beats + ~deltaSched;
-			currentEnvironment.keys.do {|key|
-				((key != \type) && (key != \dur)).if {
-					MandelClock.instance.setValue(key, currentEnvironment.at(key), schedBeats);
-				};
-			};
-		});
-	}
-	
 	
 	// deprecated
 	display {

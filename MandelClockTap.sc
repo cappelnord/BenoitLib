@@ -1,3 +1,17 @@
+/*
+	MandelClockTap
+	(c) 2011 by Patrick Borgeat <patrick@borgeat.de>
+	http://www.cappel-nord.de
+	
+	Part of BenoitLib
+	http://github.com/cappelnord/BenoitLib
+	http://www.the-mandelbrots.de
+	
+	Experimental Tapping Interface for MandelClock
+	Does not work right quite yet :-)
+	
+*/
+
 MandelClockTap {
 	
 	var instance, clock, myClock;
