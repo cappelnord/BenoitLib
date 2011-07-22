@@ -13,7 +13,7 @@
 
 MandelSpace : MandelPlug {
 	
-	var bdlDict;
+	var <bdlDict;
 	var mc;
 	
 	*new {|maclock|

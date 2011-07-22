@@ -16,6 +16,7 @@ BeatDependentValue {
 	var <list;
 	var value;
 	var clock;
+	var <>onChangeFunc;
 	
 	*new {|value, clock|
 		^super.new.init(value, clock);
@@ -31,11 +32,20 @@ BeatDependentValue {
 		var val = this.value();
 		(beats <= clock.beats).if({
 			value = newValue;
+			this.callOnChange();
 		},{
 			list.add([beats, newValue]);
+			
+			// i don't want to schedule this if it isn't necessary.
+			// even if this is a little bit problematic ...
+			onChangeFunc.notNil.if { clock.schedAbs(beats, {this.callOnChange}); };
 		});
 		^val;
 	}
+	
+	// actually a value reset also could be done through scheduling, but i think, that
+	// this is a safer thing and i don't think, that callOnChange functions get
+	// very common.
 	
 	value {
 		(list.size() > 0).if {
@@ -46,5 +56,11 @@ BeatDependentValue {
 			};
 		};
 		^value;
+	}
+	
+	callOnChange {
+		onChangeFunc.notNil.if {
+			onChangeFunc.value(this);	
+		};	
 	}
 }
