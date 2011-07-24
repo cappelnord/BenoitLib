@@ -235,7 +235,7 @@ MandelClock {
 		);
 		modules.add(platform);
 		
-		modules.do {|p| p.onStartup(this) };	
+		modules.do {|module| module.onStartup };	
 	}
 	
 	takeLead {
@@ -379,7 +379,7 @@ MandelClock {
 		// start leader responders
 		this.pr_leaderResponders;
 		
-		modules.do {|p| p.onBecomeLeader(this) };
+		modules.do {|module| module.onBecomeLeader };
 		
 		this.post("You are now the leader!");
 	}
@@ -416,7 +416,7 @@ MandelClock {
 		// start follower responders
 		this.pr_followerResponders;	
 		
-		modules.do {|p| p.onBecomeFollower(this) };
+		modules.do {|module| module.onBecomeFollower };
 	}
 	
 	// the most important method!
