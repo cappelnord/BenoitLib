@@ -812,7 +812,6 @@ MandelClock {
 		
 		tempoProxy.clear;
 		tempoProxy = nil;
-		proxySpace = nil;
 	}
 	
 	pr_setTempoProxy {|newTempo|
