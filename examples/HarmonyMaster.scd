@@ -44,7 +44,7 @@ Pdef(\test).play;
 
 It's also easy to get/set a value in MandelSpace:
 
-MandelClock.instance.getValue(\scale);
+MandelClock.instance.space.getValue(\scale);
 
-MandelClock.instance.setValue(\blub, 5000);
-MandelClock.instance.getValue(\blub);
+MandelClock.instance.space.setValue(\blub, 5000);
+MandelClock.instance.space.getValue(\blub);

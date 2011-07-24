@@ -13,7 +13,7 @@
 
 MandelSpace : MandelPlug {
 	
-	var <bdlDict;
+	var <objects;
 	var mc;
 	
 	*new {|maclock|
@@ -23,18 +23,24 @@ MandelSpace : MandelPlug {
 	init {|maclock|
 		mc = maclock;
 		
-		bdlDict = Dictionary.new;
+		objects = Dictionary.new;
 		
 		this.pr_buildEvents();
 		this.pr_setDefaults();
 	}
 	
+	createValue {|key, value|
+		var obj = this.pr_getObject(key);
+		obj.bdl = BeatDependentValue(value);
+		^value;
+	}
+	
 	pr_setDefaults {
-		bdlDict.put(\scale, BeatDependentValue(\minor));
-		bdlDict.put(\tuning, BeatDependentValue(\et12));
-		bdlDict.put(\mtranspose, BeatDependentValue(0));
-		bdlDict.put(\ctranspose, BeatDependentValue(0));
-		bdlDict.put(\root, BeatDependentValue(0));	
+		this.createValue(\scale, \minor);
+		this.createValue(\tuning, \et12);
+		this.createValue(\mtranspose, 0);
+		this.createValue(\ctranspose, 0);
+		this.createValue(\root, 0);	
 	}
 	
 	pr_buildEvents {
@@ -44,26 +50,50 @@ MandelSpace : MandelPlug {
 			schedBeats = MandelClock.instance.clock.beats + ~deltaSched;
 			currentEnvironment.keys.do {|key|
 				((key != \type) && (key != \dur)).if {
-					MandelClock.instance.setValue(key, currentEnvironment.at(key), schedBeats);
+					MandelClock.instance.space.setValue(key, currentEnvironment.at(key), schedBeats);
 				};
 			};
 		});
 	}
 	
 	pr_setBDL {|key, value, schedBeats|
-		var bdl = bdlDict.at(key.asSymbol);
+		var obj = this.pr_getObject(key);
+		var bdl = obj.at(\bdl);
 		
 		bdl.isNil.if ({
-			bdl = BeatDependentValue(value);
-			bdlDict.put(key, bdl);
+			this.createValue(key, value);
 			^value;	
 		}, {
 			^bdl.schedule(value, schedBeats);
 		});		
 	}
 	
-	getValue {|key|
-		^bdlDict.at(key.asSymbol).value();
+	pr_getObject {|key|
+		var obj = objects.at(key.asSymbol);
+		
+		obj.isNil.if {
+			obj = (
+				\key: key,
+				\bdl: nil,
+				\decorator: nil,
+				\listeners: List(),
+				\subscribers: List()
+			);
+			objects.put(key.asSymbol, obj);
+		}
+		
+		^obj;
+	}
+	
+	getValue {|key, useDecorator=true|
+		
+		var obj = this.pr_getObject(key);
+		
+		(useDecorator && obj.at(\decorator).notNil).if ({
+			^obj.at(\decorator).value(obj.at(\bdl).value, this, key);
+		}, {
+			^obj.at(\bdl).value;
+		});
 	}
 	
 	setValue {|key, value, schedBeats=0.0|
@@ -71,10 +101,67 @@ MandelSpace : MandelPlug {
 		^this.pr_setBDL(key, value, schedBeats);
 	}
 	
+	setDecorator {|key, func|
+		var obj = this.pr_getObject(key);
+		obj.decorator = func;	
+	}
+	
+	addListener {|key, func|
+		var obj = this.pr_getObject(key);
+		obj.at(\listeners).add(func);
+		this.pr_activateChangeFunc(obj);
+	}
+	
+	clearListeners {|key|
+		var obj = this.pr_getObject(key);
+		obj.at(\listeners).clear();
+		this.pr_deactivateChangeFunc(obj);
+	}
+	
+	addSubscriber {|key, subscriber|
+		var obj = this.pr_getObject(key);
+		obj.at(\subscribers).add(subscriber);
+		this.pr_activateChangeFunc(obj);
+	}
+	
+	clearSubscribers {|key|
+		var obj = this.pr_getObject(key);
+		obj.at(\subscribers).clear();
+		this.pr_deactivateChangeFunc(obj);
+	}
+	
+	valueHasChanged {|key|
+		var obj = this.pr_getObject(key);
+		
+		obj.at(\listeners).do {|func|
+			func.value(this.getValue(key), space, key);
+		};
+		
+		obj.at(\subscribers).do {|subscriber|
+			this.valueHasChanged(subscriber);	
+		};
+	}
+	
+	pr_activateChangeFunc {|obj|
+		var bdl = obj.at(\bdl);
+		bdl.notNil.if {
+			bdl.onChangeFunc = {this.valueHasChanged(obj.at(\key))};		};
+	}
+	
+	pr_deactivateChangeFunc {|obj|
+		var bdl = obj.at(\bdl);
+		
+		((obj.at(\listeners).size == 0) && (obj.at(\subscirbers).size == 0)).if {
+			bdl.notNil.if {
+				bdl.onChangeFunc = nil;
+			};
+		};
+	}
+	
 	onBecomeLeader {|mc|
 		mc.addResponder(\leader, "/requestValueSync", {|ti, tR, message, addr|
-			bdlDict.keys.do {|key|
-				var value = bdlDict.at(key);
+			objects.keys.do {|key|
+				var value = objects.at(key).bdl;
 				mc.sendMsgCmd("/value", key.asString, value.value(), 0.0);
 				value.list.do {|item|
 					mc.sendMsgCmd("/value", key.asString, item[1], item[0]);

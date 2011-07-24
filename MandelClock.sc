@@ -893,15 +893,18 @@ MandelClock {
 		dropFunc = nil;
 	}
 	
-	getValue {|key|
-		^space.getValue(key);
+	// deprecated
+
+	getValue {|key, useDecorator=true|
+		"getValue is going to be removed from MandelClock instance. Use m.space.getValue".postln;
+		^space.getValue(key, useDecorator);
 	}
 	
 	setValue {|key, value, schedBeats=0.0|
+		"setValue is going to be removed from MandelClock instance. Use m.space.setValue".postln;
 		^space.setValue(key, value, schedBeats);
 	}
 	
-	// deprecated
 	display {
 		this.deprecated(thisMethod, this.class.findRespondingMethodFor(\gui));
 		this.gui;
