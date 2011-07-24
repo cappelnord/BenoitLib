@@ -11,7 +11,7 @@
 	
 */
 
-MandelSpace : MandelPlug {
+MandelSpace : MandelModule {
 	
 	var <objects;
 	var mc;
@@ -134,7 +134,7 @@ MandelSpace : MandelPlug {
 		var obj = this.pr_getObject(key);
 		
 		obj.at(\listeners).do {|func|
-			func.value(this.getValue(key), space, key);
+			func.value(this.getValue(key), this, key);
 		};
 		
 		obj.at(\subscribers).do {|subscriber|

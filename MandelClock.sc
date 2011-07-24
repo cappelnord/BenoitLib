@@ -97,8 +97,12 @@ MandelClock {
 		
 	var <>dropFunc = nil; 
 	
+	// Modules
+	var modules;
+
 	var <space;
-	var plugs;
+	var <tools;
+	var <platform;
 			
 	*startLeader {|name, startTempo = 2.0|
 		
@@ -187,20 +191,17 @@ MandelClock {
 		// bookkeeping for scheduling
 		dropSchedDict = Dictionary.new;
 		
-		plugs = List.new;
 		
 		// start the clock
 		clock = TempoClock.new(startTempo, startBeat);
 		clock.permanent_(true);
 		
-		TempoClock.default = clock;
-		
-		space = MandelSpace(this);
-		
+		TempoClock.default = clock;		
 		externalTempo = startTempo;
 		tempo = startTempo;
 		
-		plugs.do {|p| p.onStartup(this) };
+		// init Modules
+		this.pr_initModules;
 		
 		// build responders
 		this.pr_generalResponders;
@@ -212,13 +213,29 @@ MandelClock {
 			"Follower".postln;
 			this.pr_becomeFollower;	
 		});
+	}
+	
+	pr_initModules {
+		modules = List.new;
+
+		space = MandelSpace(this);
+		modules.add(space);
 		
-		// register with growl if this is osx
+		tools = MandelTools(this);
+		modules.add(tools);
+		
+		// platform specific
 		Platform.case(
 			\osx, {
-				("osascript '" ++ this.pr_classPath("mcRegisterGrowl.applescript") ++ "'").unixCmd(postOutput:false);
+				platform = MandelPlatformOSX(this);
+			},
+			\linux, {
+				platform = MandelPlatformLinux(this);
 			}
 		);
+		modules.add(platform);
+		
+		modules.do {|p| p.onStartup(this) };	
 	}
 	
 	takeLead {
@@ -362,7 +379,7 @@ MandelClock {
 		// start leader responders
 		this.pr_leaderResponders;
 		
-		plugs.do {|p| p.onBecomeLeader(this) };
+		modules.do {|p| p.onBecomeLeader(this) };
 		
 		this.post("You are now the leader!");
 	}
@@ -399,7 +416,7 @@ MandelClock {
 		// start follower responders
 		this.pr_followerResponders;	
 		
-		plugs.do {|p| p.onBecomeFollower(this) };
+		modules.do {|p| p.onBecomeFollower(this) };
 	}
 	
 	// the most important method!
@@ -735,7 +752,7 @@ MandelClock {
 		(postPrefix ++ message).postln;	
 	}
 	
-	pr_classPath {|filename|
+	classPath {|filename|
 		^MandelClock.filenameSymbol.asString.dirname ++ "/" ++ filename;
 	}
 	
@@ -746,14 +763,7 @@ MandelClock {
 			name = name.tr($', $ );
 			message = message.tr($', $ );
 		
-			Platform.case(
-				\osx, {
-					("osascript '" ++ this.pr_classPath("mcNotify.applescript") ++ "' '" ++ name ++ "' '" ++ message ++ "'").unixCmd(postOutput:false);
-				},
-				\linux, {
-					("notify-send '" ++ name ++ "' '"++ message ++ "'").unixCmd(postOutput:false);
-				}
-			);
+			platform.displayNotification(name, message);
 		},{
 			(name == this.name).if ({
 				this.post("SHUT UP, " ++ name.toUpper ++ "!!! IT'S TOO LOUD IN HERE!");

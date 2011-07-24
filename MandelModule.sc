@@ -1,5 +1,5 @@
 /*
-	MandelPlug
+	MandelModule
 	(c) 2011 by Patrick Borgeat <patrick@borgeat.de>
 	http://www.cappel-nord.de
 	
@@ -7,12 +7,23 @@
 	http://github.com/cappelnord/BenoitLib
 	http://www.the-mandelbrots.de
 	
-	MandelPlug defines an interface and provides
-	empty implementations for MandelClock Addons.
+	MandelModule defines an interface and provides
+	empty implementations for MandelClock Plugins.
 	
 */
 
-MandelPlug {
+MandelModule {
+	
+	var mc;
+	
+	*new {|maclock|
+		^super.new.init(maclock);	
+	}
+	
+	init {|maclock|
+		mc = maclock;
+	}	
+	
 	
 	onStartup {|mc|
 		
