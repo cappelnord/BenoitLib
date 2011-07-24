@@ -79,7 +79,7 @@ MandelClock {
 	var <guiInstance;
 	var badTicks = 0;
 	
-	var proxySpace;
+	var <proxySpace;
 	var <tempoProxy;	
 	
 	// to prevent shout flooding (which is kind of stupid but also dangerous)
@@ -775,28 +775,34 @@ MandelClock {
 		shoutCounter = shoutCounter + 1;
 	}
 	
-	makeTempoProxy {|ps|
-		
-		((ps == nil) && (currentEnvironment.isKindOf(ProxySpace))).if {
-			ps = currentEnvironment;	
-		};
-		
-		// it's not very nice to check for a class (anti OO, a class COULD act as a ProxySpace)
-		(ps.isKindOf(ProxySpace)).if({
-			
-			proxySpace = ps;
-			
-			tempoProxy = ps.envir[\tempo];
-			tempoProxy.isNil.if {
-				tempoProxy = NodeProxy.control(ps.server,1);
-				ps.envir.put(\tempo,tempoProxy);
+	// it's not very nice to check for a class (anti OO, a class COULD act as a ProxySpace)
+	setProxySpace {|ps|
+		proxySpace.isKindOf(ProxySpace).not.if {
+			((ps == nil) && (currentEnvironment.isKindOf(ProxySpace))).if {
+				ps = currentEnvironment;	
 			};
-			tempoProxy.put(0, {|tempo = 2.0| tempo}, 0, [\tempo, tempo]);
+			
+			(ps.isKindOf(ProxySpace)).if({
+				proxySpace = ps;
+			},{
+				"You need to specify a ProxySpace!".throw;
+			});
+		}
+	}
+	
+	makeTempoProxy {
+		
+		// try if the currentEnvironment is a ProxySpace
+		this.setProxySpace;
+		
+		tempoProxy = proxySpace.envir[\tempo];
+		tempoProxy.isNil.if {
+			tempoProxy = NodeProxy.control(proxySpace.server,1);
+			proxySpace.envir.put(\tempo,tempoProxy);
+		};
+		tempoProxy.put(0, {|tempo = 2.0| tempo}, 0, [\tempo, tempo]);
 			// tempoProxy.fadeTime = 0;
-			^tempoProxy;
-		},{
-			"You need to specify your ProxySpace!".throw;
-		});
+		^tempoProxy;
 	}
 	
 	clearTempoProxy {
