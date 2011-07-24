@@ -25,7 +25,7 @@ MandelPlatformLinux : MandelPlatform {
 
 MandelPlatformOSX : MandelPlatform {
 	
-	onStartup {|mc|
+	onStartup {
 		("osascript '" ++ mc.classPath("mcRegisterGrowl.applescript") ++ "'").unixCmd(postOutput:false);
 	}
 	

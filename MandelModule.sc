@@ -25,15 +25,15 @@ MandelModule {
 	}	
 	
 	
-	onStartup {|mc|
+	onStartup {
 		
 	}
 	
-	onBecomeLeader {|mc|
+	onBecomeLeader {
 		
 	}
 	
-	onBecomeFollower {|mc|
+	onBecomeFollower {
 		
 	}
 }

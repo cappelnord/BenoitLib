@@ -158,7 +158,7 @@ MandelSpace : MandelModule {
 		};
 	}
 	
-	onBecomeLeader {|mc|
+	onBecomeLeader {
 		mc.addResponder(\leader, "/requestValueSync", {|ti, tR, message, addr|
 			objects.keys.do {|key|
 				var value = objects.at(key).bdl;
@@ -170,7 +170,7 @@ MandelSpace : MandelModule {
 		});	
 	}
 	
-	onStartup {|mc|
+	onStartup {
 		mc.addResponder(\general, "/value", {|ti, tR, message, addr|
 			(message[1].asString != mc.name).if {
 				this.pr_setBDL(message[2].asSymbol, message[3], message[4].asFloat);
