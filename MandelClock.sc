@@ -776,6 +776,7 @@ MandelClock {
 	}
 	
 	// it's not very nice to check for a class (anti OO, a class COULD act as a ProxySpace)
+	// not good: can't set another ps.
 	setProxySpace {|ps|
 		proxySpace.isKindOf(ProxySpace).not.if {
 			((ps == nil) && (currentEnvironment.isKindOf(ProxySpace))).if {

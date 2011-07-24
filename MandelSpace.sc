@@ -77,7 +77,8 @@ MandelSpace : MandelModule {
 				\bdl: nil,
 				\decorator: nil,
 				\listeners: List(),
-				\subscribers: List()
+				\subscribers: List(),
+				\nodeProxy: nil
 			);
 			objects.put(key.asSymbol, obj);
 		}
@@ -140,6 +141,29 @@ MandelSpace : MandelModule {
 		obj.at(\subscribers).do {|subscriber|
 			this.valueHasChanged(subscriber);	
 		};
+	}
+	
+	mapToProxySpace {|key, lag=0.0|
+		var obj = this.pr_getObject(key);
+		var ps, node;
+		
+		key = key.asSymbol;
+		
+		mc.setProxySpace;
+		
+		ps = mc.proxySpace;
+		
+		node = ps.envir[key];
+		node.isNil.if {
+			node = NodeProxy.control(ps.server, 1);
+			ps.envir.put(key, node);
+		};
+		
+		node.put(0, {|value=0| Lag2.kr(value, lag)}, 0, [\value, this.getValue(key).asFloat]);
+		this.addListener(key, {|v| node.set(\value, v.asFloat) });
+		obj.nodeProxy = node;
+		
+		^node;
 	}
 	
 	pr_activateChangeFunc {|obj|
