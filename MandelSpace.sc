@@ -77,7 +77,7 @@ MandelSpace : MandelModule {
 				\bdl: nil,
 				\decorator: nil,
 				\listeners: List(),
-				\subscribers: List(),
+				\dependencies: List(),
 				\nodeProxy: nil
 			);
 			objects.put(key.asSymbol, obj);
@@ -119,15 +119,15 @@ MandelSpace : MandelModule {
 		this.pr_deactivateChangeFunc(obj);
 	}
 	
-	addSubscriber {|key, subscriber|
+	addDependency {|key, dependent|
 		var obj = this.pr_getObject(key);
-		obj.at(\subscribers).add(subscriber);
+		obj.at(\dependencies).add(dependent);
 		this.pr_activateChangeFunc(obj);
 	}
 	
-	clearSubscribers {|key|
+	clearDependencies {|key|
 		var obj = this.pr_getObject(key);
-		obj.at(\subscribers).clear();
+		obj.at(\dependencies).clear();
 		this.pr_deactivateChangeFunc(obj);
 	}
 	
@@ -138,8 +138,8 @@ MandelSpace : MandelModule {
 			func.value(this.getValue(key), this, key);
 		};
 		
-		obj.at(\subscribers).do {|subscriber|
-			this.valueHasChanged(subscriber);	
+		obj.at(\dependencies).do {|dependent|
+			this.valueHasChanged(dependent);	
 		};
 	}
 	
@@ -175,7 +175,7 @@ MandelSpace : MandelModule {
 	pr_deactivateChangeFunc {|obj|
 		var bdl = obj.at(\bdl);
 		
-		((obj.at(\listeners).size == 0) && (obj.at(\subscirbers).size == 0)).if {
+		((obj.at(\listeners).size == 0) && (obj.at(\dependencies).size == 0)).if {
 			bdl.notNil.if {
 				bdl.onChangeFunc = nil;
 			};
