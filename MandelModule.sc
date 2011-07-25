@@ -13,27 +13,17 @@
 */
 
 MandelModule {
+
 	
-	var mc;
-	
-	*new {|maclock|
-		^super.new.init(maclock);	
-	}
-	
-	init {|maclock|
-		mc = maclock;
-	}	
-	
-	
-	onStartup {
+	onStartup {|mc|
 		
 	}
 	
-	onBecomeLeader {
+	onBecomeLeader {|mc|
 		
 	}
 	
-	onBecomeFollower {
+	onBecomeFollower {|mc|
 		
 	}
 }

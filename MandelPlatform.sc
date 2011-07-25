@@ -12,6 +12,17 @@
 */
 
 MandelPlatform : MandelModule {
+	
+	var mc;
+	
+	*new {|maclock|
+		^super.new.init(maclock);	
+	}
+	
+	init {|maclock|
+		mc = maclock;	
+	}
+	
 	displayNotification {|title, message|
 		"This should have been implemented by the platform".postln;
 	}
