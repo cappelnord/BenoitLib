@@ -114,7 +114,7 @@ MandelSpace : MandelModule {
 	onStartup {|mc|
 		mc.addResponder(\general, "/value", {|ti, tR, message, addr|
 			(message[1].asString != mc.name).if {
-				this.pr_setBDL(message[2].asSymbol, message[3], message[4].asFloat);
+				this.at(message[2].asSymbol).pr_setBDL(message[3], message[4].asFloat);
 			};
 		});
 	}
