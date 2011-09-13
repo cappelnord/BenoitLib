@@ -113,7 +113,7 @@ MandelClockTap {
 			};
 		
 			myClock.sched(1/8, {
-				instance.pr_receiveTick(ser, b, tempo, true);
+				instance.time.receiveTick(ser, b, tempo, true);
 				this.progress;
 			});
 		};

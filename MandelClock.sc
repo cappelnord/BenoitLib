@@ -33,12 +33,10 @@ MandelClock {
 	var <>tapInstance;
 	
 	var <clock;
-	var clockSerial = 0;
 	
-	var <externalTempo; // the tempo set by external clock
-	var <tempo; // the internal tempo, may differ because it does a correction
+	var <>externalTempo; // the tempo set by external clock
+	var <>tempo; // the internal tempo, may differ because it does a correction
 	
-	var lastTickTime = 0;
 	var lastTickSJ;
 	
 	var tickSJ;
@@ -60,12 +58,8 @@ MandelClock {
 	var <>helloAfterPorts = false;
 	
 	var <>tickFreq = 0.02; // in s
-	var <>latencyCompensation = 0.005; // in s
-	var <>deviationThreshold = 0.02; // in beats
 	var <>quant = 16; // may be nil, in beats
-	
-	var deviationGate = true;
-	
+		
 	var <>allowTempoRequests = true;
 	
 	var <>maxTempo = 4.0;
@@ -73,11 +67,8 @@ MandelClock {
 	
 	// TODO: really use this!
 	var beatsPerBar = 4;
-	
-	var <>listenToTicks = true;
-		
+			
 	var <guiInstance;
-	var badTicks = 0;
 	
 	var <proxySpace;
 	var <tempoProxy;	
@@ -92,8 +83,6 @@ MandelClock {
 	
 	var dropSchedDict;
 	
-	var <>hardness = 0.5;
-	var <>deviationMul = 0.3;
 		
 	var <>dropFunc = nil; 
 	
@@ -103,8 +92,11 @@ MandelClock {
 	var <space;
 	var <tools;
 	var <platform;
+	var <time;
 			
-	*startLeader {|name, startTempo = 2.0|
+	*startLeader {|name, startTempo = 2.0, timeClass|
+		
+		timeClass = timeClass ? MandelTimeDriver;
 		
 		instance.notNil.if {
 			"THERE IS ALREADY A MANDELCLOCK INSTANCE".postln;
@@ -119,13 +111,15 @@ MandelClock {
 			"".postln; 	
 		};
 		
-		instance = MandelClock.new(name, 0, startTempo, name, [NetAddr.langPort], leading:true);
+		instance = MandelClock.new(name, 0, startTempo, name, [NetAddr.langPort], leading:true, timeClass:timeClass);
 		^instance;
 	}
 	
-	*startFollower {|name, port=57120, action|
+	*startFollower {|name, port=57120, action, timeClass|
 		
 		var addr;
+		
+		timeClass = timeClass ? MandelTimeDriver;
 		
 		instance.notNil.if {
 			"THERE IS ALREADY A MANDELCLOCK INSTANCE".postln;
@@ -142,7 +136,7 @@ MandelClock {
 			
 			bStrapResponder.remove;
 			
-			instance = MandelClock.new(name, message[3], message[4], message[1].asString,[port], false);
+			instance = MandelClock.new(name, message[3], message[4], message[1].asString,[port], false, timeClass:timeClass);
 			instance.helloAfterPorts = true;
 			instance.publishPorts;
 			
@@ -155,16 +149,16 @@ MandelClock {
 		
 	}
 	
-	*new {|name, startBeat, startTempo, leaderName, ports, leading=false|
+	*new {|name, startBeat, startTempo, leaderName, ports, leading=false, timeClass|
 		
 		name.isNil.if {
 			name = "RandomUser" ++ 100000.rand;	
 		};
 		
-		^super.new.init(name, startBeat, startTempo, leaderName, ports, leading);
+		^super.new.init(name, startBeat, startTempo, leaderName, ports, leading, timeClass);
 	}
 	
-	init {|a_name, startBeat, startTempo, a_leaderName, ports, a_leading|
+	init {|a_name, startBeat, startTempo, a_leaderName, ports, a_leading, timeClass|
 		
 		name = a_name;
 		leaderName = a_leaderName;
@@ -202,6 +196,9 @@ MandelClock {
 		
 		// init Modules
 		this.pr_initModules;
+		
+		time = timeClass.new(this);
+		modules.add(time);
 		
 		// build responders
 		this.pr_generalResponders;
@@ -271,11 +268,6 @@ MandelClock {
 		this.sendMsgCmd("/publishPorts");	
 	}
 	
-	tick {
-		this.sendMsgCmd("/clock", clockSerial, clock.beats, tempo.asFloat);
-		clockSerial = clockSerial + 1;
-	}
-	
 	// of course it could be the same method for a leader and a follower
 	// but I think normally only a leader should change the tempo, so making
 	// this cut enforces this somehow.
@@ -297,7 +289,7 @@ MandelClock {
 			
 			((time <= 0) || (newTempo == tempo)).if ({
 				this.pr_setClockTempo(newTempo);
-				this.tick;
+				time.tick;
 			},{
 				delta = (newTempo - tempo) * 0.1 / time;
 				
@@ -367,13 +359,12 @@ MandelClock {
 		// clear follower tasks
 		lastTickSJ.stop;
 		lastTickSJ = nil;
-		lastTickTime = 0;
-		
+				
 		this.post("Starting leader tasks ...");
 		
 		// start leader tasks
 		tickSJ = SkipJack({
-			this.tick;
+			time.tick;
 		}, tickFreq, name: "ClockTick");
 		
 		// start leader responders
@@ -397,14 +388,13 @@ MandelClock {
 		tempoChangeSJ.stop;
 		tempoChangeSJ = nil;
 		
-		badTicks = 0;
 		
 		this.post("Starting follower tasks ...");
 		
 		// start follower tasks
-		lastTickTime = thisThread.seconds;
+
 		lastTickSJ = SkipJack({
-			((lastTickTime + 10) < thisThread.seconds).if {
+			((time.lastTickTime + 10) < thisThread.seconds).if {
 				this.post("WARNING, did not receive clock signals from the leader!");
 				this.post("Someone else should take the lead ...");
 				
@@ -419,89 +409,6 @@ MandelClock {
 		modules.do {|module| module.onBecomeFollower(this) };
 	}
 	
-	// the most important method!
-	// it is a mess :-)
-	pr_receiveTick {|ser, bea, tem, force=false|
-				
-		var deviation;
-		var tempoHasChanged = false;
-		var thisDeviationTreshold = deviationThreshold;
-		
-		// (ser + "\n" + bea + "\n" + tem + "\n").postln;
-		
-		force.if {
-			externalTempo = tem;	
-		};
-
-	
-		// only interpret a tick if it's a new one.
-		((ser > clockSerial) || force).if {
-			debug.if {
-				(((clockSerial + 1) != ser) && (force.not)).if {
-					this.post("A tick was lost or too late!");
-				};
-			};
-			
-			// update internal state
-			clockSerial = ser;
-			lastTickTime = thisThread.seconds;
-			
-			listenToTicks.if {
-				
-				if(externalTempo != tem) {
-					externalTempo = tem;
-					tempoHasChanged = true;
-				};
-
-				// compensate network latency (stupid)
-				bea = bea + (latencyCompensation * tem);
-				
-				// calculate the beat we want to snap on.
-				deviation = clock.beats - bea;
-				
-				// snap to next quant if necessary
-				quant.notNil.if {
-					(deviation.abs > (quant / 2)).if {
-						// this may not work. brain damage!
-						deviation = deviation - ((deviation / quant).floor * quant);
-					};
-				};
-				
-				// if the deviationGate is open it should be more difficult to close it again
-				deviationGate.if {
-					thisDeviationTreshold = thisDeviationTreshold / 4;
-				};
-				
-				((deviation.abs > thisDeviationTreshold) || tempoHasChanged) .if ({
-					
-					debug.if {
-						this.post("Deviation: " ++ deviation);
-					};
-					
-					// warning, crappy case syntax!
-					case
-					{ tempoHasChanged == true } {
-						this.pr_setClockTempo(externalTempo);
-					}
-					// if five ticks were bad OR timing is really off
-					{(badTicks > 5) || (deviation.abs > (deviationThreshold * 5))} {
-						this.pr_setClockTempo((tempo * (1.0 - hardness)) + ( externalTempo + (deviation * deviationMul * -1) * hardness));
-					};
-					
-					deviationGate = true;
-					badTicks = badTicks + 1;
-					
-				},{ // if our timing is good at the moment
-					(externalTempo != tempo).if {
-						this.pr_setClockTempo(externalTempo);
-					};
-					
-					badTicks = 0;
-					deviationGate = false;
-				});
-			};
-		};
-	}
 	
 	pr_setClockTempo {|newTempo|
 		
@@ -539,7 +446,7 @@ MandelClock {
 	pr_followerResponders {
 		this.pr_addResponder(oscFollowerResponders, "/clock", {|ti, tR, message, addr|
 			this.pr_shouldFollow(message).if {
-				this.pr_receiveTick(message[2], message[3], message[4]);
+				time.receiveTick(message[2], message[3], message[4]);
 			};
 		});
 	}
