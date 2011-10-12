@@ -271,14 +271,14 @@ MandelClock {
 	// of course it could be the same method for a leader and a follower
 	// but I think normally only a leader should change the tempo, so making
 	// this cut enforces this somehow.
-	requestTempo {|newTempo, time=0|
+	requestTempo {|newTempo, dur=0|
 		leading.not.if {
 			newTempo = this.pr_safeTempo(newTempo);
-			this.sendMsgCmd("/requestTempo", newTempo.asFloat, time.asFloat);
+			this.sendMsgCmd("/requestTempo", newTempo.asFloat, dur.asFloat);
 		};
 	}
 	
-	changeTempo {|newTempo, time=0|
+	changeTempo {|newTempo, dur=0|
 		
 		var delta, stopTest;
 		
@@ -287,11 +287,11 @@ MandelClock {
 		leading.if {
 			tempoChangeSJ.stop;
 			
-			((time <= 0) || (newTempo == tempo)).if ({
+			((dur <= 0) || (newTempo == tempo)).if ({
 				this.pr_setClockTempo(newTempo);
 				time.tick;
 			},{
-				delta = (newTempo - tempo) * 0.1 / time;
+				delta = (newTempo - tempo) * 0.1 / dur;
 				
 				(delta < 0.0).if ({
 					stopTest = {((tempo + delta) <= newTempo).if({this.pr_setClockTempo(newTempo);true;},{false;});};
