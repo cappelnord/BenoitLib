@@ -26,4 +26,8 @@ MandelModule {
 	onBecomeFollower {|mc|
 		
 	}
+	
+	registerCmdPeriod {|mc|
+		
+	}
 }

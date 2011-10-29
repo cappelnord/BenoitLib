@@ -75,7 +75,7 @@ MandelClock {
 	
 	// to prevent shout flooding (which is kind of stupid but also dangerous)
 	var shoutCounter = 0;
-	var shoutCounterSJ;
+	var shoutProtection = 5;
 		
 	var <>postPrefix = "MandelClock: ";
 		
@@ -210,6 +210,8 @@ MandelClock {
 			"Follower".postln;
 			this.pr_becomeFollower;	
 		});
+		
+		this.pr_doCmdPeriod;
 	}
 	
 	pr_initModules {
@@ -539,10 +541,6 @@ MandelClock {
 		this.pr_addResponder(oscGeneralResponders, "/takeLead", {|ti, tR, message, addr|
 				this.pr_receivedLeaderAnnouncement(message[1].asString);
 		});
-		
-		// ShoutCounter SkipJack
-		
-		shoutCounterSJ = SkipJack({shoutCounter = 0;},5, name:"ShoutCounterReset");
 	}
 	
 	
@@ -563,7 +561,6 @@ MandelClock {
 		lastTickSJ.stop;
 		tickSJ.stop;
 		tempoChangeSJ.stop;
-		shoutCounterSJ.stop;
 		this.clearTempoProxy;
 		
 		instance = nil;
@@ -665,7 +662,7 @@ MandelClock {
 	
 	displayShout {|name, message|
 		
-		(shoutCounter < 3).if({
+		(shoutCounter < shoutProtection).if({
 			// stupid sanity replacement, should be replaced by better escaping (or stuff)
 			name = name.tr($', $ );
 			message = message.tr($', $ );
@@ -679,7 +676,9 @@ MandelClock {
 			});	
 		});
 		
+		// shout flood protection
 		shoutCounter = shoutCounter + 1;
+		{shoutCounter = (shoutCounter - 1).max(0);}.defer(3);
 	}
 	
 	// it's not very nice to check for a class (anti OO, a class COULD act as a ProxySpace)
@@ -814,6 +813,13 @@ MandelClock {
 			"Cold Drop!".postln;
 		});
 		dropFunc = nil;
+	}
+	
+	pr_doCmdPeriod {
+		CmdPeriod.doOnce({shoutCounter = 0;});
+		
+		modules.do {|mod| mod.registerCmdPeriod(this);};
+		CmdPeriod.doOnce({this.pr_doCmdPeriod});	
 	}
 	
 	// deprecated
