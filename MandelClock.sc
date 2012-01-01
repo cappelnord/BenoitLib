@@ -736,7 +736,6 @@ MandelClock {
 	}
 	
 	metro {|pan=0.0, quant=4|
-		
 		this.stopMetro;
 		
 		Server.default.waitForBoot({
@@ -750,6 +749,21 @@ MandelClock {
 		
 			metro = Pbind(\instrument, \mcTestClick, \dur, 1, \octave, 6, \pan, pan, \degree, Pseq([7,Pn(0,quant-1)],inf)).play(clock, quant:quant);
 		});
+	}
+	
+	impulseMetro {
+		this.stopMetro;
+		
+		Server.default.waitForBoot({
+			SynthDef(\mcTestImpulse, {|out=0, amp=1|
+				var sig = Impulse.ar(0).dup;
+				var remove = Line.kr(0,1,0.1, doneAction:2);
+				
+				OffsetOut.ar(out, sig);
+			}).add;
+			
+			metro = Pbind(\instrument, \mcTestImpulse, \dur, 1, \amp, 1).play(clock);
+		});	
 	}
 	
 	stopMetro {
