@@ -18,12 +18,13 @@ MandelSpace : MandelModule {
 	
 	var <>allowRemoteCode = false;
 	
+	var envirInstance;
+	
 	const serializationPrefix = "#SER#"; // the following two letters further describe the type.
 	
 	*new {|maclock|
 		^super.new.init(maclock);	
 	}
-	
 	
 	init {|maclock|
 		mc = maclock;	
@@ -92,12 +93,16 @@ MandelSpace : MandelModule {
 		^this.setValue(key, value);	
 	}
 	
+	removeAt {|key|
+		// to implement	
+	}
+	
 	// code to string if not a native osc type
 	serialize {|value|
 		value.isInteger.if {^value};
 		value.isFloat.if {^value};
 		value.isString.if {^value};
-		value.isKindOf(Symbol).if {^value.asString};
+		value.isKindOf(Symbol).if {^value.asString}; // TODO: actually encode/decode symbols
 		
 		value.isFunction.if {
 			value.isClosed.if({
@@ -174,6 +179,13 @@ MandelSpace : MandelModule {
 				this.pr_getObject(message[2].asSymbol).pr_setBDL(this.deserialize(message[3]), message[4].asFloat);
 			};
 		});
+	}
+	
+	envir {
+		envirInstance.isNil.if {
+			envirInstance = MandelEnvironment(this);
+		};
+		^envirInstance;	
 	}
 }
 
