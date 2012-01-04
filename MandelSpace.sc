@@ -16,6 +16,10 @@ MandelSpace : MandelModule {
 	var <objects;
 	var <mc;
 	
+	var <>allowRemoteCode = false;
+	
+	const serializationPrefix = "#SER#"; // the following two letters further describe the type.
+	
 	*new {|maclock|
 		^super.new.init(maclock);	
 	}
@@ -79,8 +83,57 @@ MandelSpace : MandelModule {
 	
 	setValue {|key, value, schedBeats=0.0|
 		var obj = this.pr_getObject(key);
+		var serializedValue = this.serialize(value);
 		mc.sendMsgCmd("/value", key.asString, value, schedBeats.asFloat);
 		^obj.setValue(value, schedBeats);
+	}
+	
+	// code to string if not a native osc type
+	serialize {|value|
+		value.isInteger.if {^value};
+		value.isFloat.if {^value};
+		value.isString.if {^value};
+		value.isKindOf(Symbol).if {^value.asString};
+		
+		value.isFunction.if {
+			value.isClosed.if({
+				^(serializationPrefix ++ "CS" ++ value.asCompileString);
+			},{
+				Error("Only closed functions can be sent through MandelSpace").throw;	
+			});
+		};
+		
+		// "There is no explicit rule to send the object through MandelSpace - trying asCompileString".warn;
+		^(serializationPrefix ++ "CS" ++ value.asCompileString);
+	}
+	
+	// build object if object was serialized
+	deserialize {|value|
+		var pfl, serType, payload;
+		value.isNumber.if {^value};
+		value.isSymbol.if {value = value.asString};
+		
+		// if it's a string we need to know if we have to deserialize an object
+		value.isString.if {
+			value.containsStringAt(0, serializationPrefix).if({
+				pfl = serializationPrefix.size;
+				serType = value[pfl..pfl+2];
+				payload = value[pfl+2..];
+				
+				(serType == "CS").if {
+					allowRemoteCode.if({
+						^value.interpret;
+					}, {
+						"MandelSpace received remote code but wasn't allowed to execute.\nSet allowRemoteCode to true if you know what you're doing!".warn;
+					});	
+				};
+			}, {
+				^value; // normal string.
+			});
+		};
+		
+		// if everything else fails ...
+		^value;
 	}
 	
 	addDependency {|father, son|
