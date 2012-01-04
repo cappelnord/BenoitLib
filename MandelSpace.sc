@@ -79,7 +79,7 @@ MandelSpace : MandelModule {
 	setValue {|key, value, schedBeats=0.0|
 		var obj = this.pr_getObject(key);
 		var serializedValue = this.serialize(value);
-		mc.sendMsgCmd("/value", key.asString, value, schedBeats.asFloat);
+		mc.sendMsgCmd("/value", key.asString, serializedValue, schedBeats.asFloat);
 		^obj.setValue(value, schedBeats);
 	}
 	
@@ -171,7 +171,7 @@ MandelSpace : MandelModule {
 	onStartup {|mc|
 		mc.addResponder(\general, "/value", {|ti, tR, message, addr|
 			(message[1].asString != mc.name).if {
-				this.pr_getObject(message[2].asSymbol).pr_setBDL(message[3], message[4].asFloat);
+				this.pr_getObject(message[2].asSymbol).pr_setBDL(this.deserialize(message[3]), message[4].asFloat);
 			};
 		});
 	}
