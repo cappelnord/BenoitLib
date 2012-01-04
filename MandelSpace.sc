@@ -24,7 +24,6 @@ MandelSpace : MandelModule {
 		^super.new.init(maclock);	
 	}
 	
-
 	
 	init {|maclock|
 		mc = maclock;	
@@ -33,10 +32,6 @@ MandelSpace : MandelModule {
 		
 		this.pr_buildEvents();
 		this.pr_setDefaults();
-	}
-	
-	at {|key|
-		^this.pr_getObject(key);	
 	}
 	
 	createValue {|key, value|
@@ -86,6 +81,15 @@ MandelSpace : MandelModule {
 		var serializedValue = this.serialize(value);
 		mc.sendMsgCmd("/value", key.asString, value, schedBeats.asFloat);
 		^obj.setValue(value, schedBeats);
+	}
+	
+	// dict interface
+	at {|key|
+		^this.getValue(key);	
+	}
+	
+	put {|key, value|
+		^this.setValue(key, value);	
 	}
 	
 	// code to string if not a native osc type
@@ -167,7 +171,7 @@ MandelSpace : MandelModule {
 	onStartup {|mc|
 		mc.addResponder(\general, "/value", {|ti, tR, message, addr|
 			(message[1].asString != mc.name).if {
-				this.at(message[2].asSymbol).pr_setBDL(message[3], message[4].asFloat);
+				this.pr_getObject(message[2].asSymbol).pr_setBDL(message[3], message[4].asFloat);
 			};
 		});
 	}
