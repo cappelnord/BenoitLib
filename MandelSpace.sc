@@ -120,7 +120,7 @@ MandelSpace : MandelModule {
 	deserialize {|value|
 		var pfl, serType, payload;
 		value.isNumber.if {^value};
-		value.isSymbol.if {value = value.asString};
+		value.isKindOf(Symbol).if {value = value.asString};
 		
 		// if it's a string we need to know if we have to deserialize an object
 		value.isString.if {

@@ -85,6 +85,7 @@ MandelClockGUI
 			bpsText.string_(tempo.asString[0..5]);
 			
 			beatText.string_((clock.beats % 4 + 1).asString[0..4]);
+			
 		},0.1);
 		
 		window.onClose_({this.pr_prepClose;});
@@ -117,7 +118,7 @@ MandelClockGUI
 		var color = Color.green;
 		
 		((nextBeat % 4) == 0).if {color = Color.red;};
-		
+				
 		clock.schedAbs(nextBeat, {
 			stillOpen.if {
 				{
@@ -132,9 +133,10 @@ MandelClockGUI
 	
 	pr_addCmdPeriod {
 		stillOpen.if {
-			CmdPeriod.doOnce({this.pr_addCmdPeriod ;});
-			this.pr_schedNextBeat;
+			CmdPeriod.doOnce({
+				this.pr_addCmdPeriod;
+				this.pr_schedNextBeat;
+			});
 		};	
-	}
-	
+	}	
 }
