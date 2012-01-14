@@ -21,7 +21,7 @@ Pman : Pattern {
 	
 	embedInStream {|event|		
 		while {true} {
-			MandelClock.instance.space.getValue(key).yield;
+			MandelSpace.getValueOrDefault(key).yield;
 		};
 		^event;
 	}
@@ -38,8 +38,8 @@ PmanScale : Pattern {
 	embedInStream {|event|
 		var scaleKey, tuningKey, scale;		
 		while {true} {
-			scaleKey = MandelClock.instance.space.getValue(\scale);
-			tuningKey  = MandelClock.instance.space.getValue(\tuning);
+			scaleKey = MandelSpace.getValueOrDefault(\scale);
+			tuningKey  = MandelSpace.getValueOrDefault(\tuning);
 			
 			TuningInfo.tunings.at(tuningKey).isNil.if {
 				("Unknown Tuning " ++ tuningKey.asString).warn;

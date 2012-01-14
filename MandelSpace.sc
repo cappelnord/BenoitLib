@@ -22,8 +22,31 @@ MandelSpace : MandelModule {
 	
 	const serializationPrefix = "#SER#"; // the following two letters further describe the type.
 	
+	classvar defaultDictInstance;
+	
 	*new {|maclock|
 		^super.new.init(maclock);	
+	}
+	
+	*getValueOrDefault {|key|
+		MandelClock.instance.notNil.if {
+			^MandelClock.instance.space.at(key);
+		}Ê{
+			^MandelSpace.defaultDict.at(key);
+		}
+	}
+	
+	*defaultDict {
+		defaultDictInstance.isNil.if {
+			defaultDictInstance = (
+				scale: \minor,
+				tuning: \et12,
+				mtranspose: 0,
+				ctranspose: 0,
+				root: 0
+			);
+		};
+		^defaultDictInstance;	
 	}
 	
 	init {|maclock|
@@ -42,11 +65,9 @@ MandelSpace : MandelModule {
 	}
 	
 	pr_setDefaults {
-		this.createValue(\scale, \minor);
-		this.createValue(\tuning, \et12);
-		this.createValue(\mtranspose, 0);
-		this.createValue(\ctranspose, 0);
-		this.createValue(\root, 0);	
+		MandelSpace.defaultDict.keys.do {|key|
+			this.createValue(key, MandelSpace.defaultDict.at(key));
+		}
 	}
 	
 	pr_buildEvents {
