@@ -37,10 +37,10 @@ MandelPlatformLinux : MandelPlatform {
 MandelPlatformOSX : MandelPlatform {
 	
 	onStartup {
-		("osascript '" ++ mc.classPath("mcRegisterGrowl.applescript") ++ "'").unixCmd(postOutput:false);
+		("osascript '" ++ mc.classPath("mcRegisterGrowl.scpt") ++ "'").unixCmd(postOutput:false);
 	}
 	
 	displayNotification {|title, message|
-		("osascript '" ++ mc.classPath("mcNotify.applescript") ++ "' '" ++ title ++ "' '" ++ message ++ "'").unixCmd(postOutput:false);
+		("osascript '" ++ mc.classPath("mcNotify.scpt") ++ "' '" ++ title ++ "' '" ++ message ++ "'").unixCmd(postOutput:false);
 	}
 }
