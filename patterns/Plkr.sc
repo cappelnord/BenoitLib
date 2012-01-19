@@ -29,7 +29,7 @@ Plkr : Pfunc {
 
 
 // allows the usage of kr NodeProxies in Patterns directly
-+ NodeProxy {
++ NodeProxy {
 	asStream {
 		^Plkr(this).asStream;
 	}
