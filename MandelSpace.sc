@@ -226,6 +226,19 @@ MandelValue  {
 		dependencies = IdentitySet();
 	}
 	
+	// function interface
+	value {
+		^this.getValue();
+	}
+	
+	asStream {
+		^Routine({
+			inf.do {
+				this.getValue().yield;
+			};
+		});
+	}
+	
 	getValue {|useDecorator=true|
 		(useDecorator && decorator.notNil).if ({
 			^decorator.value(bdl.value, space, key);

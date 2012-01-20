@@ -38,8 +38,8 @@ PmanScale : Pattern {
 	embedInStream {|event|
 		var scaleKey, tuningKey, scale;		
 		while {true} {
-			scaleKey = MandelSpace.getValueOrDefault(\scale);
-			tuningKey  = MandelSpace.getValueOrDefault(\tuning);
+			scaleKey = MandelSpace.getValueOrDefault(\scale).asSymbol;
+			tuningKey  = MandelSpace.getValueOrDefault(\tuning).asSymbol;
 			
 			TuningInfo.tunings.at(tuningKey).isNil.if {
 				("Unknown Tuning " ++ tuningKey.asString).warn;
