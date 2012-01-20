@@ -155,14 +155,14 @@ MandelSpace : MandelModule {
 				
 				(serType == "CS").if {
 					allowRemoteCode.if({
-						^value.interpret;
+						^payload.interpret;
 					}, {
 						"MandelSpace received remote code but wasn't allowed to execute.\nSet allowRemoteCode to true if you know what you're doing!".warn;
 					});	
 				};
 				
 				(serType == "SM").if {
-					^value.asSymbol;	
+					^payload.asSymbol;	
 				};
 					
 			}, {
