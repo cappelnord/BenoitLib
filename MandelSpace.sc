@@ -126,7 +126,7 @@ MandelSpace : MandelModule {
 		value.isInteger.if {^value};
 		value.isFloat.if {^value};
 		value.isString.if {^value};
-		value.isKindOf(Symbol).if {^value.asString}; // TODO: actually encode/decode symbols
+		value.isKindOf(Symbol).if {^(serializationPrefix ++ "SM" ++ value.asString)};
 		
 		value.isFunction.if {
 			value.isClosed.if({
@@ -136,7 +136,7 @@ MandelSpace : MandelModule {
 			});
 		};
 		
-		// "There is no explicit rule to send the object through MandelSpace - trying asCompileString".warn;
+		"There is no explicit rule to send the object through MandelSpace - trying asCompileString".warn;
 		^(serializationPrefix ++ "CS" ++ value.asCompileString);
 	}
 	
@@ -160,6 +160,11 @@ MandelSpace : MandelModule {
 						"MandelSpace received remote code but wasn't allowed to execute.\nSet allowRemoteCode to true if you know what you're doing!".warn;
 					});	
 				};
+				
+				(serType == "SM").if {
+					^value.asSymbol;	
+				};
+					
 			}, {
 				^value; // normal string.
 			});
@@ -254,7 +259,7 @@ MandelValue  {
 		^this.pr_setBDL(value, schedBeats);	
 	}
 	
-	
+	// maybe remove this, move to setValue
 	pr_setBDL {|value, schedBeats|		
 		bdl.isNil.if ({
 			bdl = BeatDependentValue(value);
