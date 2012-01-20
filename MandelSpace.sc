@@ -59,7 +59,7 @@ MandelSpace : MandelModule {
 	}
 	
 	createValue {|key, value|
-		var obj = this.pr_getObject(key);
+		var obj = this.getObject(key);
 		obj.pr_setBDL(value, 0);
 		^value;
 	}
@@ -83,7 +83,7 @@ MandelSpace : MandelModule {
 		});
 	}
 	
-	pr_getObject {|key|
+	getObject {|key|
 		var obj = objects.at(key.asSymbol);
 		
 		obj.isNil.if {
@@ -94,12 +94,12 @@ MandelSpace : MandelModule {
 	}
 	
 	getValue {|key, useDecorator=true|
-		var obj = this.pr_getObject(key);
+		var obj = this.getObject(key);
 		^obj.getValue();
 	}
 	
 	setValue {|key, value, schedBeats=0.0|
-		var obj = this.pr_getObject(key);
+		var obj = this.getObject(key);
 		this.sendValue(key, value, schedBeats);
 		^obj.setValue(value, schedBeats);
 	}
@@ -170,7 +170,7 @@ MandelSpace : MandelModule {
 	}
 	
 	addDependency {|father, son|
-		var obj = this.pr_getObject(father);
+		var obj = this.getObject(father);
 		obj.pr_receiveDependency(son);
 	}
 	
@@ -181,7 +181,7 @@ MandelSpace : MandelModule {
 	}
 	
 	pr_callSon {|key|
-		var obj = this.pr_getObject(key);
+		var obj = this.getObject(key);
 		obj.pr_valueHasChanged;
 	}
 	
@@ -200,7 +200,7 @@ MandelSpace : MandelModule {
 	onStartup {|mc|
 		mc.addResponder(\general, "/value", {|ti, tR, message, addr|
 			(message[1].asString != mc.name).if {
-				this.pr_getObject(message[2].asSymbol).pr_setBDL(this.deserialize(message[3]), message[4].asFloat);
+				this.getObject(message[2].asSymbol).pr_setBDL(this.deserialize(message[3]), message[4].asFloat);
 			};
 		});
 	}
