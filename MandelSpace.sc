@@ -60,7 +60,7 @@ MandelSpace : MandelModule {
 	
 	createValue {|key, value|
 		var obj = this.getObject(key);
-		obj.pr_setBDL(value, 0);
+		obj.setValue(value, 0);
 		^value;
 	}
 	
@@ -200,7 +200,7 @@ MandelSpace : MandelModule {
 	onStartup {|mc|
 		mc.addResponder(\general, "/value", {|ti, tR, message, addr|
 			(message[1].asString != mc.name).if {
-				this.getObject(message[2].asSymbol).pr_setBDL(this.deserialize(message[3]), message[4].asFloat);
+				this.getObject(message[2].asSymbol).setValue(this.deserialize(message[3]), message[4].asFloat);
 			};
 		});
 	}
