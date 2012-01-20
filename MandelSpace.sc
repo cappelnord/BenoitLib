@@ -100,9 +100,12 @@ MandelSpace : MandelModule {
 	
 	setValue {|key, value, schedBeats=0.0|
 		var obj = this.pr_getObject(key);
-		var serializedValue = this.serialize(value);
-		mc.sendMsgCmd("/value", key.asString, serializedValue, schedBeats.asFloat);
+		this.sendValue(key, value, schedBeats);
 		^obj.setValue(value, schedBeats);
+	}
+	
+	sendValue {|key, value, schedBeats=0.0|
+		mc.sendMsgCmd("/value", key.asString, this.serialize(value), schedBeats.asFloat);
 	}
 	
 	// dict interface
@@ -186,9 +189,9 @@ MandelSpace : MandelModule {
 		mc.addResponder(\leader, "/requestValueSync", {|ti, tR, message, addr|
 			objects.keys.do {|key|
 				var value = objects.at(key).bdl;
-				mc.sendMsgCmd("/value", key.asString, value.value(), 0.0);
+				this.sendValue(key, value.value(), 0.0);
 				value.list.do {|item|
-					mc.sendMsgCmd("/value", key.asString, item[1], item[0]);
+					this.sendValue(key, item[1], item[0]);
 				};
 			};
 		});	
