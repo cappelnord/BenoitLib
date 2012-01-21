@@ -43,7 +43,9 @@ MandelSpace : MandelModule {
 				tuning: \et12,
 				mtranspose: 0,
 				ctranspose: 0,
-				root: 0
+				root: 0,
+				stepsPerOctave: 12,
+				octaveRatio: 2
 			);
 		};
 		^defaultDictInstance;	

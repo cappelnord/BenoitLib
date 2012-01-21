@@ -71,7 +71,6 @@ MandelClock {
 	var <guiInstance;
 	
 	var <proxySpace;
-	var <tempoProxy;	
 	
 	// to prevent shout flooding (which is kind of stupid but also dangerous)
 	var shoutCounter = 0;
@@ -420,7 +419,7 @@ MandelClock {
 		
 		tempo = newTempo;
 		clock.tempo_(newTempo);
-		this.pr_setTempoProxy(newTempo);
+		this.tools.pr_setTempoProxy(newTempo); // refactor to tempo change listener soon
 		leading.if {externalTempo = newTempo;};
 	}
 	
@@ -697,36 +696,6 @@ MandelClock {
 		}
 	}
 	
-	makeTempoProxy {
-		
-		// try if the currentEnvironment is a ProxySpace
-		this.setProxySpace;
-		
-		tempoProxy = proxySpace.envir[\tempo];
-		tempoProxy.isNil.if {
-			tempoProxy = NodeProxy.control(proxySpace.server,1);
-			proxySpace.envir.put(\tempo,tempoProxy);
-		};
-		tempoProxy.put(0, {|tempo = 2.0| tempo}, 0, [\tempo, tempo]);
-			// tempoProxy.fadeTime = 0;
-		^tempoProxy;
-	}
-	
-	clearTempoProxy {
-		proxySpace.notNil.if {
-			proxySpace.envir.removeAt(\tempo);
-		};
-		
-		tempoProxy.clear;
-		tempoProxy = nil;
-	}
-	
-	pr_setTempoProxy {|newTempo|
-		tempoProxy.notNil.if {
-			tempoProxy.set(\tempo, newTempo);	
-		}
-	}
-	
 	chatWindow {
 		StringInputDialog.new("MandelClock Chat", "Send", {|string| this.chat(string);});
 	}
@@ -848,8 +817,13 @@ MandelClock {
 		^space.setValue(key, value, schedBeats);
 	}
 	
-	display {
-		this.deprecated(thisMethod, this.class.findRespondingMethodFor(\gui));
-		this.gui;
+	makeTempoProxy {
+		"makeTempoProxy is going to be removed from MandelClock instance. Use m.tools.makeTempoProxy".postln;
+		^tools.makeTempoProxy;
 	}
+
+	clearTempoProxy {
+		"clearTempoProxy is going to be removed from MandelClock instance. Use m.tools.makeTempoProxy".postln;
+		^tools.clearTempoProxy;
+	}	
 }
