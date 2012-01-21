@@ -135,11 +135,19 @@ x.getObject(\freq_octave).decorator = {|v, space| space[\freq] * 4}
 // to have value changes only on a new bar (or something). 
 // The setter is responsible to quant.
 
-x[\quant] = 10
-x.getObject(\quant).addDependant( {|changer, key, value| ("POST: " + value).postln; });
+x[\qtest] = 10
+x.getObject(\qtest).addDependant( {|changer, key, value| ("POST: " + value).postln; });
 
-x[\quant] = 100; // POST is posted immediatly
+x[\qtest] = 100; // POST is posted immediatly
 
-x.getObject(\quant).quant = 4
+x.getObject(\qtest).quant = 4
 
-x[\quant] = 20; // POST is on next bar
+x[\qtest] = 20; // POST is on next bar
+
+// You also can set a global quant which is used if a value hasn't its own quant.
+x.quant = 2
+
+x[\testtest] = 10
+x.getObject(\testtest).addDependant( {|changer, key, value| ("POST: " + value).postln; });
+
+x[\testtest] = 2

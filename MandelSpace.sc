@@ -22,6 +22,8 @@ MandelSpace : MandelModule {
 	
 	const serializationPrefix = "#SER#"; // the following two letters further describe the type.
 	
+	var <quant;
+	
 	classvar defaultDictInstance;
 	
 	*new {|maclock|
@@ -49,6 +51,10 @@ MandelSpace : MandelModule {
 			);
 		};
 		^defaultDictInstance;	
+	}
+	
+	quant_ {|val|
+		quant = val.asQuant;	
 	}
 	
 	init {|maclock|
@@ -220,7 +226,7 @@ MandelSpace : MandelModule {
 }
 
 MandelValue  {
-	var <key, <>bdl, <decorator, <relations, <>nodeProxy, <quant;
+	var <key, <>bdl, <decorator, <relations, <>nodeProxy, quant;
 	var space;
 	
 	*new {|space, key|
@@ -247,6 +253,14 @@ MandelValue  {
 		});
 	}
 	
+	quant {
+		quant.isNil.not.if({
+			^quant
+		}, {
+			^space.quant;
+		});	
+	}
+	
 	quant_ {|val|
 		quant = val.asQuant;	
 	}
@@ -261,10 +275,10 @@ MandelValue  {
 	
 	setValue {|value, schedBeats|
 		schedBeats.isNil.if {
-			quant.isNil.if ({
+			this.quant.isNil.if ({
 				schedBeats = 0.0;	
 			}, {
-				schedBeats = quant.nextTimeOnGrid(space.mc.clock);
+				schedBeats = this.quant.nextTimeOnGrid(space.mc.clock);
 			});
 		};
 		space.sendValue(key, value, schedBeats);
