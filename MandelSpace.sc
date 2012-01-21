@@ -219,7 +219,7 @@ MandelSpace : MandelModule {
 }
 
 MandelValue  {
-	var <key, <>bdl, <decorator, <listeners, <relations, <>nodeProxy;
+	var <key, <>bdl, <decorator, <relations, <>nodeProxy;
 	var space;
 	
 	*new {|space, key|
@@ -230,7 +230,6 @@ MandelValue  {
 		space = aspace;
 		key = akey.asSymbol;
 		
-		listeners = List();
 		relations = IdentitySet();
 	}
 	
@@ -263,6 +262,7 @@ MandelValue  {
 	pr_setBDL {|value, schedBeats|		
 		bdl.isNil.if ({
 			bdl = BeatDependentValue(value);
+			bdl.onChangeFunc = {this.pr_valueHasChanged;};
 			^value;	
 		}, {
 			^bdl.schedule(value, schedBeats);
@@ -270,17 +270,8 @@ MandelValue  {
 	}
 	
 	decorator_ {|func|
-		decorator = func;	
-	}
-	
-	addListener {|func|
-		listeners.add(func);
-		this.pr_activateChangeFunc;
-	}
-	
-	clearListeners {
-		listeners.clear;
-		this.pr_deactivateChangeFunc;
+		decorator = func;
+		this.pr_valueHasChanged();	
 	}
 	
 	addRelation {|father|
@@ -289,7 +280,6 @@ MandelValue  {
 	
 	pr_receiveRelation {|son|
 		relations.add(son);
-		this.pr_activateChangeFunc;
 	}
 	
 	clearRelations {
@@ -298,17 +288,14 @@ MandelValue  {
 	
 	pr_removeRelationsFor {|son|
 		relations.remove(son);
-		this.pr_deactivateChangeFunc;
 	}
 	
-	pr_valueHasChanged {		
-		listeners.do {|func|
-			func.value(this.getValue(), space, key);
-		};
-		
+	pr_valueHasChanged {	
 		relations.do {|son|
 			space.pr_callSon(son);	
 		};
+		
+		this.changed(key, this.getValue());
 	}
 	
 	mapToProxySpace {|lag=0.0|
@@ -325,22 +312,9 @@ MandelValue  {
 		};
 		
 		node.put(0, {|value=0, lag=0| Lag2.kr(value, lag)}, 0, [\value, this.getValue().asFloat, \lag, lag]);
-		this.addListener({|v| node.set(\value, v.asFloat) });
+		this.addDependant({|changer, what, value| node.set(\value, value.asFloat) });
 		nodeProxy = node;
 		
 		^node;
-	}
-	
-	pr_activateChangeFunc {
-		bdl.notNil.if {
-			bdl.onChangeFunc = {this.pr_valueHasChanged};		};
-	}
-	
-	pr_deactivateChangeFunc {		
-		((listeners.size == 0) && (relations.size == 0)).if {
-			bdl.notNil.if {
-				bdl.onChangeFunc = nil;
-			};
-		};
 	}
 }
