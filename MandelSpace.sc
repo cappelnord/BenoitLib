@@ -300,7 +300,7 @@ MandelValue  {
 		this.changed(key, this.getValue());
 	}
 	
-	mapToProxySpace {|lag=0.0|
+	mapToProxySpace {|lag=0.0, useLatency=true|
 		var ps, node;
 				
 		space.mc.setProxySpace;
@@ -314,7 +314,7 @@ MandelValue  {
 		};
 		
 		node.put(0, {|value=0, lag=0| Lag2.kr(value, lag)}, 0, [\value, this.getValue().asFloat, \lag, lag]);
-		this.addDependant({|changer, what, value| node.set(\value, value.asFloat) });
+		this.addDependant({|changer, what, value| node.setGroup([\value, value.asFloat], useLatency) });
 		nodeProxy = node;
 		
 		^node;
