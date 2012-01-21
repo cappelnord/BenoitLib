@@ -53,6 +53,30 @@ MandelSpace : MandelModule {
 		^defaultDictInstance;	
 	}
 	
+	asDict {
+		var dict = Dictionary.new;
+		
+		objects.do {|obj|
+			dict.put(obj.key, obj.getValue());	
+		};
+		
+		^dict;
+	}
+	
+	// TODO: prettify
+	dumpValues {
+		"Dumping all MandelSpace Values: ".postln;
+		objects.do {|obj|
+			("\\" ++ obj.key ++ ": 	").post;
+			obj.getValue.asCompileString.post;
+			obj.decorator.isNil.not.if {
+				(" (Raw: " ++ obj.getValue(false).asCompileString ++ ")").post;
+			};
+			"\n".post;
+		};
+		"\n".post;
+	}
+	
 	quant_ {|val|
 		quant = val.asQuant;	
 	}
