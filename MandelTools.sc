@@ -7,7 +7,7 @@
 	http://github.com/cappelnord/BenoitLib
 	http://www.the-mandelbrots.de
 	
-	Cotains different convenience tools.
+	Contains different convenience tools.
 	
 */
 

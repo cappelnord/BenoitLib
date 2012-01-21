@@ -174,14 +174,14 @@ MandelSpace : MandelModule {
 		^value;
 	}
 	
-	addDependency {|father, son|
+	addRelation {|father, son|
 		var obj = this.getObject(father);
-		obj.pr_receiveDependency(son);
+		obj.pr_receiveRelation(son);
 	}
 	
-	clearDependenciesFor {|son|
+	clearRelationsFor {|son|
 		objects.do {|obj|
-			obj.pr_removeDependenciesFor(son);	
+			obj.pr_removeRelationsFor(son);	
 		}
 	}
 	
@@ -219,7 +219,7 @@ MandelSpace : MandelModule {
 }
 
 MandelValue  {
-	var <key, <>bdl, <decorator, <listeners, <dependencies, <>nodeProxy;
+	var <key, <>bdl, <decorator, <listeners, <relations, <>nodeProxy;
 	var space;
 	
 	*new {|space, key|
@@ -231,7 +231,7 @@ MandelValue  {
 		key = akey.asSymbol;
 		
 		listeners = List();
-		dependencies = IdentitySet();
+		relations = IdentitySet();
 	}
 	
 	// function interface
@@ -241,7 +241,7 @@ MandelValue  {
 	
 	asStream {
 		^Routine({
-			inf.do {
+			while {true} {
 				this.getValue().yield;
 			};
 		});
@@ -283,21 +283,21 @@ MandelValue  {
 		this.pr_deactivateChangeFunc;
 	}
 	
-	addDependency {|father|
-		space.addDependency(father, this.key);
+	addRelation {|father|
+		space.addRelation(father, this.key);
 	}
 	
-	pr_receiveDependency {|son|
-		dependencies.add(son);
+	pr_receiveRelation {|son|
+		relations.add(son);
 		this.pr_activateChangeFunc;
 	}
 	
-	clearDependencies {
-		space.clearDependenciesFor(this.key);	
+	clearRelations {
+		space.clearRelationsFor(this.key);	
 	}
 	
-	pr_removeDependenciesFor {|son|
-		dependencies.remove(son);
+	pr_removeRelationsFor {|son|
+		relations.remove(son);
 		this.pr_deactivateChangeFunc;
 	}
 	
@@ -306,7 +306,7 @@ MandelValue  {
 			func.value(this.getValue(), space, key);
 		};
 		
-		dependencies.do {|son|
+		relations.do {|son|
 			space.pr_callSon(son);	
 		};
 	}
@@ -337,7 +337,7 @@ MandelValue  {
 	}
 	
 	pr_deactivateChangeFunc {		
-		((listeners.size == 0) && (dependencies.size == 0)).if {
+		((listeners.size == 0) && (relations.size == 0)).if {
 			bdl.notNil.if {
 				bdl.onChangeFunc = nil;
 			};
