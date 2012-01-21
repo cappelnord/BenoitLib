@@ -130,5 +130,16 @@ x[\freq] = 100
 // or we could change the decorator
 x.getObject(\freq_octave).decorator = {|v, space| space[\freq] * 4}
 
+// *** QUANT TO MANDELCLOCK ***
+// Each MandelValue object can have it's own quant. it's usefull if you want
+// to have value changes only on a new bar (or something). 
+// The setter is responsible to quant.
 
+x[\quant] = 10
+x.getObject(\quant).addDependant( {|changer, key, value| ("POST: " + value).postln; });
 
+x[\quant] = 100; // POST is posted immediatly
+
+x.getObject(\quant).quant = 4
+
+x[\quant] = 20; // POST is on next bar

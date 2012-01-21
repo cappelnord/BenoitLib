@@ -100,9 +100,8 @@ MandelSpace : MandelModule {
 		^obj.getValue();
 	}
 	
-	setValue {|key, value, schedBeats=0.0|
+	setValue {|key, value, schedBeats|
 		var obj = this.getObject(key);
-		this.sendValue(key, value, schedBeats);
 		^obj.setValue(value, schedBeats);
 	}
 	
@@ -221,7 +220,7 @@ MandelSpace : MandelModule {
 }
 
 MandelValue  {
-	var <key, <>bdl, <decorator, <relations, <>nodeProxy;
+	var <key, <>bdl, <decorator, <relations, <>nodeProxy, <quant;
 	var space;
 	
 	*new {|space, key|
@@ -248,6 +247,10 @@ MandelValue  {
 		});
 	}
 	
+	quant_ {|val|
+		quant = val.asQuant;	
+	}
+	
 	getValue {|useDecorator=true|
 		(useDecorator && decorator.notNil).if ({
 			^decorator.value(bdl.value, space, key);
@@ -256,7 +259,15 @@ MandelValue  {
 		});	
 	}
 	
-	setValue {|value, schedBeats=0.0|
+	setValue {|value, schedBeats|
+		schedBeats.isNil.if {
+			quant.isNil.if ({
+				schedBeats = 0.0;	
+			}, {
+				schedBeats = quant.nextTimeOnGrid(space.mc.clock);
+			});
+		};
+		space.sendValue(key, value, schedBeats);
 		^this.pr_setBDL(value, schedBeats);	
 	}
 	
