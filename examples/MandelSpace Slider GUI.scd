@@ -15,14 +15,14 @@ window = Window("MandelSpace Slider Test", Rect(100, 100, num*sliderWidth, slide
 
 keys.do {|key, i|
 	var slider = Slider(window,Rect(sliderWidth*i, 10, sliderWidth, sliderHeight));
-	StaticText(window, Rect(sliderWidth*i, sliderHeight+20, sliderWidth, 10))
+	StaticText(window, Rect(sliderWidth*i, sliderHeight+20, sliderWidth, 20))
 		.string_(i.asString)
 		.align_(\center);
 	
 	slider.value = space[key];
 	slider.action = {space[key] = slider.value};
 	space.getObject(key).addDependant({|changer, key, value|
-		slider.value = value;
+		{slider.value = value;}.defer;
 	});
 };
 
