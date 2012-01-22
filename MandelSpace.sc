@@ -70,7 +70,11 @@ MandelSpace : MandelModule {
 			("\\" ++ obj.key ++ ": 	").post;
 			obj.getValue.asCompileString.post;
 			obj.decorator.isNil.not.if {
-				(" (Raw: " ++ obj.getValue(false).asCompileString ++ ")").post;
+				obj.getValue(false).isNil.if({
+					" (Synthesized)".post;
+				},{
+					(" (Raw: " ++ obj.getValue(false).asCompileString ++ ")").post;
+				});
 			};
 			"\n".post;
 		};
