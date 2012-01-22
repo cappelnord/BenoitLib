@@ -52,3 +52,18 @@ window.onClose = {
 
 window.front;
 )
+
+/*
+// Use the ProxySpace Publishing to make yourself heard!
+// (ProxySpace must have been pushed)
+(
+var num = 10;
+var keys = num.collect {|i|("ctrl" ++ i).asSymbol};
+var nps = keys.collect {|key| MandelClock.instance.space.getObject(key).mapToProxySpace(0.1)};
+
+~yeah = {Splay.ar(SinOsc.ar(nps.collect{|np| np.kr.linexp(0,1,100,5000)}))};
+~yeah.play;
+
+)
+
+*/
