@@ -1,11 +1,11 @@
-// be sure to be in a MandelClock
+// be sure to be in a MandelClock !!!
 
 (
 var space = MandelClock.instance.space;
 var sliderWidth = 30;
 var sliderHeight = 200;
 var num = 10;
-var keys = num.collect {|i|("ctrl" + i).asSymbol};
+var keys = num.collect {|i|("ctrl" ++ i).asSymbol};
 var window;
 var actions = List.new;
 

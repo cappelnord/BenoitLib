@@ -33,6 +33,7 @@ BeatDependentValue {
 	schedule {|newValue, beats, who|
 		(beats <= clock.beats).if({
 			value = newValue;
+			setBy = who;
 			this.callOnChange();
 		},{
 			list.add([beats, newValue, who]);

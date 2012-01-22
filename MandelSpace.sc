@@ -309,13 +309,13 @@ MandelValue  {
 	}
 	
 	setBy {
-		this.getValue(); // oh no!
+		bdl.value(); // oh no!
 		^bdl.setBy;	
 	}
 	
 	setValue {|value, schedBeats, who, doSend=true|
 		who = who ? space.mc.name;
-		
+				
 		schedBeats.isNil.if {
 			this.quant.isNil.if ({
 				schedBeats = 0.0;	
