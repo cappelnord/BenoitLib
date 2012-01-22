@@ -114,8 +114,8 @@ StringInputDialog {
 	}
 	
 	doAction {
+		window.close;
 		function.value(txt.string);
-		window.close;	
 	}
 	
 	close {

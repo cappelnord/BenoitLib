@@ -26,6 +26,10 @@ MandelPlatform : MandelModule {
 	displayNotification {|title, message|
 		"This should have been implemented by the platform".postln;
 	}
+	
+	focusCurrentDocument {
+		// don't know if this can apply to other platforms
+	}
 }
 
 MandelPlatformLinux : MandelPlatform {
@@ -42,5 +46,11 @@ MandelPlatformOSX : MandelPlatform {
 	
 	displayNotification {|title, message|
 		("osascript '" ++ mc.classPath("mcNotify.scpt") ++ "' '" ++ title ++ "' '" ++ message ++ "'").unixCmd(postOutput:false);
+	}
+	
+	focusCurrentDocument {
+		(thisProcess.platform.ideName == "scapp").if { // might make sense for other ides, but can't try
+			Document.current.front;
+		};	
 	}
 }

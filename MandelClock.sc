@@ -696,12 +696,19 @@ MandelClock {
 		}
 	}
 	
+	pr_sendWindow {|title, func|
+		StringInputDialog.new(title, "Send", {|string| 
+			func.value(string);
+			platform.focusCurrentDocument;
+		});		
+	}
+	
 	chatWindow {
-		StringInputDialog.new("MandelClock Chat", "Send", {|string| this.chat(string);});
+		this.pr_sendWindow("MandelClock Chat",  {|string| this.chat(string);});
 	}
 	
 	shoutWindow {
-		StringInputDialog.new("MandelClock Shout", "Send", {|string| this.shout(string);});
+		this.pr_sendWindow("MandelClock Shout", {|string| this.shout(string);});
 	}
 	
 	metro {|pan=0.0, quant=4|
