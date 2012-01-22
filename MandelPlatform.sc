@@ -49,7 +49,7 @@ MandelPlatformOSX : MandelPlatform {
 	}
 	
 	focusCurrentDocument {
-		(thisProcess.platform.ideName == "scapp").if { // might make sense for other ides, but can't try
+		(Platform.ideName == "scapp").if { // might make sense for other ides, but can't try
 			Document.current.front;
 		};	
 	}
