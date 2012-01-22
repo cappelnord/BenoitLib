@@ -164,6 +164,7 @@ MandelSpace : MandelModule {
 		value.isFloat.if {^value};
 		value.isString.if {^value};
 		value.isKindOf(Symbol).if {^(serializationPrefix ++ "SM" ++ value.asString)};
+		value.isNil.if {^(serializationPrefix ++ "NL")};
 		
 		value.isFunction.if {
 			value.isClosed.if({
@@ -187,7 +188,7 @@ MandelSpace : MandelModule {
 		value.isString.if {
 			value.containsStringAt(0, serializationPrefix).if({
 				pfl = serializationPrefix.size;
-				serType = value[pfl..pfl+2];
+				serType = value[pfl..pfl+1];
 				payload = value[pfl+2..];
 				
 				(serType == "CS").if {
@@ -200,6 +201,10 @@ MandelSpace : MandelModule {
 				
 				(serType == "SM").if {
 					^payload.asSymbol;	
+				};
+				
+				(serType == "NL").if {
+					^nil;
 				};
 					
 			}, {
