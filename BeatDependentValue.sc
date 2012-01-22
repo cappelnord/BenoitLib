@@ -15,25 +15,27 @@ BeatDependentValue {
 	
 	var <list;
 	var value;
+	var <setBy;
 	var clock;
 	var <>onChangeFunc;
 	
-	*new {|value, clock|
-		^super.new.init(value, clock);
+	*new {|value, who, clock|
+		^super.new.init(value, who, clock);
 	}
 	
-	init {|startValue, startClock|
+	init {|startValue, who, startClock|
 		value = startValue;
+		setBy = who;
 		clock = startClock ? TempoClock.default;
 		list = SortedList.new(8, {|x,y| x[0] < y[0]});	
 	}
 	
-	schedule {|newValue, beats|
+	schedule {|newValue, beats, who|
 		(beats <= clock.beats).if({
 			value = newValue;
 			this.callOnChange();
 		},{
-			list.add([beats, newValue]);
+			list.add([beats, newValue, who]);
 			
 			// i don't want to schedule this if it isn't necessary.
 			// even if this is a little bit problematic ...
@@ -50,6 +52,7 @@ BeatDependentValue {
 		(list.size() > 0).if {
 			(list[0][0] <= clock.beats).if {
 				value = list[0][1];
+				setBy = list[0][2];
 				list.removeAt(0);
 				^this.value();	
 			};

@@ -69,13 +69,15 @@ MandelSpace : MandelModule {
 		objects.do {|obj|
 			("\\" ++ obj.key ++ ": 	").post;
 			obj.getValue.asCompileString.post;
-			obj.decorator.isNil.not.if {
+			obj.decorator.isNil.not.if ({
 				obj.getValue(false).isNil.if({
 					" (Synthesized)".post;
 				},{
 					(" (Raw: " ++ obj.getValue(false).asCompileString ++ ")").post;
 				});
-			};
+			}, {
+				(" (Set by: " ++ obj.setBy.asString ++ ")").post;
+			});
 			"\n".post;
 		};
 		"\n".post;
@@ -240,7 +242,7 @@ MandelSpace : MandelModule {
 	onStartup {|mc|
 		mc.addResponder(\general, "/value", {|ti, tR, message, addr|
 			(message[1].asString != mc.name).if {
-				this.getObject(message[2].asSymbol).setValue(this.deserialize(message[3]), message[4].asFloat);
+				this.getObject(message[2].asSymbol).setValue(this.deserialize(message[3]), message[4].asFloat, message[1].asString, doSend:false);
 			};
 		});
 	}
@@ -301,7 +303,14 @@ MandelValue  {
 		});	
 	}
 	
-	setValue {|value, schedBeats|
+	setBy {
+		this.getValue(); // oh no!
+		^bdl.setBy;	
+	}
+	
+	setValue {|value, schedBeats, who, doSend=true|
+		who = who ? space.mc.name;
+		
 		schedBeats.isNil.if {
 			this.quant.isNil.if ({
 				schedBeats = 0.0;	
@@ -309,18 +318,18 @@ MandelValue  {
 				schedBeats = this.quant.nextTimeOnGrid(space.mc.clock);
 			});
 		};
-		space.sendValue(key, value, schedBeats);
-		^this.pr_setBDL(value, schedBeats);	
+		doSend.if {space.sendValue(key, value, schedBeats)};
+		^this.pr_setBDL(value, schedBeats, who);	
 	}
 	
 	// maybe remove this, move to setValue
-	pr_setBDL {|value, schedBeats|		
+	pr_setBDL {|value, schedBeats, who|		
 		bdl.isNil.if ({
-			bdl = BeatDependentValue(value);
+			bdl = BeatDependentValue(value, who);
 			bdl.onChangeFunc = {this.pr_valueHasChanged;};
 			^value;	
 		}, {
-			^bdl.schedule(value, schedBeats);
+			^bdl.schedule(value, schedBeats, who);
 		});		
 	}
 	
