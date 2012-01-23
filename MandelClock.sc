@@ -71,10 +71,6 @@ MandelClock {
 	var <guiInstance;
 	
 	var <proxySpace;
-	
-	// to prevent shout flooding (which is kind of stupid but also dangerous)
-	var shoutCounter = 0;
-	var shoutProtection = 5;
 		
 	var <>postPrefix = "MandelClock: ";
 		
@@ -660,24 +656,11 @@ MandelClock {
 	}
 	
 	displayShout {|name, message|
-		
-		(shoutCounter < shoutProtection).if({
-			// stupid sanity replacement, should be replaced by better escaping (or stuff)
-			name = name.tr($', $ );
-			message = message.tr($', $ );
-		
-			platform.displayNotification(name, message);
-		},{
-			(name == this.name).if ({
-				this.post("SHUT UP, " ++ name.toUpper ++ "!!! IT'S TOO LOUD IN HERE!");
-			},{
-				this.post("Too many shouts! Tell " ++ name ++ " to shut up!");
-			});	
-		});
-		
-		// shout flood protection
-		shoutCounter = shoutCounter + 1;
-		{shoutCounter = (shoutCounter - 1).max(0);}.defer(3);
+		// stupid sanity replacement, should be replaced by better escaping (or stuff)
+		name = name.tr($', $ );
+		message = message.tr($', $ );
+			
+		platform.displayNotification(name, message);
 	}
 	
 	// it's not very nice to check for a class (anti OO, a class COULD act as a ProxySpace)
@@ -805,9 +788,7 @@ MandelClock {
 		dropFunc = nil;
 	}
 	
-	pr_doCmdPeriod {
-		CmdPeriod.doOnce({shoutCounter = 0;});
-		
+	pr_doCmdPeriod {		
 		modules.do {|mod| mod.registerCmdPeriod(this);};
 		CmdPeriod.doOnce({this.pr_doCmdPeriod});	
 	}
