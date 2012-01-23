@@ -12,34 +12,38 @@ var actions = List.new;
 // initialize values, if not allready present
 keys.do {|key| space[key].isNil.if {space[key] = 0.0;};};
 
-window = Window("MandelSpace Slider Test", Rect(100, 100, num*sliderWidth, sliderHeight + 70));
+window = Window("MandelSpace Slider Test", Rect(100, 100, num*sliderWidth, sliderHeight + 60));
 
 keys.do {|key, i|
 	var slider = Slider(window,Rect(sliderWidth*i, 10, sliderWidth, sliderHeight));
-	var who, action;
+	var who, action, obj, setSetBy;
 	
 	StaticText(window, Rect(sliderWidth*i, sliderHeight+20, sliderWidth, 20))
 		.string_(i.asString)
 		.align_(\center);
 		
-	who = StaticText(window, Rect(sliderWidth*i, sliderHeight+50, sliderWidth, 20))
-		.string_(space.getObject(key).setBy[0].toUpper.asString)
+	who = StaticText(window, Rect(sliderWidth*i, sliderHeight+40, sliderWidth, 20))
 		.align_(\center);
-				
+		
+	obj = space.getObject(key);
 	
-	slider.value = space[key];
+	setSetBy = {who.string_(obj.setBy[0].toUpper.asString);};
+					
 	slider.action = {
 		space[key] = slider.value;
-		who.string_(space.mc.name[0].toUpper.asString);
+		setSetBy.value();
 	};
 	
-	action = {|changer, key, value|
+	action = {
 		{
-			slider.value = value;
-			who.string_(changer.setBy[0].toUpper.asString);
+			slider.value = obj.getValue();
+			setSetBy.value();
 		}.defer;
 	};
-	space.getObject(key).addDependant(action);
+	
+	action.value();
+	
+	obj.addDependant(action);
 	actions.add([key, action]);
 };
 
@@ -52,6 +56,26 @@ window.onClose = {
 
 window.front;
 )
+
+/*
+// Make a nice movement
+
+(
+{
+	var space = MandelClock.instance.space;
+	var num = 10;
+	var keys = num.collect {|i|("ctrl" ++ i).asSymbol};
+	(0, 0.1..8pi).do {|phi|
+		keys.do {|key, i|
+			var phase = (i/num) * pi;
+			space[key] = sin(phi + phase) + 1.0 * 0.5;
+			0.01.wait;
+		};
+	};
+}.fork;
+
+)
+*/
 
 /*
 // Use the ProxySpace Publishing to make yourself heard!
