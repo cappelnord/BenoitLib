@@ -112,10 +112,15 @@ MandelSpace : MandelModule {
 		Event.addEventType(\mandelspace, {
 			var schedBeats;
 			~deltaSched = ~deltaSched ? 0.0;
-			schedBeats = MandelClock.instance.clock.beats + ~deltaSched;
+			schedBeats = mc.clock.beats + ~deltaSched;
+			
+			(schedBeats <= mc.clock.beats).if {
+				schedBeats = 0.0; // no scheduling
+			};
+			
 			currentEnvironment.keys.do {|key|
-				((key != \type) && (key != \dur)).if {
-					MandelClock.instance.space.setValue(key, currentEnvironment.at(key), schedBeats);
+				((key != \type) && (key != \dur) && (key != \removeFromCleanup)).if {
+					this.setValue(key, currentEnvironment.at(key), schedBeats);
 				};
 			};
 		});
@@ -175,6 +180,8 @@ MandelSpace : MandelModule {
 		};
 		
 		"There is no explicit rule to send the object through MandelSpace - trying asCompileString".warn;
+		("Compile String: " ++ value.asCompileString).postln;
+		// ("Key: " ++ key).postln;
 		^(serializationPrefix ++ "CS" ++ value.asCompileString);
 	}
 	

@@ -182,7 +182,7 @@ MandelClock {
 		
 		
 		// start the clock
-		clock = TempoClock.new(startTempo, startBeat);
+		clock = TempoClock.new(startTempo, startBeat, queueSize:4096);
 		clock.permanent_(true);
 		
 		TempoClock.default = clock;		
