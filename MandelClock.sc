@@ -137,9 +137,7 @@ MandelClock {
 			
 			("... you are now following " ++ message[1].asString ++ "!").postln;
 			
-			action.value(instance);
-			instance.sendMsgCmd("/requestValueSync");
-			
+			action.value(instance);			
 		}).add;
 		
 	}

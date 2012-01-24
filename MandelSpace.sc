@@ -251,6 +251,10 @@ MandelSpace : MandelModule {
 				this.getObject(message[2].asSymbol).setValue(this.deserialize(message[3]), message[4].asFloat, message[1].asString, doSend:false);
 			};
 		});
+		
+		mc.leading.not.if {
+			mc.sendMsgCmd("/requestValueSync"); // request MandelSpace sync from the leader
+		}
 	}
 	
 	envir {
