@@ -24,6 +24,7 @@ MandelSpace : MandelModule {
 	
 	var <quant;
 	
+	
 	classvar defaultDictInstance;
 	
 	*new {|maclock|
@@ -271,8 +272,10 @@ MandelSpace : MandelModule {
 }
 
 MandelValue  {
-	var <key, <>bdl, <decorator, <relations, <>nodeProxy, quant;
+	var <key, <>bdl, <decorator, <relations, quant;
 	var space;
+	
+	var <>nodeProxy, nodeProxyDependant;
 	
 	*new {|space, key|
 		^super.new.init(space, key);
@@ -391,7 +394,10 @@ MandelValue  {
 		};
 		
 		node.put(0, {|value=0, lag=0| Lag2.kr(value, lag)}, 0, [\value, this.getValue().asFloat, \lag, lag]);
-		this.addDependant({|changer, what, value| node.setGroup([\value, value.asFloat], useLatency) });
+		
+		this.removeDependant(nodeProxyDependant);
+		nodeProxyDependant = {|changer, what, value| node.setGroup([\value, value.asFloat], useLatency) };
+		this.addDependant(nodeProxyDependant);
 		nodeProxy = node;
 		
 		^node;
