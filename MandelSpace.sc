@@ -96,15 +96,9 @@ MandelSpace : MandelModule {
 		this.pr_setDefaults();
 	}
 	
-	createValue {|key, value|
-		var obj = this.getObject(key);
-		obj.setValue(value, 0);
-		^value;
-	}
-	
 	pr_setDefaults {
 		MandelSpace.defaultDict.keys.do {|key|
-			this.createValue(key, MandelSpace.defaultDict.at(key));
+			this.getObject(key).setValue(MandelSpace.defaultDict.at(key), 0, doSend:false);
 		}
 	}
 	
