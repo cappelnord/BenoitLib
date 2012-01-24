@@ -235,13 +235,18 @@ MandelSpace : MandelModule {
 	
 	onBecomeLeader {|mc|
 		mc.addResponder(\leader, "/requestValueSync", {|ti, tR, message, addr|
+			{
+			0.1.wait;
 			objects.keys.do {|key|
 				var value = objects.at(key).bdl;
 				this.sendValue(key, value.value(), 0.0);
+				0.01.wait;
 				value.list.do {|item|
 					this.sendValue(key, item[1], item[0]);
+					0.01.wait;
 				};
 			};
+			}.fork; // delay a little bit and add wait times
 		});	
 	}
 	
