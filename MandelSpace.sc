@@ -275,7 +275,7 @@ MandelValue  {
 	var <key, <>bdl, <decorator, <relations, quant;
 	var space;
 	
-	var <>nodeProxy, nodeProxyDependant;
+	var nodeProxyDependant, triggerProxyDependant;
 	
 	*new {|space, key|
 		^super.new.init(space, key);
@@ -357,7 +357,7 @@ MandelValue  {
 	}
 	
 	addRelation {|father|
-		space.addRelation(father, this.key);
+		space.addRelation(father, key);
 	}
 	
 	pr_receiveRelation {|son|
@@ -365,7 +365,7 @@ MandelValue  {
 	}
 	
 	clearRelations {
-		space.clearRelationsFor(this.key);	
+		space.clearRelationsFor(key);	
 	}
 	
 	pr_removeRelationsFor {|son|
@@ -381,25 +381,28 @@ MandelValue  {
 	}
 	
 	mapToProxySpace {|lag=0.0, useLatency=true|
-		var ps, node;
-				
-		space.mc.setProxySpace;
-		
-		ps = space.mc.proxySpace;
-		
-		node = ps.envir[key];
-		node.isNil.if {
-			node = NodeProxy.control(ps.server, 1);
-			ps.envir.put(key, node);
-		};
-		
+	
+		var node = space.mc.pr_getKrProxyNode(key);
+	
 		node.put(0, {|value=0, lag=0| Lag2.kr(value, lag)}, 0, [\value, this.getValue().asFloat, \lag, lag]);
 		
 		this.removeDependant(nodeProxyDependant);
 		nodeProxyDependant = {|changer, what, value| node.setGroup([\value, value.asFloat], useLatency) };
 		this.addDependant(nodeProxyDependant);
-		nodeProxy = node;
+		
+		this.mapChangeTriggerToProxySpace
 		
 		^node;
 	}
+	
+	mapChangeTriggerToProxySpace {
+		var node = space.mc.pr_getKrProxyNode(("t_" ++ key.asString).asSymbol);
+		node.put(0, {|t_trig| t_trig});
+		
+		this.removeDependant(triggerProxyDependant);
+		triggerProxyDependant = {|changer, what, value| node.set(\t_trig, 1);};
+		this.addDependant(triggerProxyDependant);
+		
+		^node;
+	}	
 }

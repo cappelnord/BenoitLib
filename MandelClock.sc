@@ -791,6 +791,19 @@ MandelClock {
 		CmdPeriod.doOnce({this.pr_doCmdPeriod});	
 	}
 	
+	pr_getKrProxyNode {|key|
+		var node;
+		
+		this.setProxySpace;
+		
+		node = proxySpace.envir[key];
+		node.isNil.if {
+			node = NodeProxy.control(proxySpace.server, 1);			proxySpace.envir.put(key, node);
+		};
+		
+		^node;
+	}
+	
 	// deprecated
 
 	getValue {|key, useDecorator=true|

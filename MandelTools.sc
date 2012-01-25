@@ -77,15 +77,7 @@ MandelTools : MandelModule {
 	}
 	
 	makeTempoProxy {
-		
-		// try if the currentEnvironment is a ProxySpace
-		mc.setProxySpace;
-		
-		tempoProxy = mc.proxySpace.envir[\tempo];
-		tempoProxy.isNil.if {
-			tempoProxy = NodeProxy.control(mc.proxySpace.server,1);
-			mc.proxySpace.envir.put(\tempo,tempoProxy);
-		};
+		tempoProxy = mc.pr_getKrProxyNode(\tempo);
 		tempoProxy.put(0, {|tempo = 2.0| tempo}, 0, [\tempo, mc.tempo]);
 			// tempoProxy.fadeTime = 0;
 		^tempoProxy;
