@@ -25,7 +25,8 @@ Plkr : Pfunc {
 Pkr : Pfunc {
 	*new {|proxy|
 		var check;
-		
+		var last = 0.0;
+
 		// audio?
 		proxy.bus.isSettable.not.if {
 			"Not a kr NodeProxy. This will only yield 0".warn;
@@ -37,7 +38,6 @@ Pkr : Pfunc {
 		check.if ({
 			^Pfunc({proxy.bus.getSynchronous()});
 		}, {
-			var last = 0.0;
 			"No shared memory interface detected. Use localhost server on SC 3.5 or higher to get better performance".warn;	
 			proxy.bus.get({|v| last = v;});
 			^Pfunc({proxy.bus.get({|v| last = v;}); last;});
