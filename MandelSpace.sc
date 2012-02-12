@@ -315,6 +315,12 @@ MandelSpace : MandelModule {
 			ev.use {~freq.value()};
 		};
 	}
+	
+	freeAllBuses {
+		objects.do {|item|
+			item.clearBus;
+		};
+	}
 }
 
 MandelValue  {
@@ -335,7 +341,6 @@ MandelValue  {
 		relations = IdentitySet();
 	}
 	
-	// function interface
 	value {
 		^this.getValue();
 	}
@@ -348,13 +353,12 @@ MandelValue  {
 		});
 	}
 	
-	// TODO: Reset Busses
 	asBus {
 		^bus.isNil.if({this.pr_createBus}, {bus});
 	}
 	
 	pr_createBus {
-		this.removeDependant(busDependant);
+		this.freeBus;
 		
 		bus = Bus.control(space.mc.server, 1);
 		bus.set(this.getValue());
@@ -363,6 +367,12 @@ MandelValue  {
 		this.addDependant(busDependant);
 		
 		^bus;
+	}
+	
+	freeBus {
+		this.removeDependant(busDependant);
+		bus.free;
+		bus = nil;			
 	}
 	
 	prepareForProxySynthDef {|proxy|
