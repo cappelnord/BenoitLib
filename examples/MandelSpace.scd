@@ -26,18 +26,18 @@ x.getObject(\test).setValue(100, m.clock.beats + 4)
 // We can use a Decorator function to locally change the yielded value
 x.getObject(\test).decorator = {|v|Êv * 10};
 
-x[\test]; the value now seems to appear to be 100 but its actually only locally. 
+x[\test].value; // the value now seems to appear to be 1000 but its actually only locally. 
 
 x[\test] = 500;
 
-x[\test];
+x[\test].value;
 
 // we can allways acess the raw value:
 x.getObject(\test).getValue(false); // overrides decorator
 
 x.getObject(\test).decorator = nil; // now our decorator is cleared
 
-x[\test]; // and we get the raw value
+x[\test].value; // and we get the raw value
 
 
 
@@ -65,11 +65,11 @@ x.getObject(\test).setValue(500, m.clock.beats + 4)
 
 x[\a] = 10;
 x[\b] = 20;
-x.getObject(\c).decorator = {|v, space| space[\a] * space[\b]}
+x.getObject(\c).decorator = {|v, space| space.getValue(\a) * space.getValue(\b)}
 
 // \c is now a local MandelSpace value, composed by the global values \a and \b.
 // if \a or \b are changed then \c also changes
-x[\c]
+x[\c].value
 
 x.getObject(\c).addDependant({|theChanger, what, value|
 	("Yeah: c is now " ++ value).postln;
@@ -94,41 +94,39 @@ x[\a] = 100
 
 
 
-// *** MAP VALUES TO PROXY SPACE ***
-// values can be mapped to Proxy Space
-// First we need to push (or specify) the PS.
-s.boot;
-p = ProxySpace.push(s)
+// *** USE VALUES AS KR BUS ***
+// values can be used on the server
+// We demonstrate this with ProxySpace
+
+p = ProxySpace.push(s.boot);
 
 x[\freq] = 440
-x.getObject(\freq).mapToProxySpace
 
-// The MandelSpace value \freq is now mapped to \freq.kr
-~son = {SinOsc.ar(~freq).dup * 0.1}
+
+~son = {SinOsc.ar(x[\freq].kr).dup * 0.1}
 ~son.play
 
 x[\freq] = 220
 
 // we can also add a lag to the values
-x.getObject(\freq).mapToProxySpace(1)
+~son = {SinOsc.ar(x[\freq].kr.lag(1)).dup * 0.1}
 
 x[\freq] = 880
 
 ~son.stop;
 
 // let's synthesize the octave and map to ProxySpace
-x.getObject(\freq_octave).decorator = {|v, space| space[\freq] * 2}
+x.getObject(\freq_octave).decorator = {|v, space| space.getValue(\freq) * 2}
 x.getObject(\freq_octave).addRelation(\freq)
-x.getObject(\freq_octave).mapToProxySpace(1)
 
-~son = {SinOsc.ar(~freq_octave).dup}
+~son = {SinOsc.ar(x[\freq_octave].kr).dup}
 ~son.play
 
 // we can now change ~freq_octave through freq
 x[\freq] = 100
 
 // or we could change the decorator
-x.getObject(\freq_octave).decorator = {|v, space| space[\freq] * 4}
+x.getObject(\freq_octave).decorator = {|v, space| space.getValue(\freq) * 4}
 
 // *** QUANT TO MANDELCLOCK ***
 // Each MandelValue object can have it's own quant. it's usefull if you want
