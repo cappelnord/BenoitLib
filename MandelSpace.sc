@@ -310,9 +310,9 @@ MandelValue  {
 		this.removeDependant(busDependant);
 		
 		bus = Bus.control(space.mc.server, 1);
-		bus.set(this.getValue().asFloat);
+		bus.set(this.getValue());
 		
-		busDependant = {|changer, what, value| bus.set(value.asFloat)};
+		busDependant = {|changer, what, value| bus.set(value)};
 		this.addDependant(busDependant);
 		
 		^bus;
@@ -327,11 +327,11 @@ MandelValue  {
 	}
 	
 	ar {
-		^K2A.ar(this.asBus.kr);
+		^{K2A.ar(this.asBus.kr)};
 	}
 	
 	tr {
-		^InTrig.kr(this.asBus);	
+		^{InTrig.kr(this.asBus)};	
 	}
 	
 	quant {
