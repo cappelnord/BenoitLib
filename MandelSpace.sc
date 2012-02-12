@@ -318,6 +318,10 @@ MandelValue  {
 		^bus;
 	}
 	
+	prepareForProxySynthDef {|proxy|
+		^this.asBus.prepareForProxySynthDef(proxy);
+	}
+	
 	kr {
 		^this.asBus.kr;	
 	}
