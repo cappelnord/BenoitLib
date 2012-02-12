@@ -357,7 +357,7 @@ MandelValue  {
 	}
 	
 	asBusPlug {
-		BusPlug.for(this.asBus)	;
+		^BusPlug.for(this.asBus)	;
 	}
 	
 	pr_createBus {
@@ -473,8 +473,8 @@ MandelValue  {
 		this.changed(key, this.getValue());
 	}
 	
-	<>> {|target, key=\in|
-		target.map(\in, this.asBusPlug);
+	<>> {|proxy, key=\in|
+		^proxy.map(\in, this.asBusPlug);
 	}
 	
 	<<> {|source, key=\in|
@@ -498,6 +498,7 @@ MandelValue  {
 				});
 			}.fork;
 		});
+		^this;
 	}
 	
 	stopPullFromSource {
