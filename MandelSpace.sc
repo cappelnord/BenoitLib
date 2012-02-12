@@ -310,9 +310,9 @@ MandelValue  {
 		this.removeDependant(busDependant);
 		
 		bus = Bus.control(space.mc.server, 1);
-		bus.trySetSynchronous(this.getValue());
+		bus.set(this.getValue().asFloat);
 		
-		busDependant = {|changer, what, value| bus.trySetSynchronous(value)};
+		busDependant = {|changer, what, value| bus.set(value.asFloat)};
 		this.addDependant(busDependant);
 		
 		^bus;
