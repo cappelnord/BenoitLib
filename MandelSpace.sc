@@ -24,7 +24,6 @@ MandelSpace : MandelModule {
 	
 	var <quant;
 	
-	
 	classvar defaultDictInstance;
 	
 	*new {|maclock|
@@ -357,6 +356,10 @@ MandelValue  {
 		^bus.isNil.if({this.pr_createBus}, {bus});
 	}
 	
+	asBusPlug {
+		BusPlug.for(this.asBus)	;
+	}
+	
 	pr_createBusÊ{
 		this.freeBus;
 		
@@ -471,7 +474,7 @@ MandelValue  {
 	}
 	
 	<>> {|target, key=\in|
-		target.map(\in, BusPlug.for(this.asBus));
+		target.map(\in, this.asBusPlug);
 	}
 	
 	<<> {|source, key=\in|
@@ -480,7 +483,7 @@ MandelValue  {
 		this.stopPullFromSource;
 		
 		bus.isNil.if ({
-			"Could not set source, not a Bus!".warn;	
+			"Could not set source - not compatible to Bus!".warn;	
 		}, {
 			var stream = Pkr(bus).asStream;
 			sourceRoutine = {
