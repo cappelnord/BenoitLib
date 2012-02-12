@@ -39,9 +39,8 @@ m.changeTempo(3)
 
 // *** FREQUENCY TOOLS ***
 // HarmonyMaster (see the other example) can be used in ProxySpace as well.
-// This maps HarmonyMaster to ~rootFreq, ~mtransposeFreq and ~ctransposeFreq
+// Frequencies of all harmony related values are mapped to rootFreq, ctransposeFreq and mtransposeFreq
 
-m.tools.createFreqValues
 
 ~rootFreq = x[\rootFreq];
 ~son = {SinOsc.ar(~rootFreq).dup * 0.1}

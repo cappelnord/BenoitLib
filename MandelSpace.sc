@@ -95,6 +95,7 @@ MandelSpace : MandelModule {
 		
 		this.pr_buildEvents();
 		this.pr_setDefaults();
+		this.pr_createFreqValues();
 	}
 	
 	pr_setDefaults {
@@ -268,6 +269,51 @@ MandelSpace : MandelModule {
 			envirInstance = MandelEnvironment(this);
 		};
 		^envirInstance;	
+	}
+	
+	pr_createFreqValues {|lag=0.0|
+		var scale = PmanScale().asStream;
+		var relations = [\scale, \tuning, \root, \stepsPerOctave, \octaveRatio];
+		var stdValues = [\root, \stepsPerOctave, \octaveRatio];
+		
+		var rootFreq = this.getObject(\rootFreq);
+		var mtransposeFreq = this.getObject(\mtransposeFreq);
+		var ctransposeFreq = this.getObject(\ctransposeFreq);
+		
+		var stdEvent = {
+			var ev = Event.partialEvents[\pitchEvent].copy;
+			stdValues.do {|item|
+				ev[item] = this.getValue(item);
+			};
+			ev[\scale] = scale.next;
+			ev;
+		};
+
+		relations.do {|item|
+			rootFreq.addRelation(item);
+			mtransposeFreq.addRelation(item);
+			ctransposeFreq.addRelation(item);
+		};
+		
+		mtransposeFreq.addRelation(\mtranspose);
+		ctransposeFreq.addRelation(\ctranspose);
+		
+		rootFreq.decorator = {
+			var ev = stdEvent.value();
+			ev.use {~freq.value()};
+		};
+		
+		mtransposeFreq.decorator = {
+			var ev = stdEvent.value();
+			ev[\mtranspose] = 	this.getValue(\mtranspose);
+			ev.use {~freq.value()};
+		};
+		
+		ctransposeFreq.decorator = {
+			var ev = stdEvent.value();
+			ev[\ctranspose] = 	this.getValue(\ctranspose);
+			ev.use {~freq.value()};
+		};
 	}
 }
 
