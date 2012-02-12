@@ -89,6 +89,6 @@ x.getObject(\test).decorator = nil
 
 ~kr = {SinOsc.kr(0.1)}
 
-~kr.publish(x[\kr]);
+~kr <>> x[\kr];
 
 x[\kr].value
