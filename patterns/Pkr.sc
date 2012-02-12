@@ -7,7 +7,7 @@
 	http://github.com/cappelnord/BenoitLib
 	http://www.the-mandelbrots.de
 	
-	Retrieve the value of a kr NodeProxy via 
+	Retrieve the value of a kr Bus/NodeProxy via 
 	Shared Memory Interface if available.
 	
 	If not it will pull the value and always
@@ -16,31 +16,33 @@
 */
 
 Plkr : Pfunc {
-	*new {|proxy|
+	*new {|bus|
 		"Plkr is deprecated. Use Pkr instead!".warn;
-		^Pkr(proxy);	
+		^Pkr(bus);	
 	}	
 }
 
 Pkr : Pfunc {
-	*new {|proxy|
+	*new {|bus|
 		var check;
 		var last = 0.0;
+		
+		bus = bus.asBus;
 
 		// audio?
-		proxy.bus.isSettable.not.if {
-			"Not a kr NodeProxy. This will only yield 0".warn;
+		bus.isSettable.not.if {
+			"Not a kr Bus or NodeProxy. This will only yield 0".warn;
 			^Pfunc({0});	
 		};
 		
-		check = {proxy.bus.server.hasShmInterface}.try;
+		check = {bus.server.hasShmInterface}.try;
 		
 		check.if ({
-			^Pfunc({proxy.bus.getSynchronous()});
+			^Pfunc({bus.getSynchronous()});
 		}, {
 			"No shared memory interface detected. Use localhost server on SC 3.5 or higher to get better performance".warn;	
-			proxy.bus.get({|v| last = v;});
-			^Pfunc({proxy.bus.get({|v| last = v;}); last;});
+			bus.get({|v| last = v;});
+			^Pfunc({bus.get({|v| last = v;}); last;});
 		});
 	}	
 }

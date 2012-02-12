@@ -320,8 +320,9 @@ MandelSpace : MandelModule {
 MandelValue  {
 	var <key, <>bdl, <decorator, <relations, quant;
 	var space;
-	
 	var <bus, busDependant;
+	var <>sourcePullInterval = 0.05;
+	var sourceRoutine;
 	
 	*new {|space, key|
 		^super.new.init(space, key);
@@ -457,5 +458,28 @@ MandelValue  {
 		};
 		
 		this.changed(key, this.getValue());
+	}
+	
+	trySetSource {|source|
+		var bus = try {source.asBus};
+		
+		this.stopPullFromSource;
+		
+		bus.isNil.if ({
+			"Could not set source, not a Bus!".warn;	
+		}, {
+			var stream = Pkr(bus).asStream;
+			sourceRoutine = {
+				while({true}, {
+					this.setValue(stream.next);
+					sourcePullInterval.wait;
+				});
+			}.fork;
+		});
+	}
+	
+	stopPullFromSource {
+		sourceRoutine.stop;
+		sourceRoutine = nil;		
 	}
 }

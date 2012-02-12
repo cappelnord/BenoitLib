@@ -84,4 +84,11 @@ x.getObject(\test).decorator = nil
 
 ~testSound = {SinOsc.ar(~test.lag2(0.5)).dup * 0.1}
 
+// *** PUBLISH KR PROXIES TO MANDELSPACE ***
+// You can publish a .kr Bus or NodeProxy via MandelSpace
 
+~kr = {SinOsc.kr(0.1)}
+
+~kr.publish(x[\kr]);
+
+x[\kr].value
