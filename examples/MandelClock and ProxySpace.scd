@@ -7,10 +7,27 @@ p = ProxySpace.push(s)
 m = MandelClock.startLeader("MCTest");
 x = m.space;
 
+// Use the kr Busses of MandelValues
+// You directly can map MandelValues as a kr Bus
+
+x[\bbfreq] = 400;
+
+~bb = {SinOsc.ar(x[\bbfreq].kr)}
+~bb.play;
+
+x[\bbfreq] = 800;
+
+// It's also good to lag the values
+
+~bb = {SinOsc.ar(x[\bbfreq].kr.lag2(0.5))}
+
+x[\bbfreq] = 1200;
+
+
 // *** TEMPO PROXY ***
 // You can map the current tempo in BPS to a kr NodeProxy
 
-m.tools.makeTempoProxy
+~tempo = m.tempoBus
 
 ~imp = {Impulse.ar(~tempo).dup * 0.5}
 ~imp.play
@@ -24,12 +41,18 @@ m.changeTempo(3)
 // HarmonyMaster (see the other example) can be used in ProxySpace as well.
 // This maps HarmonyMaster to ~rootFreq, ~mtransposeFreq and ~ctransposeFreq
 
-m.tools.mapFreqsToProxySpace
+m.tools.createFreqValues
 
+~rootFreq = x[\rootFreq];
 ~son = {SinOsc.ar(~rootFreq).dup * 0.1}
 ~son.play
 
 x[\root] = 6
+
+// also possible to directly use the bus
+~son = {SinOsc.ar(x[\rootFreq].kr).dup * 0.1}
+
+~ctransposeFreq = x[\ctransposeFreq]
 
 ~son2 = {SinOsc.ar(~ctransposeFreq * 0.5).dup * 0.1}
 ~son2.play
@@ -37,20 +60,14 @@ x[\root] = 6
 x[\ctranspose] = 4
 
 
-// you can also lag the frequencies if you like
-
-m.tools.mapFreqsToProxySpace(1)
-
-x[\root] = 3
-
 ~son.stop
 ~son2.stop
 
 // *** MAP MANDELSPACE VALUE TO PROXY SPACE ***
-// You can map any MandelSpace Value to ProxySpace, even synthesized ones.
+// You can use any MandelSpace Value in ProxySpace, even synthesized ones.
 
 x[\test] = 100
-x.getObject(\test).mapToProxySpace(0.5); // 0.5 seconds lag
+~test = x[\test]
 
 ~testSound = {SinOsc.ar(~test).dup * 0.1}
 ~testSound.play
@@ -63,3 +80,9 @@ x.getObject(\test).decorator = {|v| v * 4}
 x[\test] = 100
 
 x.getObject(\test).decorator = nil
+
+// lagging values should be done in the synth
+
+~testSound = {SinOsc.ar(~test.lag2(0.5)).dup * 0.1}
+
+

@@ -38,7 +38,7 @@ MandelTools : MandelModule {
 		var stdEvent = {
 			var ev = Event.partialEvents[\pitchEvent].copy;
 			stdValues.do {|item|
-				ev[item] = space[item];
+				ev[item] = space.getValue(item);
 			};
 			ev[\scale] = scale.next;
 			ev;
