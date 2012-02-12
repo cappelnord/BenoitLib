@@ -14,6 +14,7 @@
 MandelEnvironment : EnvironmentRedirect {
 
     var space;
+    var <>directValueAccess = false;
 	
 	*new {|space|
 		^super.new.init(space);
@@ -24,7 +25,11 @@ MandelEnvironment : EnvironmentRedirect {
 	}
 	
 	at {|key|
-		^space.at(key);	
+		directValueAccess.if ({
+			^space.getValue(key);
+		}, {
+			^space.at(key);			
+		});
 	}
 	
 	put {|key, obj|

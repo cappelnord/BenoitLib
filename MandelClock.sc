@@ -69,9 +69,7 @@ MandelClock {
 	var beatsPerBar = 4;
 			
 	var <guiInstance;
-	
-	var <proxySpace;
-		
+			
 	var <>postPrefix = "MandelClock: ";
 		
 	var metro;
@@ -413,7 +411,7 @@ MandelClock {
 		
 		tempo = newTempo;
 		clock.tempo_(newTempo);
-		this.tools.pr_setTempoProxy(newTempo); // refactor to tempo change listener soon
+		// refactor to tempo change listener soon
 		leading.if {externalTempo = newTempo;};
 	}
 	
@@ -661,22 +659,6 @@ MandelClock {
 		platform.displayNotification(name, message);
 	}
 	
-	// it's not very nice to check for a class (anti OO, a class COULD act as a ProxySpace)
-	// not good: can't set another ps.
-	setProxySpace {|ps|
-		proxySpace.isKindOf(ProxySpace).not.if {
-			((ps == nil) && (currentEnvironment.isKindOf(ProxySpace))).if {
-				ps = currentEnvironment;	
-			};
-			
-			(ps.isKindOf(ProxySpace)).if({
-				proxySpace = ps;
-			},{
-				"You need to specify a ProxySpace!".throw;
-			});
-		}
-	}
-	
 	pr_sendWindow {|title, func|
 		StringInputDialog.new(title, "Send", {|string| 
 			func.value(string);
@@ -725,6 +707,11 @@ MandelClock {
 	
 	stopMetro {
 		metro.stop;
+	}
+	
+	// TO DO
+	server {
+		^Server.default;	
 	}
 	
 	drop {|bar, function|
@@ -791,19 +778,6 @@ MandelClock {
 		CmdPeriod.doOnce({this.pr_doCmdPeriod});	
 	}
 	
-	pr_getKrProxyNode {|key|
-		var node;
-		
-		this.setProxySpace;
-		
-		node = proxySpace.envir[key];
-		node.isNil.if {
-			node = NodeProxy.control(proxySpace.server, 1);			proxySpace.envir.put(key, node);
-		};
-		
-		^node;
-	}
-	
 	// deprecated
 
 	getValue {|key, useDecorator=true|
@@ -814,15 +788,5 @@ MandelClock {
 	setValue {|key, value, schedBeats=0.0|
 		"setValue is going to be removed from MandelClock instance. Use m.space.setValue".postln;
 		^space.setValue(key, value, schedBeats);
-	}
-	
-	makeTempoProxy {
-		"makeTempoProxy is going to be removed from MandelClock instance. Use m.tools.makeTempoProxy".postln;
-		^tools.makeTempoProxy;
-	}
-
-	clearTempoProxy {
-		"clearTempoProxy is going to be removed from MandelClock instance. Use m.tools.makeTempoProxy".postln;
-		^tools.clearTempoProxy;
 	}	
 }

@@ -136,9 +136,3 @@ MacroExpander
 		^res.asArray;
 	}
 }
-
-+ String {
-	xx {
-		MacroExpander.instance.expand(this);
-	}
-}

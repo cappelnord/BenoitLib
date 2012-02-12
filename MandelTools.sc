@@ -15,8 +15,7 @@ MandelTools : MandelModule {
 	
 	var mc;
 	var space;
-	
-	var <tempoProxy;	
+		
 	
 	*new {|maclock|
 		^super.new.init(maclock);	
@@ -27,7 +26,7 @@ MandelTools : MandelModule {
 		space = mc.space;
 	}
 	
-	mapFreqsToProxySpace {|lag=0.0|
+	createFreqValues {|lag=0.0|
 		var scale = PmanScale().asStream;
 		var relations = [\scale, \tuning, \root, \stepsPerOctave, \octaveRatio];
 		var stdValues = [\root, \stepsPerOctave, \octaveRatio];
@@ -70,31 +69,15 @@ MandelTools : MandelModule {
 			ev[\ctranspose] = 	space[\ctranspose];
 			ev.use {~freq.value()};
 		};
-		
-		rootFreq.mapToProxySpace(lag);
-		mtransposeFreq.mapToProxySpace(lag);
-		ctransposeFreq.mapToProxySpace(lag);
 	}
 	
-	makeTempoProxy {
-		tempoProxy = mc.pr_getKrProxyNode(\tempo);
-		tempoProxy.put(0, {|tempo = 2.0| tempo}, 0, [\tempo, mc.tempo]);
-			// tempoProxy.fadeTime = 0;
-		^tempoProxy;
+	createTempoBus {
+		// TO IMPLEMENT
 	}
 	
-	clearTempoProxy {
-		mc.proxySpace.notNil.if {
-			mc.proxySpace.envir.removeAt(\tempo);
-		};
-		
-		tempoProxy.clear;
-		tempoProxy = nil;
+	clearTempoBus {
+		// TO IMPLEMENT
 	}
 	
-	pr_setTempoProxy {|newTempo| // refactor to listener
-		tempoProxy.notNil.if {
-			tempoProxy.set(\tempo, newTempo);	
-		}
-	}
+	// SET TEMPO BUS via TEMPO CHANGE LISTENER
 }

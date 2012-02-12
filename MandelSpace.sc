@@ -33,7 +33,7 @@ MandelSpace : MandelModule {
 	
 	*getValueOrDefault {|key|
 		MandelClock.instance.notNil.if {
-			^MandelClock.instance.space.at(key);
+			^MandelClock.instance.space.getValue(key);
 		}Ê{
 			^MandelSpace.defaultDict.at(key);
 		}
@@ -133,7 +133,7 @@ MandelSpace : MandelModule {
 	
 	getValue {|key, useDecorator=true|
 		var obj = this.getObject(key);
-		^obj.getValue();
+		^obj.getValue(useDecorator);
 	}
 	
 	setValue {|key, value, schedBeats|
@@ -147,7 +147,7 @@ MandelSpace : MandelModule {
 	
 	// dict interface
 	at {|key|
-		^this.getValue(key);	
+		^this.getObject(key);	
 	}
 	
 	put {|key, value|
@@ -275,7 +275,7 @@ MandelValue  {
 	var <key, <>bdl, <decorator, <relations, quant;
 	var space;
 	
-	var nodeProxyDependant, triggerProxyDependant;
+	var <bus, busDependant;
 	
 	*new {|space, key|
 		^super.new.init(space, key);
@@ -299,6 +299,35 @@ MandelValue  {
 				this.getValue().yield;
 			};
 		});
+	}
+	
+	// TODO: Reset Busses
+	asBus {
+		^bus.isNil.if({this.pr_createBus}, {bus});
+	}
+	
+	pr_createBusÊ{
+		this.removeDependant(busDependant);
+		
+		bus = Bus.control(space.mc.server, 1);
+		bus.trySetSynchronous(this.getValue());
+		
+		busDependant = {|changer, what, value| bus.trySetSynchronous(value)};
+		this.addDependant(busDependant);
+		
+		^bus;
+	}
+	
+	kr {
+		^this.asBus.kr;	
+	}
+	
+	ar {
+		^K2A.ar(this.asBus.kr);
+	}
+	
+	tr {
+		^InTrig.kr(this.asBus);	
 	}
 	
 	quant {
@@ -379,30 +408,4 @@ MandelValue  {
 		
 		this.changed(key, this.getValue());
 	}
-	
-	mapToProxySpace {|lag=0.0, useLatency=true|
-	
-		var node = space.mc.pr_getKrProxyNode(key);
-	
-		node.put(0, {|value=0, lag=0| Lag2.kr(value, lag)}, 0, [\value, this.getValue().asFloat, \lag, lag]);
-		
-		this.removeDependant(nodeProxyDependant);
-		nodeProxyDependant = {|changer, what, value| node.setGroup([\value, value.asFloat], useLatency) };
-		this.addDependant(nodeProxyDependant);
-		
-		this.mapChangeTriggerToProxySpace
-		
-		^node;
-	}
-	
-	mapChangeTriggerToProxySpace {
-		var node = space.mc.pr_getKrProxyNode(("t_" ++ key.asString).asSymbol);
-		node.put(0, {|t_trig| t_trig});
-		
-		this.removeDependant(triggerProxyDependant);
-		triggerProxyDependant = {|changer, what, value| node.set(\t_trig, 1);};
-		this.addDependant(triggerProxyDependant);
-		
-		^node;
-	}	
 }
