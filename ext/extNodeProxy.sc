@@ -3,9 +3,4 @@
 	asStream {
 		^Pkr(this).asStream;
 	}
-	
-	// map to MandelValue
-	publish {|to|
-		to.trySetSource(this);	
-	}
 }

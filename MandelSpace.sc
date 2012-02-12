@@ -470,7 +470,11 @@ MandelValue  {
 		this.changed(key, this.getValue());
 	}
 	
-	trySetSource {|source|
+	<>> {|target, key=\in|
+		target.map(\in, BusPlug.for(this.asBus));
+	}
+	
+	<<> {|source, key=\in|
 		var bus = try {source.asBus};
 		
 		this.stopPullFromSource;
