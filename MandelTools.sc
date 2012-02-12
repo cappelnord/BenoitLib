@@ -70,14 +70,4 @@ MandelTools : MandelModule {
 			ev.use {~freq.value()};
 		};
 	}
-	
-	createTempoBus {
-		// TO IMPLEMENT
-	}
-	
-	clearTempoBus {
-		// TO IMPLEMENT
-	}
-	
-	// SET TEMPO BUS via TEMPO CHANGE LISTENER
 }

@@ -76,8 +76,9 @@ MandelClock {
 	
 	var dropSchedDict;
 	
-		
 	var <>dropFunc = nil; 
+	
+	var tempoBusInstance, tempoBusDependant;
 	
 	// Modules
 	var modules;
@@ -86,10 +87,13 @@ MandelClock {
 	var <tools;
 	var <platform;
 	var <time;
+	
+	var <>server;
 			
-	*startLeader {|name, startTempo = 2.0, timeClass|
+	*startLeader {|name, startTempo = 2.0, timeClass, server|
 		
 		timeClass = timeClass ? MandelTimeDriver;
+		server = server ? Server.default;
 		
 		instance.notNil.if {
 			"THERE IS ALREADY A MANDELCLOCK INSTANCE".postln;
@@ -104,15 +108,16 @@ MandelClock {
 			"".postln; 	
 		};
 		
-		instance = MandelClock.new(name, 0, startTempo, name, [NetAddr.langPort], leading:true, timeClass:timeClass);
+		instance = MandelClock.new(name, 0, startTempo, name, [NetAddr.langPort], leading:true, timeClass:timeClass, server:server);
 		^instance;
 	}
 	
-	*startFollower {|name, port=57120, action, timeClass|
+	*startFollower {|name, port=57120, action, timeClass, server|
 		
 		var addr;
 		
 		timeClass = timeClass ? MandelTimeDriver;
+		server = server ? Server.default;
 		
 		instance.notNil.if {
 			"THERE IS ALREADY A MANDELCLOCK INSTANCE".postln;
@@ -129,7 +134,7 @@ MandelClock {
 			
 			bStrapResponder.remove;
 			
-			instance = MandelClock.new(name, message[3], message[4], message[1].asString,[port], false, timeClass:timeClass);
+			instance = MandelClock.new(name, message[3], message[4], message[1].asString,[port], false, timeClass:timeClass, server:server);
 			instance.helloAfterPorts = true;
 			instance.publishPorts;
 			
@@ -140,20 +145,21 @@ MandelClock {
 		
 	}
 	
-	*new {|name, startBeat, startTempo, leaderName, ports, leading=false, timeClass|
+	*new {|name, startBeat, startTempo, leaderName, ports, leading=false, timeClass, server|
 		
 		name.isNil.if {
 			name = "RandomUser" ++ 100000.rand;	
 		};
 		
-		^super.new.init(name, startBeat, startTempo, leaderName, ports, leading, timeClass);
+		^super.new.init(name, startBeat, startTempo, leaderName, ports, leading, timeClass, server);
 	}
 	
-	init {|a_name, startBeat, startTempo, a_leaderName, ports, a_leading, timeClass|
+	init {|a_name, startBeat, startTempo, a_leaderName, ports, a_leading, timeClass, a_server|
 		
 		name = a_name;
 		leaderName = a_leaderName;
 		leading = a_leading;
+		server = a_server;
 		
 		NetAddr.broadcastFlag_(true);
 		
@@ -411,7 +417,7 @@ MandelClock {
 		
 		tempo = newTempo;
 		clock.tempo_(newTempo);
-		// refactor to tempo change listener soon
+		this.changed(\tempo, newTempo);
 		leading.if {externalTempo = newTempo;};
 	}
 	
@@ -709,11 +715,6 @@ MandelClock {
 		metro.stop;
 	}
 	
-	// TO DO
-	server {
-		^Server.default;	
-	}
-	
 	drop {|bar, function|
 	
 		var schedBeat = bar * beatsPerBar;
@@ -776,6 +777,17 @@ MandelClock {
 	pr_doCmdPeriod {		
 		modules.do {|mod| mod.registerCmdPeriod(this);};
 		CmdPeriod.doOnce({this.pr_doCmdPeriod});	
+	}
+	
+	tempoBus {
+		tempoBusInstance.isNil.if {
+			tempoBusInstance = Bus.control(server, 1);
+			tempoBusInstance.set(tempo);
+			
+			tempoBusDependant = {|changed, what, value| (what == \tempo).if {tempoBusInstance.set(value)};};
+			this.addDependant(tempoBusDependant);
+		};
+		^tempoBusInstance;
 	}
 	
 	// deprecated

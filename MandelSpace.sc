@@ -312,7 +312,7 @@ MandelValue  {
 		bus = Bus.control(space.mc.server, 1);
 		bus.set(this.getValue());
 		
-		busDependant = {|changer, what, value| bus.set(value)};
+		busDependant = {|changed, what, value| bus.set(value)};
 		this.addDependant(busDependant);
 		
 		^bus;
