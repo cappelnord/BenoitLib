@@ -470,8 +470,13 @@ MandelValue  {
 		}, {
 			var stream = Pkr(bus).asStream;
 			sourceRoutine = {
+				var lastVal = nil;
 				while({true}, {
-					this.setValue(stream.next);
+					var val = stream.next;
+					if(val != lastVal) {
+						this.setValue(val);
+						lastVal = val;
+					};
 					sourcePullInterval.wait;
 				});
 			}.fork;
