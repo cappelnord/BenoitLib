@@ -10,7 +10,7 @@ var window;
 var actions = List.new;
 
 // initialize values, if not allready present
-keys.do {|key| space[key].isNil.if {space[key] = 0.0;};};
+keys.do {|key| space.getValue(key).isNil.if {space[key] = 0.0;};};
 
 window = Window("MandelSpace Slider Test", Rect(100, 100, num*sliderWidth, sliderHeight + 60));
 
@@ -78,16 +78,26 @@ window.front;
 */
 
 /*
-// Use the ProxySpace Publishing to make yourself heard!
+// Make sound with it!
 // (ProxySpace must have been pushed)
 (
 var num = 10;
 var keys = num.collect {|i|("ctrl" ++ i).asSymbol};
-var nps = keys.collect {|key| MandelClock.instance.space.getObject(key).mapToProxySpace(0.1)};
 
-~yeah = {Splay.ar(SinOsc.ar(nps.collect{|np| np.kr.linexp(0,1,100,5000)}))};
+~yeah = {Splay.ar(SinOsc.ar(keys.collect{|key| MandelClock.instance.space[key].kr.lag2(0.2).linexp(0,1,100,5000)}))};
 ~yeah.play;
 
 )
+
+*/
+
+/*
+// map a NodeProxy to a value
+
+~kr = {LFNoise2.kr(2).abs};
+~kr <>> MandelClock.instance.space[\ctrl0];
+
+// Stop it!
+MandelClock.instance.space[\ctrl0].stopPullFromSource;
 
 */

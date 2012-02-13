@@ -137,8 +137,16 @@ MandelSpace : MandelModule {
 	}
 	
 	setValue {|key, value, schedBeats|
-		var obj = this.getObject(key);
-		^obj.setValue(value, schedBeats);
+		var obj;
+		key = key.asSymbol;
+		
+		key.isNil.if {
+			("Invalid key: " ++ key).error;
+			^nil;	
+		};
+		
+		obj = this.getObject(key);
+		obj.setValue(value, schedBeats);
 	}
 	
 	sendValue {|key, value, schedBeats=0.0|
@@ -322,7 +330,7 @@ MandelSpace : MandelModule {
 	}
 }
 
-MandelValue  {
+MandelValue {
 	var <key, <>bdl, <decorator, <relations, quant;
 	var space;
 	var <bus, busDependant;
