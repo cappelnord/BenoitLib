@@ -24,11 +24,9 @@ MandelClock {
 	*/
 	
 	classvar <instance;
-	classvar <>oscPrefix = "/mc";
 	classvar bStrapResponder;
 	
 	classvar <>debug = false;
-	classvar <>dumpOSC = false;
 	
 	var <>tapInstance;
 	
@@ -41,17 +39,10 @@ MandelClock {
 	
 	var tickSJ;
 	var tempoChangeSJ;
-			
-	// OSCresponders
-	var oscGeneralResponders;
-	var oscLeaderResponders;
-	var oscFollowerResponders;
-		
+					
 	var <leading = false;
 	var <leaderName;
-	
-	var <addrDict;
-	
+		
 	// an String ID
 	var <name;
 	
@@ -79,22 +70,33 @@ MandelClock {
 	// Modules
 	var modules;
 
+	var <net;
 	var <space;
 	var <tools;
 	var <platform;
 	var <time;
 	
 	var <>server;
-			
-	*startLeader {|name, startTempo = 2.0, timeClass, server|
+	
+	// Startup procedure is a mess. ToFix!
+	
+	*startGeneral {|timeClass, server|
+		NetAddr.broadcastFlag_(true);
 		
 		timeClass = timeClass ? MandelTimeDriver;
 		server = server ? Server.default;
 		
 		instance.notNil.if {
 			"THERE IS ALREADY A MANDELCLOCK INSTANCE".postln;
-			^instance;	
+			^nil;	
 		};
+	}
+			
+	*startLeader {|name, startTempo = 2.0, timeClass, server|
+		var general = MandelClock.startGeneral(timeClass, server);
+		general.isNil.if {"COULD NOT START A LEADER MANDELOCK".postln; ^nil;}
+		timeClass = general[0];
+		server = general[1];
 		
 		(NetAddr.langPort != 57120).if {
 			"*** Warning! ***".postln;
@@ -111,23 +113,18 @@ MandelClock {
 	*startFollower {|name, port=57120, action, timeClass, server|
 		
 		var addr;
+		var general = MandelClock.startGeneral(timeClass, server);
+		general.isNil.if {"COULD NOT START A FOLLOWER MANDELOCK".postln; ^nil;}
+		timeClass = general[0];
+		server = general[1];
 		
-		timeClass = timeClass ? MandelTimeDriver;
-		server = server ? Server.default;
-		
-		instance.notNil.if {
-			"THERE IS ALREADY A MANDELCLOCK INSTANCE".postln;
-			^instance;	
-		};
-		
-		NetAddr.broadcastFlag_(true);
 		addr = NetAddr("255.255.255.255", port);
-		addr.sendMsg(oscPrefix ++ "/requestPort", name, NetAddr.langPort);
+		addr.sendMsg(MandelNetwork.oscPrefix ++ "/requestPort", name, NetAddr.langPort);
 		
 		"Waiting for a signal from the Leader ...".postln;
 		
+		// ATTENTION: THIS NEEDS MANUAL UPDATE IF NETWORK CODE CHANGES
 		bStrapResponder = OSCresponder(nil, oscPrefix ++ "/clock", {|ti, tR, message, addr|
-			
 			bStrapResponder.remove;
 			
 			instance = MandelClock.new(name, message[3], message[4], message[1].asString,[port], false, timeClass:timeClass, server:server);
@@ -137,8 +134,7 @@ MandelClock {
 			("... you are now following " ++ message[1].asString ++ "!").postln;
 			
 			action.value(instance);			
-		}).add;
-		
+		}).add;	
 	}
 	
 	*new {|name, startBeat, startTempo, leaderName, ports, leading=false, timeClass, server|
@@ -157,25 +153,6 @@ MandelClock {
 		leading = a_leading;
 		server = a_server;
 		
-		NetAddr.broadcastFlag_(true);
-		
-		// start networking
-		ports = ports ? [57120];
-		
-		// this is a workaround, check if ports are publishhed correctly
-		ports.includes(57120).not.if {
-			ports = ports ++ 57120;
-		};
-		
-		addrDict = IdentityDictionary.new;
-		this.pr_managePorts(ports);
-		
-		// bookkeeping for responders
-		oscGeneralResponders = Dictionary.new;
-		oscLeaderResponders = Dictionary.new;
-		oscFollowerResponders = Dictionary.new;
-				
-		
 		// start the clock
 		clock = TempoClock.new(startTempo, startBeat, queueSize:4096);
 		clock.permanent_(true);
@@ -185,7 +162,7 @@ MandelClock {
 		tempo = startTempo;
 		
 		// init Modules
-		this.pr_initModules;
+		this.pr_initModules(ports);
 		
 		time = timeClass.new(this);
 		modules.add(time);
@@ -204,12 +181,13 @@ MandelClock {
 		this.pr_doCmdPeriod;
 	}
 	
-	pr_initModules {
+	pr_initModules {|ports|
 		modules = List.new;
-
+		
+		net = MandelNetwork(this, ports);
+		modules.add(net);
 		space = MandelSpace(this);
 		modules.add(space);
-		
 		tools = MandelTools(this);
 		modules.add(tools);
 		
@@ -227,37 +205,36 @@ MandelClock {
 		modules.do {|module| module.onStartup(this) };	
 	}
 	
+	sendHello {
+		this.net.sendMsgCmd("/hello");	
+	}
+	
+	sendRequestHello {
+		this.net.sendMsgCmd("/requestHello");	
+	}
+	
+	sendPongPort {
+		this.net.sendMsgCmd("/pongPort", NetAddr.langPort);
+	}
+	
 	takeLead {
-		this.sendMsgCmd("/takeLead");
+		this.net.sendMsgCmd("/takeLead");
 		
 		leading.not.if {
 			this.pr_becomeLeader;
 		};
 	}
 	
-	hello {
-		this.sendMsgCmd("/hello");	
-	}
-	
-	requestHello {
-		this.sendMsgCmd("/requestHello");	
-	}
-	
 	chat {|message|
-		this.sendMsgCmd("/chat", message);
+		this.net.sendMsgCmd("/chat", message);
 	}
 	
 	shout {|message|
-		this.sendMsgCmd("/shout", message);
-	}
-	
-	systemPorts {
-		var intKeys = (addrDict.keys.collect{|i| i.asInteger}).asArray;
-		this.sendMsgCmd("/systemPorts", *intKeys);	
+		this.net.sendMsgCmd("/shout", message);
 	}
 	
 	publishPorts {
-		this.sendMsgCmd("/publishPorts");	
+		this.net.sendMsgCmd("/publishPorts");	
 	}
 	
 	// of course it could be the same method for a leader and a follower
@@ -266,7 +243,7 @@ MandelClock {
 	requestTempo {|newTempo, dur=0|
 		leading.not.if {
 			newTempo = this.pr_safeTempo(newTempo);
-			this.sendMsgCmd("/requestTempo", newTempo.asFloat, dur.asFloat);
+			this.net.sendMsgCmd("/requestTempo", newTempo.asFloat, dur.asFloat);
 		};
 	}
 	
@@ -313,40 +290,13 @@ MandelClock {
 		^newTempo;
 	}
 	
-	// sendMessageCmd adds name and oscPrefix
-	sendMsgCmd {|... args|
-		
-		var message = args[0];
-		var argNum = args.size;
-		
-		// args.postcs;
-		
-		args = args[(1..(args.size-1))]; // remove first item, i think this is dumb
-		
-		(argNum > 1).if ({
-			this.sendMsg(oscPrefix ++ message, name, *args);
-		},{
-			this.sendMsg(oscPrefix ++ message, name);
-		});
-	}
-	
-	// sendMessage delivers to NetAddr
-	sendMsg {|... args|
-		
-		dumpOSC.if {args.postcs;};
-		
-		addrDict.do {|addr|
-				addr.sendMsg(*args);
-		};
-	}
-	
 	pr_becomeLeader {
 		
 		leaderName = name;
 		leading = true;
 		
 		// clear follower responders
-		this.pr_clearResponders(oscFollowerResponders);
+		this.net.clearResponders(\follower);
 		
 		// clear follower tasks
 		lastTickSJ.stop;
@@ -372,14 +322,13 @@ MandelClock {
 		leading = false;
 		
 		// clear leader responders
-		this.pr_clearResponders(oscLeaderResponders);
+		this.net.clearResponders(\leader);
 
 		// clear leader tasks		
 		tickSJ.stop;
 		tickSJ = nil;
 		tempoChangeSJ.stop;
 		tempoChangeSJ = nil;
-		
 		
 		this.post("Starting follower tasks ...");
 		
@@ -414,48 +363,15 @@ MandelClock {
 		leading.if {externalTempo = newTempo;};
 	}
 	
-	addResponder {|key, cmd, function |
-	
-		var d = (\general: oscGeneralResponders,
-				\leader: oscLeaderResponders,
-				\follower: oscFollowerResponders);
-				
-		var dict = d[key];
-		
-		key.notNil.if ({
-			this.pr_addResponder(dict, cmd, function);
-		}, {
-			("Key " ++ key.asString ++ " not found!").postln;
-		});
-	}
-	
-	// this function should go sometimes
-	pr_addResponder {|dict, cmd, function|
-		dict.add(cmd -> OSCresponder(nil, oscPrefix ++ cmd, function).add);
-	}
-	
 	// responders only for followers
 	pr_followerResponders {
-		this.pr_addResponder(oscFollowerResponders, "/clock", {|ti, tR, message, addr|
-			this.pr_shouldFollow(message).if {
-				time.receiveTick(message[2], message[3], message[4]);
-			};
-		});
+		this..net.addOSCResponder(\follower, "/clock", {|header, payload|
+			time.receiveTick(*payload);
+		}, \leaderOnly);
 	}
 	
 	// responders only for leaders
 	pr_leaderResponders {
-		
-		this.pr_addResponder(oscLeaderResponders, "/requestPort", {|ti, tR, message, addr|
-			this.pr_addPort(message[2].asInteger);
-			this.post(message[1].asString ++ " requested port " ++ message[2]);
-		});
-		
-		this.pr_addResponder(oscLeaderResponders, "/publishPorts", {|ti, tR, message, addr|
-			leading.if {
-				this.systemPorts;
-			};
-		});
 		
 		this.pr_addResponder(oscLeaderResponders, "/requestTempo", {|ti, tR, message, addr|
 			
@@ -471,39 +387,33 @@ MandelClock {
 	pr_generalResponders {
 		
 		// chat and shout responders
-				
-		this.pr_addResponder(oscGeneralResponders, "/chat", {|ti, tR, message, addr|
-			 (message[1].asString ++ ":  " ++ message[2].asString).postln;
+		this.net.addOSCResponder(\general, "/chat", {|header, payload|
+			 (header.name ++ ":  " ++ payload[0].asString).postln;
 		});
 		
 		// a shout should be more visible than this.
-		this.pr_addResponder(oscGeneralResponders, "/shout", {|ti, tR, message, addr|
-			 (message[1].asString ++ " (shout):  " ++ message[2].asString).postln;
-			 this.displayShout(message[1].asString, message[2].asString);
+		this.net.addOSCResponder(\general, "/shout", {|header, payload|
+			 (header.name ++ " (shout):  " ++ payload[0].asString).postln;
+			 this.displayShout(header.name, payload[0]);
 		});
 		
-		this.pr_addResponder(oscGeneralResponders, "/hello", {|ti, tR, message, addr|
-			
-			var name = message[1].asString;
-			
-			(leaderName == name).if({
-				(name ++ " is the leader.").postln;	
+		this.net.addOSCResponder(\general, "/hello", {|header, payload|
+			(leaderName == header.name).if({
+				(header.name ++ " is the leader.").postln;
 			},{
-				(name ++ " is following the leader.").postln;
+				(header.name ++ " is following the leader.").postln;
 			});
 		});
 		
-		this.pr_addResponder(oscGeneralResponders, "/requestHello", {|ti, tR, message, addr|
-			this.hello;
+		this.net.addOSCResponder(\general, "/requestHello", {|header, payload|
+			this.sendHello;
 		});
 		
 		// port responders
 		
-		this.pr_addResponder(oscGeneralResponders, "/pingPort", {|ti, tR, message, addr|
-			this.pr_shouldFollow(message).if {
-				this.sendMsgCmd("pongPort", NetAddr.langPort);
-			};
-		});
+		this.pr_addResponder(\general, "/pingPort", {|header, payload|
+			this.sendPongPort;
+		}, \leaderOnly);
 		
 		this.pr_addResponder(oscGeneralResponders, "/systemPorts", {|ti, tR, message, addr|
 			this.pr_shouldFollow(message).if {
@@ -514,7 +424,7 @@ MandelClock {
 				// to say hello.
 				
 				helloAfterPorts.if {
-					this.hello;
+					this.sendHello;
 					helloAfterPorts = false;	
 				};
 			};
@@ -525,25 +435,12 @@ MandelClock {
 		});
 	}
 	
-	
-	clearAllResponders {
-		this.pr_clearResponders(oscGeneralResponders);
-		this.pr_clearResponders(oscLeaderResponders);
-		this.pr_clearResponders(oscFollowerResponders);
-	}
-	
-	pr_clearResponders {|list|
-		list.do {|item| item.remove;};
-		list.clear;
-	}
-	
 	clear {
-		this.clearAllResponders;
+		this.net.clearAllResponders;
 		
 		lastTickSJ.stop;
 		tickSJ.stop;
 		tempoChangeSJ.stop;
-		this.clearTempoProxy;
 		
 		instance = nil;
 	}
@@ -569,44 +466,6 @@ MandelClock {
 				this.post("You are not the leader anymore :-(");
 			};
 		};	
-	}
-	
-	pr_managePorts {|ports|
-		
-		var addList = List.new;
-		var remList = List.new;
-				
-		ports.do {|item|
-			
-			item = item.asInteger;
-			
-			addrDict.includesKey(item).not.if {
-				addList = addList.add((item -> NetAddr("255.255.255.255", item)));
-			};	
-		};
-		
-		addrDict.keys.do {|key|
-			ports.includes(key).not.if {
-				remList.add(key);	
-			};	
-		};
-		
-		addList.do {|ass|
-			addrDict.add(ass);	
-		};
-		
-		remList.do {|key|
-			addrDict.removeAt(key);	
-		};
-	}
-	
-	pr_addPort {|port|
-		
-		port = port.asInteger;
-		
-		addrDict.includesKey(port).not.if {
-			addrDict = addrDict.add(port -> NetAddr("255.255.255.255", port));
-		};
 	} 
 	
 	pr_shouldFollow {|message|
