@@ -73,11 +73,7 @@ MandelClock {
 	var <>postPrefix = "MandelClock: ";
 		
 	var metro;
-	
-	var dropSchedDict;
-	
-	var <>dropFunc = nil; 
-	
+			
 	var tempoBusInstance, tempoBusDependant;
 	
 	// Modules
@@ -178,10 +174,7 @@ MandelClock {
 		oscGeneralResponders = Dictionary.new;
 		oscLeaderResponders = Dictionary.new;
 		oscFollowerResponders = Dictionary.new;
-		
-		// bookkeeping for scheduling
-		dropSchedDict = Dictionary.new;
-		
+				
 		
 		// start the clock
 		clock = TempoClock.new(startTempo, startBeat, queueSize:4096);
@@ -477,14 +470,6 @@ MandelClock {
 	// responders for leaders and followers
 	pr_generalResponders {
 		
-		// drop responder
-		
-		this.pr_addResponder(oscGeneralResponders, "/drop", {|ti, tR, message, addr|
-			(message[1].asString != name).if {
-				this.pr_receiveDrop(message[2].asInteger, message[3].asFloat);
-			};
-		});
-		
 		// chat and shout responders
 				
 		this.pr_addResponder(oscGeneralResponders, "/chat", {|ti, tR, message, addr|
@@ -713,65 +698,6 @@ MandelClock {
 	
 	stopMetro {
 		metro.stop;
-	}
-	
-	drop {|bar, function|
-	
-		var schedBeat = bar * beatsPerBar;
-		
-		(schedBeat > clock.beats).if ({
-			dropSchedDict.at(bar).isNil.if {
-				clock.schedAbs(schedBeat - 0.0000001 ,{
-					dropSchedDict.at(bar).value;
-					dropSchedDict.removeAt(bar);
-					nil;
-				});
-			};
-						
-			dropSchedDict.removeAt(bar); // does nothing on first time
-			dropSchedDict.put(bar, function);
-			
-		}, {
-			("Bar " ++ bar ++ " is in the past! Didn't do anything.").warn;
-		});
-	}
-	
-	startDrop {|quant=0|
-		this.sendMsgCmd("/drop", quant.asInteger, clock.beats.asFloat);
-		this.pr_receiveDrop(quant.asInteger, clock.beats.asFloat);
-	}
-	
-	pr_receiveDrop {|quant, referenceBeat|
-		var schedBeat;
-		
-		(quant == 0).if {
-			this.runDropFunc;
-		};
-				
-		(dropFunc != nil).if {
-			schedBeat = ceil(referenceBeat / quant) * quant;
-			
-			(schedBeat < clock.beats).if ({
-				this.runDropFunc;
-			}, {
-				clock.schedAbs(schedBeat - 0.0000001 ,{
-					this.runDropFunc;
-					nil;
-				});
-			});
-		};
-	}
-	
-	runDropFunc {
-		dropFunc.isNil.not.if ({
-			dropFunc.value;
-			this.displayShout("", "Hot Drop!");
-			"Hot Drop!".postln;
-		}, {
-			this.displayShout("", "Cold Drop!");
-			"Cold Drop!".postln;
-		});
-		dropFunc = nil;
 	}
 	
 	pr_doCmdPeriod {		
