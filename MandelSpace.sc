@@ -482,16 +482,29 @@ MandelValue {
 	}
 	
 	<>> {|proxy, key=\in|
-		^proxy.map(\in, this.asBusPlug);
+		proxy.isNil.if {^proxy};
+		
+		// if the Proxy doesn't allready has a bus we map through assignment
+		proxy.bus.isNil.if {
+			proxy.source = this;
+			^proxy;	
+		};
+		// otherwise map
+		^proxy.map(key, this.asBusPlug);
+		
 	}
 	
 	<<> {|source, key=\in|
 		var bus = try {source.asBus};
 		
-		this.stopPullFromSource;
+		this.unmap(\source);
+		
+		source.isNil.if ({
+			^this; // early exit - just disconnect
+		});
 		
 		bus.isNil.if ({
-			"Could not set source - not compatible to Bus!".warn;	
+			"Could not set source - not compatible to Bus!".warn;
 		}, {
 			var stream = Pkr(bus).asStream;
 			sourceRoutine = {
@@ -509,8 +522,10 @@ MandelValue {
 		^this;
 	}
 	
-	stopPullFromSource {
+	unmap {|key|
+		// (key == \source).if {
 		sourceRoutine.stop;
-		sourceRoutine = nil;		
+		sourceRoutine = nil;
+		// };	
 	}
 }
