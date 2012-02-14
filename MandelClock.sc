@@ -384,7 +384,7 @@ MandelClock {
 		// a shout should be more visible than this.
 		this.net.addOSCResponder(\general, "/shout", {|header, payload|
 			 (header.name ++ " (shout):  " ++ payload[0].asString).postln;
-			 this.displayShout(header.name, payload[0]);
+			 this.displayShout(header.name, payload[0].asString);
 		});
 		
 		this.net.addOSCResponder(\general, "/hello", {|header, payload|

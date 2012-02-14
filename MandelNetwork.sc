@@ -15,7 +15,9 @@
 MandelNetwork : MandelModule {
 	
 	classvar <>oscPrefix = "/mc";
-	classvar <>dumpOSC = true;
+	
+	var <>dumpTXOSC = false;
+	var <>dumpRXOSC = false;
 	
 	// OSCresponders
 	var oscGeneralResponders;
@@ -27,6 +29,12 @@ MandelNetwork : MandelModule {
 	var currentMessageID;
 	
 	var mc;
+	
+	var oscQueue;
+	var oscQueueRoutine;
+	var oscQueueWaitTime = 0.01;
+	
+	var burstGuardDict;
 
 	*new {|maclock, ports|
 		^super.new.init(maclock);	
@@ -52,6 +60,11 @@ MandelNetwork : MandelModule {
 		oscFollowerResponders = Dictionary.new;
 		
 		currentMessageID = 5000.rand;
+		
+		oscQueue = LinkedList.new;
+		oscQueueRoutine = Routine({}); // dummy
+		
+		burstGuardDict = IdentityDictionary.new;
 	}
 	
 	onStartup {|mc|		
@@ -148,7 +161,7 @@ MandelNetwork : MandelModule {
 		};
 	}
 	
-	clearRespondersÊ{|key|
+	clearResponders {|key|
 		var list = this.pr_respondersForKey(key);
 		list.do {|item| item.remove;};
 		list.clear;	
@@ -162,7 +175,7 @@ MandelNetwork : MandelModule {
 		var messageID = 0; // no burst
 		args = args[1..];
 		
-		this.sendMsg(cmd, messageID, *args);
+		this.sendMsg(oscPrefix ++ cmd, mc.name, messageID, *args);
 	}
 	
 	// send a message without a burst ID
@@ -171,7 +184,7 @@ MandelNetwork : MandelModule {
 		var messageID = 0; // no burst
 		args = args[1..];
 		
-		this.dispatchMsg(cmd, messageID, *args);
+		this.dispatchMsg(oscPrefix ++ cmd, mc.name, messageID, *args);
 	}
 	
 	sendMsgBurst {|... args|
@@ -207,20 +220,29 @@ MandelNetwork : MandelModule {
 		
 		{
 			burstNum.do {
-				this.dispatchMsg(cmd, messageID, *args);
+				this.dispatchMsg(oscPrefix ++ cmd, mc.name, messageID, *args);
 				burstWait.wait;	
 			};
 		}.fork;
 	}
 	
 	dispatchMsg {|... args|
-		// auf die queue setzen, task starten falls notwendig
-		this.sendMsg(args);
+		oscQueue.add(args);
+		
+		// start a new Routine - could be solved better probably
+		oscQueueRoutine.isPlaying.not.if {
+			oscQueueRoutine = {
+				while({oscQueue.last.isNil.not}, {
+					this.sendMsg(*oscQueue.pop);
+					oscQueueWaitTime.wait;
+				});
+			}.fork;
+		};
 	}
 	
 	// sendMessage delivers to NetAddr
 	sendMsg {|... args|
-		dumpOSC.if {
+		dumpTXOSC.if {
 			("OSC TX: " ++ args.asCompileString)	.postln;
 		};
 		
@@ -237,25 +259,76 @@ MandelNetwork : MandelModule {
 			
 			// Seperate Header from Payload
 			var header = ();
-			var payload = message[2..];
+			var payload = message[3..];
 			
-			dumpOSC.if {
+			dumpRXOSC.if {
 				("OSC RX: " ++ message.asCompileString).postln;
 			};
 			
 			header[\cmdName] = message[0].asString;
 			header[\name] = message[1].asString;
+			header[\messageID] = message[2];
 			
 			// Register Message and/or discard
+			doDispatch = doDispatch && this.pr_filterBurstMessages(message[1].asSymbol, message[2]);
 			
 			// Discard by Strategy
+			doDispatch.if {
+				(strategy == \leaderOnly).if {
+					doDispatch = (header.name == mc.leaderName.asString) && mc.leading.not;
+				};
+				(strategy == \dropOwn).if {
+					doDispatch = (header.name != mc.name);
+				};
+			};
 			
 			// Dispatch
-			doDispatch.if {
+			doDispatch.if ({
 				action.value(header, payload);
-			};	
+			}, {
+				dumpRXOSC.if {"OSC RX: Message discarded.".postln;};
+			});	
 		}).add;
+		
 		dict.add(cmdName -> responder);
+	}
+	
+	pr_filterBurstMessages {|name, messageID|
+		var queue = burstGuardDict.at(name);
+		var curBeat = mc.clock.beats;
+		var checkList = true;
+		
+		// early out
+		(messageID == 0).if {^true;};
+		
+		// build queue if necessary
+		queue.isNil.if {
+			queue = LinkedList.new;
+			burstGuardDict.put(name, queue);	
+		};
+		
+		// drop old messageIDs
+		while({checkList}, {
+			var last = queue.last;
+			last.isNil.if({
+				checkList = false
+			},{
+				(last[0] <= curBeat).if ({
+					queue.pop;
+				}, {
+					checkList = false;
+				});
+			});
+		});
+		
+		// linear search, exit if found
+		queue.do {|item|
+			(item[1] == messageID).if {^false};	
+		};
+		
+		// if not found add to list, exit with true
+		queue.add([curBeat+16, messageID]);
+		^true;
 	}
 	
 	nextMessageID {
