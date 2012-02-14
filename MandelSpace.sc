@@ -150,7 +150,7 @@ MandelSpace : MandelModule {
 	}
 	
 	sendValue {|key, value, schedBeats=0.0|
-		mc.sendMsgCmd("/value", key.asString, this.serialize(value), schedBeats.asFloat);
+		mc.net.sendMsgCmd("/value", key.asString, this.serialize(value), schedBeats.asFloat);
 	}
 	
 	// dict interface
@@ -243,7 +243,7 @@ MandelSpace : MandelModule {
 	}
 	
 	onBecomeLeader {|mc|
-		mc.addResponder(\leader, "/requestValueSync", {|ti, tR, message, addr|
+		mc.net.addOSCResponder(\leader, "/requestValueSync", {|header, payload|
 			{
 			0.1.wait;
 			objects.keys.do {|key|
@@ -260,14 +260,12 @@ MandelSpace : MandelModule {
 	}
 	
 	onStartup {|mc|
-		mc.addResponder(\general, "/value", {|ti, tR, message, addr|
-			(message[1].asString != mc.name).if {
-				this.getObject(message[2].asSymbol).setValue(this.deserialize(message[3]), message[4].asFloat, message[1].asString, doSend:false);
-			};
-		});
+		mc.net.addOSCResponder(\general, "/value", {|header, payload|
+			this.getObject(payload[0].asSymbol).setValue(this.deserialize(payload[1]), payload[2].asFloat, header.name, doSend:false);
+		}, \dropOwn);
 		
 		mc.leading.not.if {
-			mc.sendMsgCmd("/requestValueSync"); // request MandelSpace sync from the leader
+			mc.net.sendMsgCmd("/requestValueSync"); // request MandelSpace sync from the leader
 		}
 	}
 	

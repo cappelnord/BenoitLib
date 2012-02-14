@@ -12,10 +12,10 @@
 	
 */
 
-MandelModule {
+MandelNetwork : MandelModule {
 	
 	classvar <>oscPrefix = "/mc";
-	classvar <>dumpOSC = false;
+	classvar <>dumpOSC = true;
 	
 	// OSCresponders
 	var oscGeneralResponders;
@@ -50,8 +50,14 @@ MandelModule {
 		oscFollowerResponders = Dictionary.new;
 	}
 	
-	onStartup {|mc|
+	onStartup {|mc|		
+		this.addOSCResponder(\general, "/pingPort", {|header, payload|
+			this.sendPongPort;
+		}, \leaderOnly);
 		
+		this.addOSCResponder(\general, "/systemPorts", {|header, payload|
+			this.pr_managePorts(payload);
+		}, \leaderOnly);
 	}
 	
 	onBecomeLeader {|mc|
@@ -65,17 +71,23 @@ MandelModule {
 		});	
 	}
 	
-	sendSystemPorts {
-		var intKeys = (addrDict.keys.collect{|i| i.asInteger}).asArray;
-		this.sendMsgCmd("/systemPorts", *intKeys);	
-	}
-	
+	/*
 	onBecomeFollower {|mc|
 		
 	}
 	
 	registerCmdPeriod {|mc|
 		
+	}
+	*/
+	
+	sendPongPort {
+		this.net.sendMsgCmd("/pongPort", NetAddr.langPort);
+	}
+	
+	sendSystemPorts {
+		var intKeys = (addrDict.keys.collect{|i| i.asInteger}).asArray;
+		this.sendMsgCmd("/systemPorts", *intKeys);	
 	}
 	
 	pr_respondersForKey {|key|
@@ -134,19 +146,19 @@ MandelModule {
 		list.clear;	
 	}
 	
-	// sendMessageCmd adds name and oscPrefix
+	// rewrite
 	sendMsgCmd {|... args|
-		var message = args[0];
+		var cmd = args[0];
 		var argNum = args.size;
 		
 		// args.postcs;
 		
-		args = args[(1..(args.size-1))]; // remove first item, i think this is dumb
+		args = args[1..];
 		
 		(argNum > 1).if ({
-			this.sendMsg(oscPrefix ++ message, name, *args);
+			this.sendMsg(oscPrefix ++ cmd, mc.name, *args);
 		},{
-			this.sendMsg(oscPrefix ++ message, name);
+			this.sendMsg(oscPrefix ++ cmd, mc.name);
 		});
 	}
 	
@@ -161,7 +173,7 @@ MandelModule {
 		};
 	}
 	
-	addOSCResponder {|dictKey, cmdName, action, strategy|
+	addOSCResponder {|dictKey, cmdName, action, strategy=\no|
 		var dict = this.pr_respondersForKey(dictKey);
 		var responder = OSCresponder(nil, oscPrefix ++ cmdName, {|ti, tR, message, addr|
 			

@@ -45,10 +45,8 @@ MandelClock {
 		
 	// an String ID
 	var <name;
-	
-	var <>helloAfterPorts = false;
-	
-	var <>tickFreq = 0.02; // in s
+		
+	var <>tickFreq = 0.05; // in beats
 	var <>quant = 16; // may be nil, in beats
 		
 	var <>allowTempoRequests = true;
@@ -62,9 +60,7 @@ MandelClock {
 	var <guiInstance;
 			
 	var <>postPrefix = "MandelClock: ";
-		
-	var metro;
-			
+					
 	var tempoBusInstance, tempoBusDependant;
 	
 	// Modules
@@ -90,11 +86,12 @@ MandelClock {
 			"THERE IS ALREADY A MANDELCLOCK INSTANCE".postln;
 			^nil;	
 		};
+		^[timeClass, server];
 	}
 			
 	*startLeader {|name, startTempo = 2.0, timeClass, server|
 		var general = MandelClock.startGeneral(timeClass, server);
-		general.isNil.if {"COULD NOT START A LEADER MANDELOCK".postln; ^nil;}
+		general.isNil.if {"COULD NOT START A LEADER MANDELOCK".postln; ^nil;};
 		timeClass = general[0];
 		server = general[1];
 		
@@ -114,7 +111,7 @@ MandelClock {
 		
 		var addr;
 		var general = MandelClock.startGeneral(timeClass, server);
-		general.isNil.if {"COULD NOT START A FOLLOWER MANDELOCK".postln; ^nil;}
+		general.isNil.if {"COULD NOT START A FOLLOWER MANDELOCK".postln; ^nil;};
 		timeClass = general[0];
 		server = general[1];
 		
@@ -124,11 +121,10 @@ MandelClock {
 		"Waiting for a signal from the Leader ...".postln;
 		
 		// ATTENTION: THIS NEEDS MANUAL UPDATE IF NETWORK CODE CHANGES
-		bStrapResponder = OSCresponder(nil, oscPrefix ++ "/clock", {|ti, tR, message, addr|
+		bStrapResponder = OSCresponder(nil, MandelNetwork.oscPrefix ++ "/clock", {|ti, tR, message, addr|
 			bStrapResponder.remove;
 			
 			instance = MandelClock.new(name, message[3], message[4], message[1].asString,[port], false, timeClass:timeClass, server:server);
-			instance.helloAfterPorts = true;
 			instance.publishPorts;
 			
 			("... you are now following " ++ message[1].asString ++ "!").postln;
@@ -174,8 +170,8 @@ MandelClock {
 		leading.if ({
 			this.pr_becomeLeader;
 		},{
-			"Follower".postln;
 			this.pr_becomeFollower;	
+			{this.sendHello}.defer(1);
 		});
 		
 		this.pr_doCmdPeriod;
@@ -211,10 +207,6 @@ MandelClock {
 	
 	sendRequestHello {
 		this.net.sendMsgCmd("/requestHello");	
-	}
-	
-	sendPongPort {
-		this.net.sendMsgCmd("/pongPort", NetAddr.langPort);
 	}
 	
 	takeLead {
@@ -365,7 +357,7 @@ MandelClock {
 	
 	// responders only for followers
 	pr_followerResponders {
-		this..net.addOSCResponder(\follower, "/clock", {|header, payload|
+		this.net.addOSCResponder(\follower, "/clock", {|header, payload|
 			time.receiveTick(*payload);
 		}, \leaderOnly);
 	}
@@ -373,13 +365,15 @@ MandelClock {
 	// responders only for leaders
 	pr_leaderResponders {
 		
-		this.pr_addResponder(oscLeaderResponders, "/requestTempo", {|ti, tR, message, addr|
+		this.net.addOSCResponder(\leader, "/requestTempo", {|header, payload|
+			this.post(header.name ++ " requested a tempo change to " ++ payload[0].asFloat ++ " BPS");
 			
-			this.post(message[1].asString ++ " requested a tempo change to " ++ message[2].asFloat ++ " BPS");
-			
-			allowTempoRequests.if {
-				this.changeTempo(message[2].asFloat, message[3].asFloat);
-			};
+			allowTempoRequests.if ({
+				this.changeTempo(payload[0].asFloat, payload[1].asFloat);
+				this.post("Tempchange granted!");
+			}, {
+				this.post("Tempochange denied.");
+			});
 		});
 	}
 	
@@ -409,29 +403,9 @@ MandelClock {
 			this.sendHello;
 		});
 		
-		// port responders
 		
-		this.pr_addResponder(\general, "/pingPort", {|header, payload|
-			this.sendPongPort;
-		}, \leaderOnly);
-		
-		this.pr_addResponder(oscGeneralResponders, "/systemPorts", {|ti, tR, message, addr|
-			this.pr_shouldFollow(message).if {
-				this.pr_managePorts(message[2..32]); // 32 is just a large enough number.
-				
-				// this is the last step after connecting to 
-				// a MandelClock System, so this is a good point
-				// to say hello.
-				
-				helloAfterPorts.if {
-					this.sendHello;
-					helloAfterPorts = false;	
-				};
-			};
-		});
-		
-		this.pr_addResponder(oscGeneralResponders, "/takeLead", {|ti, tR, message, addr|
-				this.pr_receivedLeaderAnnouncement(message[1].asString);
+		this.net.addOSCResponder(\general, "/takeLead", {|header, payload|
+				this.pr_receivedLeaderAnnouncement(header.name);
 		});
 	}
 	
@@ -524,41 +498,6 @@ MandelClock {
 		this.pr_sendWindow("MandelClock Shout", {|string| this.shout(string);});
 	}
 	
-	metro {|pan=0.0, quant=4|
-		this.stopMetro;
-		
-		Server.default.waitForBoot({
-			
-			SynthDef(\mcTestClick, {|out=0, freq=440, pan=0, amp=0.4|
-				var sig = SinOsc.ar(freq, phase:0.5pi);
-				sig = sig * EnvGen.ar(Env.perc(0.000001,0.1), doneAction:2);
-				
-				OffsetOut.ar(out, Pan2.ar(sig, pan) * amp);
-			}).add;
-		
-			metro = Pbind(\instrument, \mcTestClick, \dur, 1, \octave, 6, \pan, pan, \degree, Pseq([7,Pn(0,quant-1)],inf)).play(clock, quant:quant);
-		});
-	}
-	
-	impulseMetro {
-		this.stopMetro;
-		
-		Server.default.waitForBoot({
-			SynthDef(\mcTestImpulse, {|out=0, amp=1|
-				var sig = Impulse.ar(0).dup;
-				var remove = Line.kr(0,1,0.1, doneAction:2);
-				
-				OffsetOut.ar(out, sig);
-			}).add;
-			
-			metro = Pbind(\instrument, \mcTestImpulse, \dur, 1, \amp, 1).play(clock);
-		});	
-	}
-	
-	stopMetro {
-		metro.stop;
-	}
-	
 	pr_doCmdPeriod {		
 		modules.do {|mod| mod.registerCmdPeriod(this);};
 		CmdPeriod.doOnce({this.pr_doCmdPeriod});	
@@ -573,5 +512,13 @@ MandelClock {
 			this.addDependant(tempoBusDependant);
 		};
 		^tempoBusInstance;
+	}
+	
+	
+	// depr.
+	
+	metro {|pan=0.0, quant=4|
+		"metro is going to be removed from MandelClock instance. Use m.tools.metro instead".postln;
+		^tools.metro(pan, quant);
 	}	
 }
