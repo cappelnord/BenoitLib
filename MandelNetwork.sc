@@ -196,25 +196,20 @@ MandelNetwork : MandelModule {
 		var burstWait;
 		args = args[2..];
 		
+		burst.isKindOf(Symbol).if {
+			burst = (
+				time: #[2, 0.25],
+				critical: #[8, 4],
+				important: #[4, 2],
+				timeCritical: #[8, 0.5]
+			).at(burst);
+		};
+		
 		burst.isKindOf(Collection).if {
 			burstNum = burst[0];
 			burstSpan = burst[1];	
 		};
 		
-		(burst == \critical).if {
-			burstNum = 8;
-			burstSpan = 4;	
-		};
-		
-		(burst == \important).if {
-			burstNum = 4;
-			burstSpan = 2;	
-		};
-		
-		(burst == \timeCritical).if {
-			burstNum = 8;
-			burstSpan = 0.5;	
-		};
 		
 		burstWait = burstSpan / burstNum;
 		

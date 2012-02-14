@@ -136,7 +136,7 @@ MandelSpace : MandelModule {
 		^obj.getValue(useDecorator);
 	}
 	
-	setValue {|key, value, schedBeats, strategy=\stream|
+	setValue {|key, value, schedBeats, strategy=\time|
 		var obj;
 		key = key.asSymbol;
 		
@@ -149,7 +149,7 @@ MandelSpace : MandelModule {
 		obj.setValue(value, schedBeats, strategy:strategy);
 	}
 	
-	sendValue {|key, value, schedBeats=0.0, strategy=\stream|
+	sendValue {|key, value, schedBeats=0.0, strategy=\time|
 		var delta = schedBeats - mc.clock.beats;
 		var burstNum = 2;
 		
@@ -157,7 +157,7 @@ MandelSpace : MandelModule {
 			(strategy == \stream).if {
 				mc.net.sendMsgCmd("/value", key.asString, this.serialize(value), schedBeats.asFloat);
 			};
-			[\critital, \timeCritical, \important].includes(strategy).if {
+			#[\time, \critital, \timeCritical, \important].includes(strategy).if {
 				mc.net.sendMsgBurst("/value", strategy, key.asString, this.serialize(value), schedBeats.asFloat);
 			};
 		}, {
@@ -441,7 +441,7 @@ MandelValue {
 		^bdl.setBy;	
 	}
 	
-	setValue {|value, schedBeats, who, doSend=true, strategy=\stream|
+	setValue {|value, schedBeats, who, doSend=true, strategy=\time|
 		who = who ? space.mc.name;
 				
 		schedBeats.isNil.if {
@@ -526,7 +526,7 @@ MandelValue {
 				while({true}, {
 					var val = stream.next;
 					if(val != lastVal) {
-						this.setValue(val);
+						this.setValue(val, strategy:\stream);
 						lastVal = val;
 					};
 					sourcePullInterval.wait;
