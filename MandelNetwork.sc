@@ -17,7 +17,7 @@ MandelNetwork : MandelModule {
 	classvar <>oscPrefix = "/mc";
 	
 	var <>dumpTXOSC = false;
-	var <>dumpRXOSC = true;
+	var <>dumpRXOSC = false;
 	
 	// OSCresponders
 	var oscGeneralResponders;
