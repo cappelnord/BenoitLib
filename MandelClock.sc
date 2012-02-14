@@ -116,7 +116,7 @@ MandelClock {
 		server = general[1];
 		
 		addr = NetAddr("255.255.255.255", port);
-		addr.sendMsg(MandelNetwork.oscPrefix ++ "/requestPort", name, NetAddr.langPort);
+		addr.sendMsg(MandelNetwork.oscPrefix ++ "/requestPort", name, 0, NetAddr.langPort);
 		
 		"Waiting for a signal from the Leader ...".postln;
 		
@@ -125,7 +125,7 @@ MandelClock {
 			bStrapResponder.remove;
 			
 			instance = MandelClock.new(name, message[3], message[4], message[1].asString,[port], false, timeClass:timeClass, server:server);
-			instance.publishPorts;
+			instance.net.sendPublishPorts;
 			
 			("... you are now following " ++ message[1].asString ++ "!").postln;
 			
@@ -218,15 +218,11 @@ MandelClock {
 	}
 	
 	chat {|message|
-		this.net.sendMsgCmd("/chat", message);
+		this.net.sendMsgBurst("/chat", \important, message);
 	}
 	
 	shout {|message|
-		this.net.sendMsgCmd("/shout", message);
-	}
-	
-	publishPorts {
-		this.net.sendMsgCmd("/publishPorts");	
+		this.net.sendMsgBurst("/shout", \important, message);
 	}
 	
 	// of course it could be the same method for a leader and a follower

@@ -24,6 +24,8 @@ MandelNetwork : MandelModule {
 	
 	var <addrDict;
 	
+	var currentMessageID;
+	
 	var mc;
 
 	*new {|maclock, ports|
@@ -48,6 +50,8 @@ MandelNetwork : MandelModule {
 		oscGeneralResponders = Dictionary.new;
 		oscLeaderResponders = Dictionary.new;
 		oscFollowerResponders = Dictionary.new;
+		
+		currentMessageID = 5000.rand;
 	}
 	
 	onStartup {|mc|		
@@ -87,7 +91,11 @@ MandelNetwork : MandelModule {
 	
 	sendSystemPorts {
 		var intKeys = (addrDict.keys.collect{|i| i.asInteger}).asArray;
-		this.sendMsgCmd("/systemPorts", *intKeys);	
+		this.sendMsgBurst("/systemPorts", \critical, *intKeys);	
+	}
+	
+	sendPublishPorts {
+		this.sendMsgBurst("/publishPorts", \critical);
 	}
 	
 	pr_respondersForKey {|key|
@@ -146,20 +154,68 @@ MandelNetwork : MandelModule {
 		list.clear;	
 	}
 	
-	// rewrite
-	sendMsgCmd {|... args|
+	// this is all slightly off  ...
+	
+	// send a message without defering
+	sendMsgDirect {|... args|
 		var cmd = args[0];
-		var argNum = args.size;
-		
-		// args.postcs;
-		
+		var messageID = 0; // no burst
 		args = args[1..];
 		
-		(argNum > 1).if ({
-			this.sendMsg(oscPrefix ++ cmd, mc.name, *args);
-		},{
-			this.sendMsg(oscPrefix ++ cmd, mc.name);
-		});
+		this.sendMsg(cmd, messageID, *args);
+	}
+	
+	// send a message without a burst ID
+	sendMsgCmd {|... args|
+		var cmd = args[0];
+		var messageID = 0; // no burst
+		args = args[1..];
+		
+		this.dispatchMsg(cmd, messageID, *args);
+	}
+	
+	sendMsgBurst {|... args|
+		var cmd = args[0];
+		var burstNum = 1; // in case no burst strategy is found
+		var burstSpan = 1;
+		var burst = args[1];
+		var messageID = this.nextMessageID;
+		var burstWait;
+		args = args[2..];
+		
+		burst.isKindOf(Collection).if {
+			burstNum = burst[0];
+			burstSpan = burst[1];	
+		};
+		
+		(burst == \critical).if {
+			burstNum = 8;
+			burstSpan = 4;	
+		};
+		
+		(burst == \important).if {
+			burstNum = 4;
+			burstSpan = 2;	
+		};
+		
+		(burst == \timeCritical).if {
+			burstNum = 8;
+			burstSpan = 0.5;	
+		};
+		
+		burstWait = burstSpan / burstNum;
+		
+		{
+			burstNum.do {
+				this.dispatchMsg(cmd, messageID, *args);
+				burstWait.wait;	
+			};
+		}.fork;
+	}
+	
+	dispatchMsg {|... args|
+		// auf die queue setzen, task starten falls notwendig
+		this.sendMsg(args);
 	}
 	
 	// sendMessage delivers to NetAddr
@@ -200,5 +256,11 @@ MandelNetwork : MandelModule {
 			};	
 		}).add;
 		dict.add(cmdName -> responder);
+	}
+	
+	nextMessageID {
+		var ret = currentMessageID;
+		currentMessageID = currentMessageID + 1;
+		^ret;	
 	}
 }

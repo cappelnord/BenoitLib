@@ -42,7 +42,7 @@ MandelTimeDriver : MandelModule {
 	}
 	
 	tick {
-		mc.net.sendMsgCmd("/clock", clockSerial, mc.clock.beats, mc.tempo.asFloat);
+		mc.net.sendMsgDirect("/clock", clockSerial, mc.clock.beats, mc.tempo.asFloat);
 		clockSerial = clockSerial + 1;
 	}
 	
