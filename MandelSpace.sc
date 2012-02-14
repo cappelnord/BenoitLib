@@ -136,7 +136,7 @@ MandelSpace : MandelModule {
 		^obj.getValue(useDecorator);
 	}
 	
-	setValue {|key, value, schedBeats|
+	setValue {|key, value, schedBeats, strategy=\stream|
 		var obj;
 		key = key.asSymbol;
 		
@@ -146,11 +146,27 @@ MandelSpace : MandelModule {
 		};
 		
 		obj = this.getObject(key);
-		obj.setValue(value, schedBeats);
+		obj.setValue(value, schedBeats, strategy:strategy);
 	}
 	
-	sendValue {|key, value, schedBeats=0.0|
-		mc.net.sendMsgCmd("/value", key.asString, this.serialize(value), schedBeats.asFloat);
+	sendValue {|key, value, schedBeats=0.0, strategy=\stream|
+		var delta = schedBeats - mc.clock.beats;
+		var burstNum = 2;
+		
+		(delta < 0.25).if ({
+			(strategy == \stream).if {
+				mc.net.sendMsgCmd("/value", key.asString, this.serialize(value), schedBeats.asFloat);
+			};
+			[\critital, \timeCritical, \important].includes(strategy).if {
+				mc.net.sendMsgBurst("/value", strategy, key.asString, this.serialize(value), schedBeats.asFloat);
+			};
+		}, {
+			// burst, if there is time.
+			(delta > 8).if {delta = 8};
+			delta = delta * 0.75;
+			burstNum = burstNum + delta.round;
+			mc.net.sendMsgBurst("/value", [burstNum, delta], key.asString, this.serialize(value), schedBeats.asFloat);
+		});
 	}
 	
 	// dict interface
@@ -425,7 +441,7 @@ MandelValue {
 		^bdl.setBy;	
 	}
 	
-	setValue {|value, schedBeats, who, doSend=true|
+	setValue {|value, schedBeats, who, doSend=true, strategy=\stream|
 		who = who ? space.mc.name;
 				
 		schedBeats.isNil.if {
@@ -435,7 +451,7 @@ MandelValue {
 				schedBeats = this.quant.nextTimeOnGrid(space.mc.clock);
 			});
 		};
-		doSend.if {space.sendValue(key, value, schedBeats)};
+		doSend.if {space.sendValue(key, value, schedBeats, strategy)};
 		^this.pr_setBDL(value, schedBeats, who);	
 	}
 	
