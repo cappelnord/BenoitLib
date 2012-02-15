@@ -107,6 +107,7 @@ MandelSpace : MandelModule {
 		Event.addEventType(\mandelspace, {
 			var schedBeats;
 			var strategy = \time;
+			var list = List.new;
 			~deltaSched = ~deltaSched ? 0.0;
 			schedBeats = mc.clock.beats + ~deltaSched;
 			
@@ -120,9 +121,14 @@ MandelSpace : MandelModule {
 			};
 			
 			currentEnvironment.keys.do {|key|
-				((key != \type) && (key != \dur) && (key != \removeFromCleanup)).if {
-					this.setValue(key, currentEnvironment.at(key), schedBeats, strategy:strategy);
+				#[\type, \dur, \removeFromCleanup, \deltaSched].includes(key).not.if {
+					list.add(key);
+					list.add(currentEnvironment.at(key));
 				};
+			};
+			
+			(list.size >= 2).if {
+				this.setValueList(list, schedBeats, strategy:strategy);
 			};
 		});
 	}
@@ -155,23 +161,46 @@ MandelSpace : MandelModule {
 		obj.setValue(value, schedBeats, strategy:strategy);
 	}
 	
-	sendValue {|key, value, schedBeats=0.0, strategy=\time|
+	setValueList {|keyValueList, schedBeats, strategy=\time|
+		(0,2..(keyValueList.size-1)).do {|i|
+			var key = keyValueList[i].asSymbol;
+			var value = keyValueList[i+1];
+				
+			key.isNil.if ({
+				("Invalid key: " ++ key).error;
+				^nil;
+			}, {
+				this.getObject(key).setValue(value, schedBeats, doSend: false);
+			});
+		};
+		
+		this.sendValue(keyValueList, schedBeats, strategy);
+	}
+	
+	sendValue {|keyValueList, schedBeats=0.0, strategy=\time|
 		var delta = schedBeats - mc.clock.beats;
 		var burstNum = 2;
 		
+		// encode data
+		(0,2..(keyValueList.size-1)).do {|i|
+			keyValueList[i] = keyValueList[i].asString;
+			keyValueList[i+1] = this.serialize(keyValueList[i+1]);
+		};
+		schedBeats = schedBeats.asFloat;
+		
 		(delta < 0.25).if ({
 			(strategy == \stream).if {
-				mc.net.sendMsgCmd("/value", key.asString, this.serialize(value), schedBeats.asFloat);
+				mc.net.sendMsgCmd("/value", schedBeats, *keyValueList);
 			};
 			#[\time, \critital, \timeCritical, \important].includes(strategy).if {
-				mc.net.sendMsgBurst("/value", strategy, key.asString, this.serialize(value), schedBeats.asFloat);
+				mc.net.sendMsgBurst("/value", strategy, schedBeats, *keyValueList);
 			};
 		}, {
 			// burst, if there is time.
 			(delta > 8).if {delta = 8};
 			delta = delta * 0.75;
 			burstNum = burstNum + delta.round;
-			mc.net.sendMsgBurst("/value", [burstNum, delta], key.asString, this.serialize(value), schedBeats.asFloat);
+			mc.net.sendMsgBurst("/value", [burstNum, delta], schedBeats, *keyValueList);
 		});
 	}
 	
@@ -270,10 +299,10 @@ MandelSpace : MandelModule {
 			0.1.wait;
 			objects.keys.do {|key|
 				var value = objects.at(key).bdl;
-				this.sendValue(key, value.value(), 0.0);
+				this.sendValue([key, value.value()], 0.0);
 				0.01.wait;
 				value.list.do {|item|
-					this.sendValue(key, item[1], item[0]);
+					this.sendValue([key, item[1]], item[0]);
 					0.01.wait;
 				};
 			};
@@ -283,12 +312,23 @@ MandelSpace : MandelModule {
 	
 	onStartup {|mc|
 		mc.net.addOSCResponder(\general, "/value", {|header, payload|
-			this.getObject(payload[0].asSymbol).setValue(this.deserialize(payload[1]), payload[2].asFloat, header.name, doSend:false);
+			// this.getObject(payload[0].asSymbol).setValue(this.deserialize(payload[1]), payload[2].asFloat, header.name, doSend:false);
+			this.pr_receiveValues(header, payload);
 		}, \dropOwn);
 		
 		mc.leading.not.if {
 			mc.net.sendMsgCmd("/requestValueSync"); // request MandelSpace sync from the leader
 		}
+	}
+	
+	pr_receiveValues {|header, payload|
+		var name = header.name;
+		var schedBeats = payload[0].asFloat;
+		
+		(1,3..(payload.size-1)).do {|i|
+			var key = payload[i].asSymbol;
+			var value = this.deserialize(payload[i+1]);			this.getObject(key).setValue(value, schedBeats, header.name, doSend:false);
+		};
 	}
 	
 	envir {
@@ -457,7 +497,7 @@ MandelValue {
 				schedBeats = this.quant.nextTimeOnGrid(space.mc.clock);
 			});
 		};
-		doSend.if {space.sendValue(key, value, schedBeats, strategy)};
+		doSend.if {space.sendValue([key, value], schedBeats, strategy)};
 		^this.pr_setBDL(value, schedBeats, who);	
 	}
 	
