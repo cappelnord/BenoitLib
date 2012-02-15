@@ -99,7 +99,7 @@ MandelNetwork : MandelModule {
 	*/
 	
 	sendPongPort {
-		this.net.sendMsgCmd("/pongPort", NetAddr.langPort);
+		this.sendMsgCmd("/pongPort", NetAddr.langPort);
 	}
 	
 	sendSystemPorts {
@@ -269,12 +269,10 @@ MandelNetwork : MandelModule {
 			
 			// Discard by Strategy
 			doDispatch.if {
-				(strategy == \leaderOnly).if {
-					doDispatch = (header.name == mc.leaderName.asString) && mc.leading.not;
-				};
-				(strategy == \dropOwn).if {
-					doDispatch = (header.name != mc.name);
-				};
+				doDispatch = strategy.switch(
+					\leaderOnly, {(header.name == mc.leaderName.asString) && mc.leading.not},
+					\dropOwn, {(header.name != mc.name)}
+				);
 			};
 			
 			// Dispatch
