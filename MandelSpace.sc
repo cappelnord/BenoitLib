@@ -312,23 +312,18 @@ MandelSpace : MandelModule {
 	
 	onStartup {|mc|
 		mc.net.addOSCResponder(\general, "/value", {|header, payload|
-			// this.getObject(payload[0].asSymbol).setValue(this.deserialize(payload[1]), payload[2].asFloat, header.name, doSend:false);
-			this.pr_receiveValues(header, payload);
+			var name = header.name;
+			var schedBeats = payload[0].asFloat;
+			
+			(1,3..(payload.size-1)).do {|i|
+				var key = payload[i].asSymbol;
+				var value = this.deserialize(payload[i+1]);			this.getObject(key).setValue(value, schedBeats, header.name, doSend:false);
+			};
 		}, \dropOwn);
 		
 		mc.leading.not.if {
 			mc.net.sendMsgCmd("/requestValueSync"); // request MandelSpace sync from the leader
 		}
-	}
-	
-	pr_receiveValues {|header, payload|
-		var name = header.name;
-		var schedBeats = payload[0].asFloat;
-		
-		(1,3..(payload.size-1)).do {|i|
-			var key = payload[i].asSymbol;
-			var value = this.deserialize(payload[i+1]);			this.getObject(key).setValue(value, schedBeats, header.name, doSend:false);
-		};
 	}
 	
 	envir {
