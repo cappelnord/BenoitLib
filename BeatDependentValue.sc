@@ -16,6 +16,7 @@ BeatDependentValue {
 	var <list;
 	var value;
 	var <setBy;
+	var <setAtBeat;
 	var clock;
 	var <>onChangeFunc;
 	
@@ -27,6 +28,7 @@ BeatDependentValue {
 		value = startValue;
 		setBy = who;
 		clock = startClock ? TempoClock.default;
+		setAtBeat = clock.beats;
 		list = SortedList.new(8, {|x,y| x[0] < y[0]});	
 	}
 	
@@ -34,6 +36,7 @@ BeatDependentValue {
 		(beats <= clock.beats).if({
 			value = newValue;
 			setBy = who;
+			setAtBeat = clock.beats;
 			this.callOnChange();
 		},{
 			list.add([beats, newValue, who]);
@@ -54,6 +57,7 @@ BeatDependentValue {
 			(list[0][0] <= clock.beats).if {
 				value = list[0][1];
 				setBy = list[0][2];
+				setAtBeat = list[0][0];
 				list.removeAt(0);
 				^this.value();	
 			};

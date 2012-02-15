@@ -201,7 +201,8 @@ MandelNetwork : MandelModule {
 				time: #[2, 0.25],
 				critical: #[8, 4],
 				important: #[4, 2],
-				timeCritical: #[8, 0.5]
+				timeCritical: #[8, 0.5],
+				relaxed: #[4,8]
 			).at(burst);
 		};
 		

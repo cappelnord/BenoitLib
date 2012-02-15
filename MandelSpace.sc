@@ -26,6 +26,8 @@ MandelSpace : MandelModule {
 	
 	classvar defaultDictInstance;
 	
+	var healSJ;
+	
 	*new {|maclock|
 		^super.new.init(maclock);	
 	}
@@ -95,6 +97,24 @@ MandelSpace : MandelModule {
 		this.pr_buildEvents();
 		this.pr_setDefaults();
 		this.pr_createFreqValues();
+		
+		this.pr_startHealSJ;
+
+	}
+	
+	pr_startHealSJ {
+		// all keys that can be healed
+		var keyStreamFunc = {Pseq(objects.values.select({|item|item.canHeal}).collect({|item|item.key}), 1).asStream};
+		var keyStream = keyStreamFunc.value;
+		
+		healSJ = SkipJack({
+			var nextKey = keyStream.next;
+			nextKey.isNil.if({
+				keyStream = keyStreamFunc.value;
+			}, {
+				this.sendHealValue(nextKey);
+			});
+		},3.5, name: "MandelSpaceHealing");	
 	}
 	
 	pr_setDefaults {
@@ -192,7 +212,7 @@ MandelSpace : MandelModule {
 			(strategy == \stream).if {
 				mc.net.sendMsgCmd("/value", schedBeats, *keyValueList);
 			};
-			#[\time, \critital, \timeCritical, \important].includes(strategy).if {
+			#[\time, \critital, \timeCritical, \important, \relaxed].includes(strategy).if {
 				mc.net.sendMsgBurst("/value", strategy, schedBeats, *keyValueList);
 			};
 		}, {
@@ -202,6 +222,13 @@ MandelSpace : MandelModule {
 			burstNum = burstNum + delta.round;
 			mc.net.sendMsgBurst("/value", [burstNum, delta], schedBeats, *keyValueList);
 		});
+	}
+	
+	sendHealValue {|key|
+		var obj = this.getObject(key);
+		obj.canHeal.if {
+			mc.net.sendMsgBurst("/healValue", \relaxed, obj.bdl.setAtBeat.asFloat, key.asString, obj.value);
+		};
 	}
 	
 	// dict interface
@@ -307,7 +334,7 @@ MandelSpace : MandelModule {
 				};
 			};
 			}.fork; // delay a little bit and add wait times
-		});	
+		}, \dropOwn);	
 	}
 	
 	onStartup {|mc|
@@ -319,6 +346,14 @@ MandelSpace : MandelModule {
 				var key = payload[i].asSymbol;
 				var value = this.deserialize(payload[i+1]);			this.getObject(key).setValue(value, schedBeats, header.name, doSend:false);
 			};
+		}, \dropOwn);
+		
+		mc.net.addOSCResponder(\general, "/healValue", {|header, payload|
+			var schedBeats = payload[0].asFloat;
+			var key = payload[1].asSymbol;
+			var value = this.deserialize(payload[2]);
+			
+			this.getObject(key).tryHealValue(value, schedBeats, header.name);
 		}, \dropOwn);
 		
 		mc.leading.not.if {
@@ -383,6 +418,11 @@ MandelSpace : MandelModule {
 			item.clearBus;
 		};
 	}
+	
+	onClear {|mc|
+		this.freeAllBuses;
+		healSJ.stop;
+	}
 }
 
 MandelValue {
@@ -391,6 +431,7 @@ MandelValue {
 	var <bus, busDependant;
 	var <>sourcePullInterval = 0.05;
 	var sourceRoutine;
+	var <>doHeal = true;
 	
 	*new {|space, key|
 		^super.new.init(space, key);
@@ -496,6 +537,13 @@ MandelValue {
 		^this.pr_setBDL(value, schedBeats, who);	
 	}
 	
+	tryHealValue {|value, schedBeats, who|
+		((bdl.setAtBeat < schedBeats) && doHeal).if {
+			("MandelSpace Value " ++ key.asString ++ "got healed!").postln;
+			this.setValue(value,  schedBeats, who, doSend: false);
+		}
+	}
+	
 	// maybe remove this, move to setValue
 	pr_setBDL {|value, schedBeats, who|		
 		bdl.isNil.if ({
@@ -582,5 +630,10 @@ MandelValue {
 		sourceRoutine.stop;
 		sourceRoutine = nil;
 		// };	
+	}
+	
+	canHeal {
+		bdl.isNil.if {^false};
+		^(doHeal && (bdl.setBy == space.mc.name));
 	}
 }

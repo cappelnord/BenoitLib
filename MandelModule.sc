@@ -30,4 +30,8 @@ MandelModule {
 	registerCmdPeriod {|mc|
 		
 	}
+	
+	onClear {|mc|
+		
+	}
 }

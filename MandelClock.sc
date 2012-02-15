@@ -412,7 +412,9 @@ MandelClock {
 		tickSJ.stop;
 		tempoChangeSJ.stop;
 		
-		instance = nil;
+		modules.do {|module| module.onClear(this)};
+		
+		instance = nil;		
 	}
 	
 	*clear {
