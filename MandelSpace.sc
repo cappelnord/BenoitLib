@@ -106,6 +106,7 @@ MandelSpace : MandelModule {
 	pr_buildEvents {
 		Event.addEventType(\mandelspace, {
 			var schedBeats;
+			var strategy = \time;
 			~deltaSched = ~deltaSched ? 0.0;
 			schedBeats = mc.clock.beats + ~deltaSched;
 			
@@ -113,9 +114,14 @@ MandelSpace : MandelModule {
 				schedBeats = 0.0; // no scheduling
 			};
 			
+			// stream values if duration is short
+			((~dur <= 0.1) && (schedBeats == 0.0)).if {
+				strategy = \stream;	
+			};
+			
 			currentEnvironment.keys.do {|key|
 				((key != \type) && (key != \dur) && (key != \removeFromCleanup)).if {
-					this.setValue(key, currentEnvironment.at(key), schedBeats);
+					this.setValue(key, currentEnvironment.at(key), schedBeats, strategy:strategy);
 				};
 			};
 		});
