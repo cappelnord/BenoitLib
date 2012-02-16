@@ -207,15 +207,15 @@ MandelClock {
 	}
 	
 	sendHello {
-		this.net.sendMsgCmd("/hello");	
+		this.net.sendMsgBurst("/hello", \relaxed);	
 	}
 	
 	sendRequestHello {
-		this.net.sendMsgCmd("/requestHello");	
+		this.net.sendMsgBurst("/requestHello", \relaxed);
 	}
 	
 	takeLead {
-		this.net.sendMsgCmd("/takeLead");
+		this.net.sendMsgBurst("/takeLead", \crititcal);
 		
 		leading.not.if {
 			this.pr_becomeLeader;
@@ -236,7 +236,7 @@ MandelClock {
 	requestTempo {|newTempo, dur=0|
 		leading.not.if {
 			newTempo = this.pr_safeTempo(newTempo);
-			this.net.sendMsgCmd("/requestTempo", newTempo.asFloat, dur.asFloat);
+			this.net.sendMsgBurst("/requestTempo", \important, newTempo.asFloat, dur.asFloat);
 		};
 	}
 	
