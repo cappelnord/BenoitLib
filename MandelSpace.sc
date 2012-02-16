@@ -478,12 +478,17 @@ MandelValue {
 	
 	pr_createBus {
 		this.freeBus;
+		space.mc.server.serverRunning.if ({
+			bus = Bus.control(space.mc.server, 1);
+			bus.set(this.getValue());
 		
-		bus = Bus.control(space.mc.server, 1);
-		bus.set(this.getValue());
-		
-		busDependant = {|changed, what, value| bus.set(value)};
-		this.addDependant(busDependant);
+			busDependant = {|changed, what, value| bus.set(value)};
+			this.addDependant(busDependant);
+		}, {
+			"Server is not running! You have to re-evaluate.".warn;
+			// dummy Bus to fail silently
+			^Bus.control(space.mc.server, 1);
+		});
 		
 		^bus;
 	}

@@ -508,11 +508,17 @@ MandelClock {
 	
 	tempoBus {
 		tempoBusInstance.isNil.if {
-			tempoBusInstance = Bus.control(server, 1);
-			tempoBusInstance.set(tempo);
+			server.serverRunning.if ({
+				tempoBusInstance = Bus.control(server, 1);
+				tempoBusInstance.set(tempo);
 			
-			tempoBusDependant = {|changed, what, value| (what == \tempo).if {tempoBusInstance.set(value)};};
-			this.addDependant(tempoBusDependant);
+				tempoBusDependant = {|changed, what, value| (what == \tempo).if {tempoBusInstance.set(value)};};
+				this.addDependant(tempoBusDependant);
+			}, {
+				"Server is not running! You have to re-evaluate tempoBus.".warn;
+				// dummy Bus to fail silently
+				^Bus.control(server, 1);
+			});
 		};
 		^tempoBusInstance;
 	}
