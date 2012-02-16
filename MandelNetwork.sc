@@ -291,6 +291,7 @@ MandelNetwork : MandelModule {
 		var queue = burstGuardDict.at(name);
 		var curBeat = mc.clock.beats;
 		var checkList = true;
+		var last;
 		
 		// early out
 		(messageID == 0).if {^true;};
@@ -303,7 +304,7 @@ MandelNetwork : MandelModule {
 		
 		// drop old messageIDs
 		while({checkList}, {
-			var last = queue.last;
+			last = queue.last;
 			last.isNil.if({
 				checkList = false
 			},{

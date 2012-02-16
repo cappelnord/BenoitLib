@@ -599,6 +599,7 @@ MandelValue {
 	
 	<<> {|source, key=\in|
 		var bus = try {source.asBus};
+		var stream, val;
 		
 		this.unmap(\source);
 		
@@ -609,11 +610,11 @@ MandelValue {
 		bus.isNil.if ({
 			"Could not set source - not compatible to Bus!".warn;
 		}, {
-			var stream = Pkr(bus).asStream;
+			stream = Pkr(bus).asStream;
 			sourceRoutine = {
 				var lastVal = nil;
 				while({true}, {
-					var val = stream.next;
+					val = stream.next;
 					if(val != lastVal) {
 						this.setValue(val, strategy:\stream);
 						lastVal = val;
