@@ -110,19 +110,24 @@ MandelClock {
 	*startFollower {|name, port=57120, action, timeClass, server|
 		
 		var addr;
+		var followSkipJack;
 		var general = MandelClock.startGeneral(timeClass, server);
 		general.isNil.if {"COULD NOT START A FOLLOWER MANDELOCK".postln; ^nil;};
 		timeClass = general[0];
 		server = general[1];
 		
 		addr = NetAddr("255.255.255.255", port);
-		addr.sendMsg(MandelNetwork.oscPrefix ++ "/requestPort", name, 0, NetAddr.langPort);
+		
+		followSkipJack = SkipJack({
+			addr.sendMsg(MandelNetwork.oscPrefix ++ "/requestPort", name, 0, NetAddr.langPort);
+		}, 1);
 		
 		"Waiting for a signal from the Leader ...".postln;
 		
 		// ATTENTION: THIS NEEDS MANUAL UPDATE IF NETWORK CODE CHANGES
 		bStrapResponder = OSCresponder(nil, MandelNetwork.oscPrefix ++ "/clock", {|ti, tR, message, addr|
 			bStrapResponder.remove;
+			followSkipJack.stop;
 			
 			instance = MandelClock.new(name, message[3], message[4], message[1].asString,[port], false, timeClass:timeClass, server:server);
 			instance.net.sendPublishPorts;
