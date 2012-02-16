@@ -119,7 +119,7 @@ MandelClock {
 		addr = NetAddr("255.255.255.255", port);
 		
 		followSkipJack = SkipJack({
-			addr.sendMsg(MandelNetwork.oscPrefix ++ "/requestPort", name, 0, NetAddr.langPort);
+			addr.sendMsg(MandelNetwork.oscPrefix ++ "/requestPort", name, -1, NetAddr.langPort);
 		}, 1);
 		
 		"Waiting for a signal from the Leader ...".postln;
