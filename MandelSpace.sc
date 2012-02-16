@@ -104,7 +104,15 @@ MandelSpace : MandelModule {
 	
 	pr_startHealSJ {
 		// all keys that can be healed
-		var keyStreamFunc = {Pseq(objects.values.select({|item|item.canHeal}).collect({|item|item.key}), 1).asStream};
+		var keyStreamFunc = {
+			var keys = objects.values.select({|item|item.canHeal}).collect({|item|item.key});
+			keys.isNil.not.if({
+				Pseq(keys, 1).asStream;
+			}, {
+				nil;
+			});
+		};
+		
 		var keyStream = keyStreamFunc.value;
 		
 		healSJ = SkipJack({
