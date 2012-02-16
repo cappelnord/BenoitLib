@@ -272,7 +272,8 @@ MandelNetwork : MandelModule {
 			doDispatch.if {
 				doDispatch = strategy.switch(
 					\leaderOnly, {(header.name == mc.leaderName.asString) && mc.leading.not},
-					\dropOwn, {(header.name != mc.name)}
+					\dropOwn, {(header.name != mc.name)},
+					{true}
 				);
 			};
 			

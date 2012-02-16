@@ -235,7 +235,7 @@ MandelSpace : MandelModule {
 	sendHealValue {|key|
 		var obj = this.getObject(key);
 		obj.canHeal.if {
-			mc.net.sendMsgBurst("/healValue", \relaxed, obj.bdl.setAtBeat.asFloat, key.asString, obj.value);
+			mc.net.sendMsgBurst("/healValue", \relaxed, obj.bdl.setAtBeat.asFloat, key.asString, this.serialize(obj.value));
 		};
 	}
 	
@@ -334,11 +334,13 @@ MandelSpace : MandelModule {
 			0.1.wait;
 			objects.keys.do {|key|
 				var value = objects.at(key).bdl;
-				this.sendValue([key, value.value()], 0.0);
-				0.01.wait;
-				value.list.do {|item|
-					this.sendValue([key, item[1]], item[0]);
+				value.notNil.if {
+					this.sendValue([key, value.value()], 0.0);
 					0.01.wait;
+					value.list.do {|item|
+						this.sendValue([key, item[1]], item[0]);
+						0.01.wait;
+					};
 				};
 			};
 			}.fork; // delay a little bit and add wait times
@@ -547,7 +549,7 @@ MandelValue {
 	
 	tryHealValue {|value, schedBeats, who|
 		((bdl.setAtBeat < schedBeats) && doHeal).if {
-			("MandelSpace Value " ++ key.asString ++ "got healed!").postln;
+			("MandelSpace Value " ++ key.asString ++ " got healed!").postln;
 			this.setValue(value,  schedBeats, who, doSend: false);
 		}
 	}

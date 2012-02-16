@@ -32,7 +32,7 @@ keys.do {|key, i|
 	setSetBy = {who.string_(obj.setBy[0].toUpper.asString);};
 					
 	slider.action = {
-		space[key] = slider.value;
+		space.setValue(key, slider.value, strategy: \stream);
 		setSetBy.value();
 	};
 	
