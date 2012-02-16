@@ -20,15 +20,15 @@ BeatDependentValue {
 	var clock;
 	var <>onChangeFunc;
 	
-	*new {|value, who, clock|
-		^super.new.init(value, who, clock);
+	*new {|value, who, schedBeats, clock|
+		^super.new.init(value, who, schedBeats, clock);
 	}
 	
-	init {|startValue, who, startClock|
+	init {|startValue, who, schedBeats, startClock|
 		value = startValue;
 		setBy = who;
 		clock = startClock ? TempoClock.default;
-		setAtBeat = clock.beats;
+		setAtBeat = schedBeats ? clock.beats;
 		list = SortedList.new(8, {|x,y| x[0] < y[0]});	
 	}
 	

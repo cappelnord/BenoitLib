@@ -127,7 +127,7 @@ MandelSpace : MandelModule {
 	
 	pr_setDefaults {
 		MandelSpace.defaultDict.keys.do {|key|
-			this.getObject(key).setValue(MandelSpace.defaultDict.at(key), 0, doSend:false);
+			this.getObject(key).setValue(MandelSpace.defaultDict.at(key), -1, doSend:false);
 		}
 	}
 	
@@ -335,7 +335,9 @@ MandelSpace : MandelModule {
 			objects.keys.do {|key|
 				var value = objects.at(key).bdl;
 				value.notNil.if {
-					this.sendValue([key, value.value()], 0.0);
+					(value.setAtBeat > 0).if {
+						this.sendValue([key, value.value()], 0.0);
+					};
 					0.01.wait;
 					value.list.do {|item|
 						this.sendValue([key, item[1]], item[0]);
@@ -557,7 +559,7 @@ MandelValue {
 	// maybe remove this, move to setValue
 	pr_setBDL {|value, schedBeats, who|		
 		bdl.isNil.if ({
-			bdl = BeatDependentValue(value, who);
+			bdl = BeatDependentValue(value, who, schedBeats);
 			bdl.onChangeFunc = {this.pr_valueHasChanged;};
 			^value;	
 		}, {
@@ -645,6 +647,6 @@ MandelValue {
 	
 	canHeal {
 		bdl.isNil.if {^false};
-		^(doHeal && (bdl.setBy == space.mc.name));
+		^(doHeal && (bdl.setBy == space.mc.name) && ((bdl.setAtBeat) + 4 < space.mc.clock.beats) && (bdl.setAtBeat > 0));
 	}
 }
