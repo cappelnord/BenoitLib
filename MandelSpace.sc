@@ -106,7 +106,7 @@ MandelSpace : MandelModule {
 		// all keys that can be healed
 		var keyStreamFunc = {
 			var keys = objects.values.select({|item|item.canHeal}).collect({|item|item.key});
-			keys.isNil.not.if({
+			(keys.size > 0).if({
 				Pseq(keys, 1).asStream;
 			}, {
 				nil;
