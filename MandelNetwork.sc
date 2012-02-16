@@ -323,7 +323,7 @@ MandelNetwork : MandelModule {
 		};
 		
 		// if not found add to list, exit with true
-		queue.add([curBeat+16, messageID]);
+		queue.add([curBeat+32, messageID]);
 		^true;
 	}
 	
