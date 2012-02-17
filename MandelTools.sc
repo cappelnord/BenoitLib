@@ -17,6 +17,8 @@ MandelTools : MandelModule {
 	var space;
 	
 	var metro;
+	
+	var genresInstance;
 		
 	
 	*new {|maclock|
@@ -57,6 +59,19 @@ MandelTools : MandelModule {
 			
 			metro = Pbind(\instrument, \mcTestImpulse, \dur, 1, \amp, 1).play(mc.clock);
 		});	
+	}
+	
+	randomGenre {
+		^this.genres.choose;	
+	}
+	
+	genres {
+		var lines;
+		genresInstance.isNil.if {
+			lines = File(mc.classPath("data/ID3v1Genres.txt"), "r").readAllString.split($\n);
+			genresInstance = lines.collect {|line| line.replace(" - ", "|").split($|)[1]};
+		};
+		^genresInstance;	
 	}
 	
 	stopMetro {
