@@ -61,10 +61,6 @@ MandelTools : MandelModule {
 		});	
 	}
 	
-	randomGenre {
-		^this.genres.choose;	
-	}
-	
 	genres {
 		var lines;
 		genresInstance.isNil.if {
