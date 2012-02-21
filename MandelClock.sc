@@ -161,26 +161,26 @@ MandelClock {
 		tempo = startTempo;
 		
 		// init Modules
-		this.pr_initModules(ports);
+		this.prInitModules(ports);
 		
 		time = timeClass.new(this);
 		modules.add(time);
 		
 		// build responders
-		this.pr_generalResponders;
+		this.prGeneralResponders;
 				
 		// start your career
 		leading.if ({
-			this.pr_becomeLeader;
+			this.prBecomeLeader;
 		},{
-			this.pr_becomeFollower;	
+			this.prBecomeFollower;	
 			{this.sendHello}.defer(1);
 		});
 		
-		this.pr_doCmdPeriod;
+		this.prDoCmdPeriod;
 	}
 	
-	pr_initModules {|ports|
+	prInitModules {|ports|
 		modules = List.new;
 		
 		net = MandelNetwork(this, ports);
@@ -216,7 +216,7 @@ MandelClock {
 		this.net.sendMsgBurst("/takeLead", \crititcal);
 		
 		leading.not.if {
-			this.pr_becomeLeader;
+			this.prBecomeLeader;
 		};
 	}
 	
@@ -233,7 +233,7 @@ MandelClock {
 	// this cut enforces this somehow.
 	requestTempo {|newTempo, dur=0|
 		leading.not.if {
-			newTempo = this.pr_safeTempo(newTempo);
+			newTempo = this.prSafeTempo(newTempo);
 			this.net.sendMsgBurst("/requestTempo", \important, newTempo.asFloat, dur.asFloat);
 		};
 	}
@@ -242,31 +242,31 @@ MandelClock {
 		
 		var delta, stopTest;
 		
-		newTempo = this.pr_safeTempo(newTempo);
+		newTempo = this.prSafeTempo(newTempo);
 		
 		leading.if {
 			tempoChangeSJ.stop;
 			
 			((dur <= 0) || (newTempo == tempo)).if ({
-				this.pr_setClockTempo(newTempo);
+				this.prSetClockTempo(newTempo);
 				time.tick;
 			},{
 				delta = (newTempo - tempo) * 0.1 / dur;
 				
 				(delta < 0.0).if ({
-					stopTest = {((tempo + delta) <= newTempo).if({this.pr_setClockTempo(newTempo);true;},{false;});};
+					stopTest = {((tempo + delta) <= newTempo).if({this.prSetClockTempo(newTempo);true;},{false;});};
 				},{
-					stopTest = {((tempo + delta) >= newTempo).if({this.pr_setClockTempo(newTempo);true;},{false;});};				});
+					stopTest = {((tempo + delta) >= newTempo).if({this.prSetClockTempo(newTempo);true;},{false;});};				});
 				
 				tempoChangeSJ = SkipJack({
 					// TO IMPROVE: Smoother curve, linear kinda sux
-					this.pr_setClockTempo(tempo + delta);
+					this.prSetClockTempo(tempo + delta);
 				},0.1, stopTest, name: "TempoChange");
 			});
 		};	
 	}
 	
-	pr_safeTempo {|newTempo|
+	prSafeTempo {|newTempo|
 		
 		(newTempo < minTempo).if {
 			this.post("Tempo out of range. Set tempo to minTempo=" ++ minTempo);
@@ -281,7 +281,7 @@ MandelClock {
 		^newTempo;
 	}
 	
-	pr_becomeLeader {
+	prBecomeLeader {
 		
 		leaderName = name;
 		leading = true;
@@ -301,14 +301,14 @@ MandelClock {
 		}, tickFreq, name: "ClockTick");
 		
 		// start leader responders
-		this.pr_leaderResponders;
+		this.prLeaderResponders;
 		
 		modules.do {|module| module.onBecomeLeader(this) };
 		
 		this.post("You are now the leader!");
 	}
 	
-	pr_becomeFollower {
+	prBecomeFollower {
 		
 		leading = false;
 		
@@ -330,19 +330,19 @@ MandelClock {
 				this.post("WARNING, did not receive clock signals from the leader!");
 				this.post("Someone else should take the lead ...");
 				
-				this.pr_setClockTempo(externalTempo);
+				this.prSetClockTempo(externalTempo);
 				
 			};
 		},5, name: "LeaderCheck");
 		
 		// start follower responders
-		this.pr_followerResponders;	
+		this.prFollowerResponders;	
 		
 		modules.do {|module| module.onBecomeFollower(this) };
 	}
 	
 	
-	pr_setClockTempo {|newTempo|
+	prSetClockTempo {|newTempo|
 		
 		(newTempo < (minTempo / 4)).if {
 			newTempo = minTempo / 4;
@@ -355,14 +355,14 @@ MandelClock {
 	}
 	
 	// responders only for followers
-	pr_followerResponders {
+	prFollowerResponders {
 		this.net.addOSCResponder(\follower, "/clock", {|header, payload|
 			time.receiveTick(*payload);
 		}, \leaderOnly);
 	}
 	
 	// responders only for leaders
-	pr_leaderResponders {
+	prLeaderResponders {
 		
 		this.net.addOSCResponder(\leader, "/requestTempo", {|header, payload|
 			this.post(header.name ++ " requested a tempo change to " ++ payload[0].asFloat ++ " BPS");
@@ -377,7 +377,7 @@ MandelClock {
 	}
 	
 	// responders for leaders and followers
-	pr_generalResponders {
+	prGeneralResponders {
 		
 		// chat and shout responders
 		this.net.addOSCResponder(\general, "/chat", {|header, payload|
@@ -404,7 +404,7 @@ MandelClock {
 		
 		
 		this.net.addOSCResponder(\general, "/takeLead", {|header, payload|
-				this.pr_receivedLeaderAnnouncement(header.name);
+				this.prReceivedLeaderAnnouncement(header.name);
 		});
 	}
 	
@@ -429,7 +429,7 @@ MandelClock {
 		bStrapResponder.remove;	
 	}
 	
-	pr_receivedLeaderAnnouncement {|newLeader|
+	prReceivedLeaderAnnouncement {|newLeader|
 		
 		(newLeader != name).if {
 			
@@ -437,13 +437,13 @@ MandelClock {
 			leaderName = newLeader;
 			
 			leading.if {
-				this.pr_becomeFollower;
+				this.prBecomeFollower;
 				this.post("You are not the leader anymore :-(");
 			};
 		};	
 	} 
 	
-	pr_shouldFollow {|message|
+	prShouldFollow {|message|
 		^((message[1].asString == leaderName) && leading.not);	
 	}
 	
@@ -484,7 +484,7 @@ MandelClock {
 		platform.displayNotification(name, message);
 	}
 	
-	pr_sendWindow {|title, func|
+	prSendWindow {|title, func|
 		StringInputDialog.new(title, "Send", {|string| 
 			func.value(string);
 			platform.focusCurrentDocument;
@@ -492,16 +492,16 @@ MandelClock {
 	}
 	
 	chatWindow {
-		this.pr_sendWindow("MandelClock Chat",  {|string| this.chat(string);});
+		this.prSendWindow("MandelClock Chat",  {|string| this.chat(string);});
 	}
 	
 	shoutWindow {
-		this.pr_sendWindow("MandelClock Shout", {|string| this.shout(string);});
+		this.prSendWindow("MandelClock Shout", {|string| this.shout(string);});
 	}
 	
-	pr_doCmdPeriod {		
+	prDoCmdPeriod {		
 		modules.do {|mod| mod.registerCmdPeriod(this);};
-		CmdPeriod.doOnce({this.pr_doCmdPeriod});	
+		CmdPeriod.doOnce({this.prDoCmdPeriod});	
 	}
 	
 	tempoBus {

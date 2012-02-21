@@ -94,15 +94,15 @@ MandelSpace : MandelModule {
 					
 		objects = Dictionary.new;
 		
-		this.pr_buildEvents();
-		this.pr_setDefaults();
-		this.pr_createFreqValues();
+		this.prBuildEvents();
+		this.prSetDefaults();
+		this.prCreateFreqValues();
 		
-		this.pr_startHealSJ;
+		this.prStartHealSJ;
 
 	}
 	
-	pr_startHealSJ {
+	prStartHealSJ {
 		// all keys that can be healed
 		var keyStreamFunc = {
 			var keys = objects.values.select({|item|item.canHeal}).collect({|item|item.key});
@@ -125,13 +125,13 @@ MandelSpace : MandelModule {
 		},3.5, name: "MandelSpaceHealing");	
 	}
 	
-	pr_setDefaults {
+	prSetDefaults {
 		MandelSpace.defaultDict.keys.do {|key|
 			this.getObject(key).setValue(MandelSpace.defaultDict.at(key), -1, doSend:false);
 		}
 	}
 	
-	pr_buildEvents {
+	prBuildEvents {
 		Event.addEventType(\mandelspace, {
 			var schedBeats;
 			var strategy = \time;
@@ -314,18 +314,18 @@ MandelSpace : MandelModule {
 	
 	addRelation {|father, son|
 		var obj = this.getObject(father);
-		obj.pr_receiveRelation(son);
+		obj.prReceiveRelation(son);
 	}
 	
 	clearRelationsFor {|son|
 		objects.do {|obj|
-			obj.pr_removeRelationsFor(son);	
+			obj.prRemoveRelationsFor(son);	
 		}
 	}
 	
-	pr_callSon {|key|
+	prCallSon {|key|
 		var obj = this.getObject(key);
-		obj.pr_valueHasChanged;
+		obj.prValueHasChanged;
 	}
 	
 	onBecomeLeader {|mc|
@@ -380,7 +380,7 @@ MandelSpace : MandelModule {
 		^envirInstance;	
 	}
 	
-	pr_createFreqValues {|lag=0.0|
+	prCreateFreqValues {|lag=0.0|
 		var scale = PmanScale().asStream;
 		var relations = [\scale, \tuning, \root, \stepsPerOctave, \octaveRatio];
 		var stdValues = [\root, \stepsPerOctave, \octaveRatio];
@@ -469,14 +469,14 @@ MandelValue {
 	}
 	
 	asBus {
-		^bus.isNil.if({this.pr_createBus}, {bus});
+		^bus.isNil.if({this.prCreateBus}, {bus});
 	}
 	
 	asBusPlug {
 		^BusPlug.for(this.asBus)	;
 	}
 	
-	pr_createBus {
+	prCreateBus {
 		this.freeBus;
 		space.mc.server.serverRunning.if ({
 			bus = Bus.control(space.mc.server, 1);
@@ -551,7 +551,7 @@ MandelValue {
 			});
 		};
 		doSend.if {space.sendValue([key, value], schedBeats, strategy)};
-		^this.pr_setBDL(value, schedBeats, who);	
+		^this.prSetBDL(value, schedBeats, who);	
 	}
 	
 	tryHealValue {|value, schedBeats, who|
@@ -562,10 +562,10 @@ MandelValue {
 	}
 	
 	// maybe remove this, move to setValue
-	pr_setBDL {|value, schedBeats, who|		
+	prSetBDL {|value, schedBeats, who|		
 		bdl.isNil.if ({
 			bdl = BeatDependentValue(value, who, schedBeats);
-			bdl.onChangeFunc = {this.pr_valueHasChanged;};
+			bdl.onChangeFunc = {this.prValueHasChanged;};
 			^value;	
 		}, {
 			^bdl.schedule(value, schedBeats, who);
@@ -574,14 +574,14 @@ MandelValue {
 	
 	decorator_ {|func|
 		decorator = func;
-		this.pr_valueHasChanged();	
+		this.prValueHasChanged();	
 	}
 	
 	addRelation {|father|
 		space.addRelation(father, key);
 	}
 	
-	pr_receiveRelation {|son|
+	prReceiveRelation {|son|
 		relations.add(son);
 	}
 	
@@ -589,13 +589,13 @@ MandelValue {
 		space.clearRelationsFor(key);	
 	}
 	
-	pr_removeRelationsFor {|son|
+	prRemoveRelationsFor {|son|
 		relations.remove(son);
 	}
 	
-	pr_valueHasChanged {	
+	prValueHasChanged {	
 		relations.do {|son|
-			space.pr_callSon(son);	
+			space.prCallSon(son);	
 		};
 		
 		this.changed(key, this.getValue());

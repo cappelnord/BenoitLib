@@ -52,7 +52,7 @@ MandelNetwork : MandelModule {
 		};
 		
 		addrDict = IdentityDictionary.new;
-		this.pr_managePorts(ports);
+		this.prManagePorts(ports);
 		
 		// bookkeeping for responders
 		oscGeneralResponders = Dictionary.new;
@@ -73,7 +73,7 @@ MandelNetwork : MandelModule {
 		}, \leaderOnly);
 		
 		this.addOSCResponder(\general, "/systemPorts", {|header, payload|
-			this.pr_managePorts(payload);
+			this.prManagePorts(payload);
 		}, \leaderOnly);
 	}
 	
@@ -112,7 +112,7 @@ MandelNetwork : MandelModule {
 		this.sendMsgBurst("/publishPorts", \critical);
 	}
 	
-	pr_respondersForKey {|key|
+	prRespondersForKey {|key|
 		^key.switch (
 			\general,  {oscGeneralResponders},
 			\leader,   {oscLeaderResponders},
@@ -120,7 +120,7 @@ MandelNetwork : MandelModule {
 		);
 	}
 	
-	pr_managePorts {|ports|
+	prManagePorts {|ports|
 		var addList = List.new;
 				
 		ports.do {|item|
@@ -151,7 +151,7 @@ MandelNetwork : MandelModule {
 	}
 	
 	clearResponders {|key|
-		var list = this.pr_respondersForKey(key);
+		var list = this.prRespondersForKey(key);
 		list.do {|item| item.remove;};
 		list.clear;	
 	}
@@ -237,7 +237,7 @@ MandelNetwork : MandelModule {
 	}
 	
 	addOSCResponder {|dictKey, cmdName, action, strategy=\no|
-		var dict = this.pr_respondersForKey(dictKey);
+		var dict = this.prRespondersForKey(dictKey);
 		var responder = OSCresponder(nil, oscPrefix ++ cmdName, {|ti, tR, message, addr|
 			
 			var doDispatch = true;
@@ -255,7 +255,7 @@ MandelNetwork : MandelModule {
 			header[\messageID] = message[2];
 			
 			// Register Message and/or discard
-			doDispatch = doDispatch && this.pr_filterBurstMessages(message[1].asSymbol, message[2]);
+			doDispatch = doDispatch && this.prFilterBurstMessages(message[1].asSymbol, message[2]);
 			
 			// Discard by Strategy
 			doDispatch.if {
@@ -277,7 +277,7 @@ MandelNetwork : MandelModule {
 		dict.add(cmdName -> responder);
 	}
 	
-	pr_filterBurstMessages {|name, messageID|
+	prFilterBurstMessages {|name, messageID|
 		var queue = burstGuardDict.at(name);
 		var curBeat = mc.clock.beats;
 		var checkList = true;

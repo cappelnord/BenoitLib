@@ -59,7 +59,7 @@ MandelClockGUI
 			.states_([["Shout", Color.black, Color.clear]])
 			.action_({mc.shoutWindow;});
 		
-		this.pr_clearBeats;
+		this.prClearBeats;
 		
 		sj = SkipJack({
 			
@@ -88,32 +88,32 @@ MandelClockGUI
 			
 		},0.1);
 		
-		window.onClose_({this.pr_prepClose;});
+		window.onClose_({this.prPrepClose;});
 		window.front;
 		
-		this.pr_addCmdPeriod ;
-		this.pr_schedNextBeat;
+		this.prAddCmdPeriod ;
+		this.prSchedNextBeat;
 		
 	}
 	
 	
 	close {
-		this.pr_prepClose;
+		this.prPrepClose;
 		window.close;	
 	}
 	
-	pr_prepClose {
+	prPrepClose {
 		sj.stop;
 		stillOpen = false;
 	}
 	
-	pr_clearBeats {
+	prClearBeats {
 		beatArr.do {|item|
 			item.background = Color.grey;
 		};
 	}
 	
-	pr_schedNextBeat {
+	prSchedNextBeat {
 		var nextBeat = clock.beats.ceil;
 		var color = Color.green;
 		
@@ -122,20 +122,20 @@ MandelClockGUI
 		clock.schedAbs(nextBeat, {
 			stillOpen.if {
 				{
-					this.pr_clearBeats;
+					this.prClearBeats;
 					beatArr[nextBeat%4].background = color;
 					mesText.string_((clock.beats / 4).floor);
-					this.pr_schedNextBeat;
+					this.prSchedNextBeat;
 				}.defer;
 			};
 		});	
 	}
 	
-	pr_addCmdPeriod {
+	prAddCmdPeriod {
 		stillOpen.if {
 			CmdPeriod.doOnce({
-				this.pr_addCmdPeriod;
-				this.pr_schedNextBeat;
+				this.prAddCmdPeriod;
+				this.prSchedNextBeat;
 			});
 		};	
 	}	

@@ -109,11 +109,11 @@ MandelTimeDriver : MandelModule {
 					// warning, crappy case syntax!
 					case
 					{ tempoHasChanged == true } {
-						mc.pr_setClockTempo(mc.externalTempo);
+						mc.prSetClockTempo(mc.externalTempo);
 					}
 					// if five ticks were bad OR timing is really off
 					{(badTicks > 5) || (deviation.abs > (deviationThreshold * 5))} {
-						mc.pr_setClockTempo((mc.tempo * (1.0 - hardness)) + ( mc.externalTempo + (deviation * deviationMul * -1) * hardness));
+						mc.prSetClockTempo((mc.tempo * (1.0 - hardness)) + ( mc.externalTempo + (deviation * deviationMul * -1) * hardness));
 					};
 					
 					deviationGate = true;
@@ -121,7 +121,7 @@ MandelTimeDriver : MandelModule {
 					
 				},{ // if our timing is good at the moment
 					(mc.externalTempo != mc.tempo).if {
-						mc.pr_setClockTempo(mc.externalTempo);
+						mc.prSetClockTempo(mc.externalTempo);
 					};
 					
 					badTicks = 0;

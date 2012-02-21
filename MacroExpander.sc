@@ -50,12 +50,12 @@ MacroExpander
 				replacement = replacement.replace("%", "");
 			};
 			
-			this.pr_replace("\"" ++ cmd ++ "\".xx", replacement.asString, cursorPos);
+			this.prReplace("\"" ++ cmd ++ "\".xx", replacement.asString, cursorPos);
 		};
 	}
 	
 	// private
-	pr_replace {|cmd, replacement, cursorPos|
+	prReplace {|cmd, replacement, cursorPos|
 				
 		// this would be more sensible, if it wouldn't try to replace all occurences of the expand cmd. 
 		
@@ -87,7 +87,7 @@ MacroExpander
 		},
 		{
 			key =  cmd.copyRange(0,pos-1).toLower;
-			args = this.pr_splitArgs(cmd.copyRange(pos + 1, cmd.size));
+			args = this.prSplitArgs(cmd.copyRange(pos + 1, cmd.size));
 		});
 		
 		res = dict.at(key);
@@ -102,22 +102,20 @@ MacroExpander
 		};
 			
 		res.isKindOf(String).if {
-			^this.pr_performString(res, args, key);
+			^this.prPerformString(res, args, key);
 		};
 		
 		// if nothing really makes sense:
 		^res.asCompileString;
 	}
 	
-	// private
-	pr_splitArgs{|string|
+	prSplitArgs{|string|
 		string = string ? "";
 		^string.split($#);
 		// some cleanup?
 	}
 	
-	// private 
-	pr_performString{|res, args, key|
+	prPerformString{|res, args, key|
 		var string = res;
 		args.do {|item,i|
 			string = string.replace("#" ++ i ++ "#", item);

@@ -42,34 +42,34 @@ Pholds : FilterPattern {
 				(thisEvent.isNil || thisDur.isNil).if {
 					^event;
 				};
-				nextPoll = this.pr_newTimeInstance + thisDur.abs;
+				nextPoll = this.prNewTimeInstance + thisDur.abs;
 				doPoll = false;
 			};			
 			
 			// allow undersampling in a versions
-			(this.pr_curTimeInstance >= nextPoll).not.if {
+			(this.prCurTimeInstance >= nextPoll).not.if {
 				event = thisEvent.copy.yield;
 			};
 						
-			(this.pr_curTimeInstance >= nextPoll).if {
+			(this.prCurTimeInstance >= nextPoll).if {
 				doPoll = true;	
 			};
 		};		
 	}
 	
-	pr_newTimeInstance {
-		^this.pr_curTimeInstance;	
+	prNewTimeInstance {
+		^this.prCurTimeInstance;	
 	}
 	
-	pr_curTimeInstance {
+	prCurTimeInstance {
 		^thisThread.seconds;
 	}
 }
 
 Pholdas : Pholds {
 	
-	pr_newTimeInstance {
-		^this.nextPoll ? this.pr_curTimeInstance;
+	prNewTimeInstance {
+		^this.nextPoll ? this.prCurTimeInstance;
 	}
 }
 
@@ -86,14 +86,14 @@ Phold : Pholds {
 		^[dur,pattern];
 	}
 
-	pr_curTimeInstance {
+	prCurTimeInstance {
 		^clock.beats;
 	}
 }
 
 Pholda : Phold {
 
-	pr_newTimeInstance {
-		^this.nextPoll ? this.pr_curTimeInstance;	
+	prNewTimeInstance {
+		^this.nextPoll ? this.prCurTimeInstance;	
 	}
 }
