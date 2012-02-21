@@ -130,8 +130,6 @@ MandelClock {
 			followSkipJack.stop;
 			
 			instance = MandelClock.new(name, message[4], message[5], message[1].asString,[port], false, timeClass:timeClass, server:server);
-			instance.net.sendPublishPorts;
-			
 			("... you are now following " ++ message[1].asString ++ "!").postln;
 			
 			action.value(instance);			

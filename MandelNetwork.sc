@@ -81,6 +81,7 @@ MandelNetwork : MandelModule {
 		this.addOSCResponder(\leader, "/requestPort", {|header, payload|
 			this.addPort(payload[0].asInteger);
 			mc.post(header.name ++ " requested port " ++ payload[0]);
+			this.sendPublishPorts;
 		});
 		
 		this.addOSCResponder(\leader, "/publishPorts", {|header, payload|
@@ -104,7 +105,7 @@ MandelNetwork : MandelModule {
 	
 	sendSystemPorts {
 		var intKeys = (addrDict.keys.collect{|i| i.asInteger}).asArray;
-		this.sendMsgBurst("/systemPorts", \critical, *intKeys);	
+		this.sendMsgBurst("/systemPorts", \critical, *intKeys);
 	}
 	
 	sendPublishPorts {
@@ -131,7 +132,7 @@ MandelNetwork : MandelModule {
 		};
 		
 		addList.do {|item|
-			addrDict.add(ass);	
+			addrDict.add(item);	
 		};
 	}
 	
