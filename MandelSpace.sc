@@ -476,7 +476,7 @@ MandelValue {
 		^BusPlug.for(this.asBus)	;
 	}
 	
-	prCreateBus {
+	prCreateBus {
 		this.freeBus;
 		space.mc.server.serverRunning.if ({
 			bus = Bus.control(space.mc.server, 1);
