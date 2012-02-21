@@ -120,9 +120,7 @@ MandelNetwork : MandelModule {
 	}
 	
 	pr_managePorts {|ports|
-		
 		var addList = List.new;
-		var remList = List.new;
 				
 		ports.do {|item|
 			item = item.asInteger;
@@ -132,18 +130,8 @@ MandelNetwork : MandelModule {
 			};	
 		};
 		
-		addrDict.keys.do {|key|
-			ports.includes(key).not.if {
-				remList.add(key);	
-			};	
-		};
-		
-		addList.do {|ass|
+		addList.do {|item|
 			addrDict.add(ass);	
-		};
-		
-		remList.do {|key|
-			addrDict.removeAt(key);	
 		};
 	}
 	
