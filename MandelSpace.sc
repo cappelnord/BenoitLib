@@ -461,11 +461,11 @@ MandelValue : AbstractFunction {
 	}
 	
 	value {
-		^this.getValue(true); // why?
+		^this.getValue(); // why?
 	}
 	
-	valueArray {
-		^this.getValue(true); // why?
+	valueArray {|array|
+		^this.getValue(); // why?
 	}
 	
 	asStream {
