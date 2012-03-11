@@ -435,9 +435,13 @@ MandelSpace : MandelModule {
 		this.freeAllBuses;
 		healSJ.stop;
 	}
+	
+	keys {
+		^objects.keys;	
+	}
 }
 
-MandelValue {
+MandelValue : AbstractFunction {
 	var <key, <>bdl, <decorator, <relations, quant;
 	var space;
 	var <bus, busDependant;
@@ -457,7 +461,11 @@ MandelValue {
 	}
 	
 	value {
-		^this.getValue();
+		^this.getValue(true); // why?
+	}
+	
+	valueArray {
+		^this.getValue(true); // why?
 	}
 	
 	asStream {

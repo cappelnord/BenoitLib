@@ -42,5 +42,9 @@ MandelEnvironment : EnvironmentRedirect {
 	
 	removeAt {|key|
 		space.removeAt(key);	
+	}
+	
+	keys {
+		^space.keys;	
 	}	
 }
