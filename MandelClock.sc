@@ -228,23 +228,13 @@ MandelClock {
 		this.net.sendMsgBurst("/shout", \important, message);
 	}
 	
-	// of course it could be the same method for a leader and a follower
-	// but I think normally only a leader should change the tempo, so making
-	// this cut enforces this somehow.
-	requestTempo {|newTempo, dur=0|
-		leading.not.if {
-			newTempo = this.prSafeTempo(newTempo);
-			this.net.sendMsgBurst("/requestTempo", \important, newTempo.asFloat, dur.asFloat);
-		};
-	}
-	
 	changeTempo {|newTempo, dur=0|
 		
 		var delta, stopTest;
 		
 		newTempo = this.prSafeTempo(newTempo);
 		
-		leading.if {
+		leading.if ({
 			tempoChangeSJ.stop;
 			
 			((dur <= 0) || (newTempo == tempo)).if ({
@@ -263,7 +253,10 @@ MandelClock {
 					this.prSetClockTempo(tempo + delta);
 				},0.1, stopTest, name: "TempoChange");
 			});
-		};	
+		}, {
+			this.post("Requested new tempo from the Leader");
+			this.net.sendMsgBurst("/requestTempo", \important, newTempo.asFloat, dur.asFloat);
+		});
 	}
 	
 	prSafeTempo {|newTempo|
@@ -527,5 +520,11 @@ MandelClock {
 	metro {|pan=0.0, quant=4|
 		"metro is going to be removed from MandelClock instance. Use m.tools.metro instead".postln;
 		^tools.metro(pan, quant);
+	}
+	
+		
+	requestTempo {|newTempo, dur=0|
+		"requestTempo is deprecated. Use changeTempo instead, even if you're not the leader".postln;
+		^this.changeTempo(newTempo, dur);
 	}	
 }
