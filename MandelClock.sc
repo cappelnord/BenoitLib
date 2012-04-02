@@ -197,6 +197,10 @@ MandelClock {
 			},
 			\linux, {
 				platform = MandelPlatformLinux(this);
+			},
+			{ // default
+				this.post("Platform specific functions for your system aren't available.");
+				platform = MandelPlatform(this);
 			}
 		);
 		modules.add(platform);
@@ -372,12 +376,10 @@ MandelClock {
 	// responders for leaders and followers
 	prGeneralResponders {
 		
-		// chat and shout responders
 		this.net.addOSCResponder(\general, "/chat", {|header, payload|
 			 (header.name ++ ":  " ++ payload[0].asString).postln;
 		});
 		
-		// a shout should be more visible than this.
 		this.net.addOSCResponder(\general, "/shout", {|header, payload|
 			 (header.name ++ " (shout):  " ++ payload[0].asString).postln;
 			 this.displayShout(header.name, payload[0].asString);

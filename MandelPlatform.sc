@@ -24,7 +24,7 @@ MandelPlatform : MandelModule {
 	}
 	
 	displayNotification {|title, message|
-		"This should have been implemented by the platform".postln;
+		// NOOP;
 	}
 	
 	focusCurrentDocument {

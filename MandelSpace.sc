@@ -19,9 +19,7 @@ MandelSpace : MandelModule {
 	var <>allowRemoteCode = false;
 	
 	var envirInstance;
-	
-	const serializationPrefix = "#SER#"; // the following two letters further describe the type.
-	
+		
 	var <quant;
 	
 	classvar defaultDictInstance;
@@ -208,12 +206,20 @@ MandelSpace : MandelModule {
 	sendValue {|keyValueList, schedBeats=0.0, strategy=\time|
 		var delta = schedBeats - mc.clock.beats;
 		var burstNum = 2;
+		var origList = keyValueList;
+		var oi = 0;
+		var serSlots;
+		keyValueList = Array.newClear(origList.size / 2 * 3);
 		
 		// encode data
-		(0,2..(keyValueList.size-1)).do {|i|
-			keyValueList[i] = keyValueList[i].asString;
-			keyValueList[i+1] = this.serialize(keyValueList[i+1]);
+		(0,3..(keyValueList.size-1)).do {|i|
+			keyValueList[i] = origList[i].asString;
+			serSlots = this.serialize(origList[oi+1]);
+			keyValueList[i+1] = serSlots[0];
+			keyValueList[i+2] = serSlots[1];
+			oi = oi + 2;
 		};
+		
 		schedBeats = schedBeats.asFloat;
 		
 		(delta < 0.25).if ({
@@ -234,8 +240,10 @@ MandelSpace : MandelModule {
 	
 	sendHealValue {|key|
 		var obj = this.getObject(key);
+		var serSlots;
 		obj.canHeal.if {
-			mc.net.sendMsgBurst("/healValue", \relaxed, obj.bdl.setAtBeat.asFloat, key.asString, this.serialize(obj.value));
+			serSlots = this.serialize(obj.value);
+			mc.net.sendMsgBurst("/healValue", \relaxed, obj.bdl.setAtBeat.asFloat, key.asString, serSlots[0], serSlots[1]);
 		};
 	}
 	
@@ -254,15 +262,15 @@ MandelSpace : MandelModule {
 	
 	// code to string if not a native osc type
 	serialize {|value|
-		value.isInteger.if {^value};
-		value.isFloat.if {^value};
-		value.isString.if {^value};
-		value.isKindOf(Symbol).if {^(serializationPrefix ++ "SM" ++ value.asString)};
-		value.isNil.if {^(serializationPrefix ++ "NL")};
+		value.isInteger.if {^[0, value]};
+		value.isFloat.if {^[0, value]};
+		value.isString.if {^[0, value]};
+		value.isKindOf(Symbol).if {^["SM", value.asString]};
+		value.isNil.if {^["NL", ""]};
 		
 		value.isFunction.if {
 			value.isClosed.if({
-				^(serializationPrefix ++ "CS" ++ value.asCompileString);
+				^["CS", value.asCompileString];
 			},{
 				Error("Only closed functions can be sent through MandelSpace").throw;	
 			});
@@ -271,45 +279,29 @@ MandelSpace : MandelModule {
 		"There is no explicit rule to send the object through MandelSpace - trying asCompileString".warn;
 		("Compile String: " ++ value.asCompileString).postln;
 		// ("Key: " ++ key).postln;
-		^(serializationPrefix ++ "CS" ++ value.asCompileString);
+		^["CS", value.asCompileString];
 	}
 	
 	// build object if object was serialized
-	deserialize {|value|
-		var pfl, serType, payload;
+	deserialize {|serType, value|
+		var payload;
 		value.isNumber.if {^value};
-		value.isKindOf(Symbol).if {value = value.asString};
+		(serType == \NL).if {^nil;};
 		
-		// if it's a string we need to know if we have to deserialize an object
-		value.isString.if {
-			value.containsStringAt(0, serializationPrefix).if({
-				pfl = serializationPrefix.size;
-				serType = value[pfl..pfl+1];
-				payload = value[pfl+2..];
-				
-				(serType == "CS").if {
-					allowRemoteCode.if({
-						^payload.interpret;
-					}, {
-						"MandelSpace received remote code but wasn't allowed to execute.\nSet allowRemoteCode to true if you know what you're doing!".warn;
-					});	
-				};
-				
-				(serType == "SM").if {
-					^payload.asSymbol;	
-				};
-				
-				(serType == "NL").if {
-					^nil;
-				};
-					
-			}, {
-				^value; // normal string.
-			});
+		value.isKindOf(Symbol).if {
+			((serType == 0) || (serType == '')).if {^value.asString;};
+			(serType == \SM).if {^value.asSymbol;};
+			(serType == \CS).if {
+				allowRemoteCode.if({
+					^value.interpret;
+				}, {
+					"MandelSpace received remote code but wasn't allowed to execute.\nSet allowRemoteCode to true if you know what you're doing!".warn;
+				});	
+			};	
 		};
 		
 		// if everything else fails ...
-		^value;
+		^value.asString;
 	}
 	
 	addRelation {|father, son|
@@ -354,16 +346,16 @@ MandelSpace : MandelModule {
 			var name = header.name;
 			var schedBeats = payload[0].asFloat;
 			
-			(1,3..(payload.size-1)).do {|i|
+			(1,4..(payload.size-1)).do {|i|
 				var key = payload[i].asSymbol;
-				var value = this.deserialize(payload[i+1]);			this.getObject(key).setValue(value, schedBeats, header.name, doSend:false);
+				var value = this.deserialize(payload[i+1], payload[i+2]);			this.getObject(key).setValue(value, schedBeats, header.name, doSend:false);
 			};
 		}, \dropOwn);
 		
 		mc.net.addOSCResponder(\general, "/healValue", {|header, payload|
 			var schedBeats = payload[0].asFloat;
 			var key = payload[1].asSymbol;
-			var value = this.deserialize(payload[2]);
+			var value = this.deserialize(payload[2], payload[3]);
 			
 			this.getObject(key).tryHealValue(value, schedBeats, header.name);
 		}, \dropOwn);
