@@ -348,7 +348,8 @@ MandelSpace : MandelModule {
 			
 			(1,4..(payload.size-1)).do {|i|
 				var key = payload[i].asSymbol;
-				var value = this.deserialize(payload[i+1], payload[i+2]);			this.getObject(key).setValue(value, schedBeats, header.name, doSend:false);
+				var value = this.deserialize(payload[i+1], payload[i+2]);
+				this.getObject(key).setValue(value, schedBeats, header.name, doSend:false);
 			};
 		}, \dropOwn);
 		
@@ -356,7 +357,6 @@ MandelSpace : MandelModule {
 			var schedBeats = payload[0].asFloat;
 			var key = payload[1].asSymbol;
 			var value = this.deserialize(payload[2], payload[3]);
-			
 			this.getObject(key).tryHealValue(value, schedBeats, header.name);
 		}, \dropOwn);
 		
