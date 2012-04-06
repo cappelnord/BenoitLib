@@ -1,5 +1,5 @@
 /*
-	BeatDependentValue
+	MandelBDL
 	(c) 2011 by Patrick Borgeat <patrick@borgeat.de>
 	http://www.cappel-nord.de
 	
@@ -7,11 +7,12 @@
 	http://github.com/cappelnord/BenoitLib
 	http://www.the-mandelbrots.de
 	
+	BDL = Beat Dependant Value
 	Can be used as value-container which can schedule changes.
 	
 */
 
-BeatDependentValue {
+MandelBDL {
 	
 	var <list;
 	var value;
