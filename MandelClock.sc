@@ -84,13 +84,14 @@ MandelClock {
 		
 		instance.notNil.if {
 			"THERE IS ALREADY A MANDELCLOCK INSTANCE".postln;
-			^nil;	
+			^instance;	
 		};
 		^[timeClass, server];
 	}
 			
 	*startLeader {|name, startTempo = 2.0, timeClass, server|
 		var general = MandelClock.startGeneral(timeClass, server);
+		(general === instance).if {^instance};
 		general.isNil.if {"COULD NOT START A LEADER MANDELOCK".postln; ^nil;};
 		timeClass = general[0];
 		server = general[1];

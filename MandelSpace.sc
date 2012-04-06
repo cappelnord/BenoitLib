@@ -515,6 +515,10 @@ MandelValue : AbstractFunction {
 		^{InTrig.kr(this.asBus)};	
 	}
 	
+	ir {
+		^this.getValue();	
+	}
+	
 	quant {
 		quant.isNil.not.if({
 			^quant
