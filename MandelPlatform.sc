@@ -13,14 +13,14 @@
 
 MandelPlatform : MandelModule {
 	
-	var mc;
+	var hub;
 	
-	*new {|maclock|
-		^super.new.init(maclock);	
+	*new {|hub|
+		^super.new.init(hub);	
 	}
 	
-	init {|maclock|
-		mc = maclock;	
+	init {|a_hub|
+		hub = a_hub;	
 	}
 	
 	displayNotification {|title, message|
@@ -41,11 +41,11 @@ MandelPlatformLinux : MandelPlatform {
 MandelPlatformOSX : MandelPlatform {
 	
 	onStartup {
-		("osascript '" ++ mc.classPath("mandelRegisterGrowl.scpt") ++ "'").unixCmd(postOutput:false);
+		("osascript '" ++ hub.classPath("mandelRegisterGrowl.scpt") ++ "'").unixCmd(postOutput:false);
 	}
 	
 	displayNotification {|title, message|
-		("osascript '" ++ mc.classPath("mandelNotify.scpt") ++ "' '" ++ title ++ "' '" ++ message ++ "'").unixCmd(postOutput:false);
+		("osascript '" ++ hub.classPath("mandelNotify.scpt") ++ "' '" ++ title ++ "' '" ++ message ++ "'").unixCmd(postOutput:false);
 	}
 	
 	focusCurrentDocument {

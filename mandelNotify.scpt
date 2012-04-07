@@ -10,7 +10,7 @@ on run argv
 				"Shout" title ¬
 				item 1 of argv description ¬
 				item 2 of argv application name ¬
-				"MandelClock"
+				"MandelHub"
 		end tell
 	end if
 end run

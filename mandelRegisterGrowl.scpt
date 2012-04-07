@@ -8,7 +8,7 @@ if isRunning then
 		set the allNotificationsList to {"Shout"}
 		set the enabledNotificationsList to {"Shout"}
 		register as application Â
-			"MandelClock" all notifications allNotificationsList Â
+			"MandelHub" all notifications allNotificationsList Â
 			default notifications enabledNotificationsList Â
 			icon of application "SuperCollider"
 	end tell

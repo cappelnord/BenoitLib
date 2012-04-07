@@ -7,8 +7,8 @@
 	http://github.com/cappelnord/BenoitLib
 	http://www.the-mandelbrots.de
 	
-	MandelTimeDriver is the standard timing agent
-	for MandelClock. Followers use this module to
+	MandelTimeDriver is the default timing agent
+	for MandelHub. Followers use this module to
 	interpret Ticks and change the clock. Leaders
 	use this to sync their followers.
 	
@@ -16,7 +16,7 @@
 
 MandelTimeDriver : MandelModule {
 
-	var <mc;
+	var <hub;
 	
 	var clockSerial = 0;
 
@@ -33,16 +33,16 @@ MandelTimeDriver : MandelModule {
 	var <>listenToTicks = true;
 
 	
-	*new {|maclock|
-		^super.new.init(maclock);	
+	*new {|hub|
+		^super.new.init(hub);	
 	}
 	
-	init {|maclock|
-		mc = maclock;					
+	init {|a_hub|
+		hub = a_hub;					
 	}
 	
 	tick {
-		mc.net.sendMsgDirect("/clock", clockSerial, mc.clock.beats, mc.tempo.asFloat);
+		hub.net.sendMsgDirect("/clock", clockSerial, hub.clock.beats, hub.tempo.asFloat);
 		clockSerial = clockSerial + 1;
 	}
 	
@@ -51,13 +51,13 @@ MandelTimeDriver : MandelModule {
 		var deviation;
 		var tempoHasChanged = false;
 		var thisDeviationTreshold = deviationThreshold;
-		var quant = mc.quant;
+		var quant = hub.quant;
 		
 		// (ser + "\n" + bea + "\n" + tem + "\n").postln;
 		
 		
 		force.if {
-			mc.externalTempo = tem;	
+			hub.externalTempo = tem;	
 		};
 		
 	
@@ -75,8 +75,8 @@ MandelTimeDriver : MandelModule {
 					
 			listenToTicks.if {
 				
-				if(mc.externalTempo != tem) {
-					mc.externalTempo = tem;
+				if(hub.externalTempo != tem) {
+					hub.externalTempo = tem;
 					tempoHasChanged = true;
 				};
 				
@@ -85,7 +85,7 @@ MandelTimeDriver : MandelModule {
 				bea = bea + (latencyCompensation * tem);
 				
 				// calculate the beat we want to snap on.
-				deviation = mc.clock.beats - bea;
+				deviation = hub.clock.beats - bea;
 				
 				// snap to next quant if necessary
 				quant.notNil.if {
@@ -103,25 +103,25 @@ MandelTimeDriver : MandelModule {
 				((deviation.abs > thisDeviationTreshold) || tempoHasChanged) .if ({
 					
 					MandelClock.debug.if {
-						mc.post("Deviation: " ++ deviation);
+						hub.post("Deviation: " ++ deviation);
 					};
 										
 					// warning, crappy case syntax!
 					case
 					{ tempoHasChanged == true } {
-						mc.prSetClockTempo(mc.externalTempo);
+						hub.prSetClockTempo(hub.externalTempo);
 					}
 					// if five ticks were bad OR timing is really off
 					{(badTicks > 5) || (deviation.abs > (deviationThreshold * 5))} {
-						mc.prSetClockTempo((mc.tempo * (1.0 - hardness)) + ( mc.externalTempo + (deviation * deviationMul * -1) * hardness));
+						hub.prSetClockTempo((hub.tempo * (1.0 - hardness)) + ( hub.externalTempo + (deviation * deviationMul * -1) * hardness));
 					};
 					
 					deviationGate = true;
 					badTicks = badTicks + 1;
 					
 				},{ // if our timing is good at the moment
-					(mc.externalTempo != mc.tempo).if {
-						mc.prSetClockTempo(mc.externalTempo);
+					(hub.externalTempo != hub.tempo).if {
+						hub.prSetClockTempo(hub.externalTempo);
 					};
 					
 					badTicks = 0;
@@ -131,15 +131,15 @@ MandelTimeDriver : MandelModule {
 		};
 	}
 	
-	onStartup {|mc|
+	onStartup {|hub|
 		
 	}
 	
-	onBecomeLeader {|mc|
+	onBecomeLeader {|hub|
 		lastTickTime = 0;
 	}
 	
-	onBecomeFollower {|mc|
+	onBecomeFollower {|hub|
 		badTicks = 0;
 		lastTickTime = thisThread.seconds;
 	}

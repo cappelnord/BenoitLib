@@ -8,30 +8,30 @@
 	http://www.the-mandelbrots.de
 	
 	MandelModule defines an interface and provides
-	empty implementations for MandelClock Plugins.
+	empty implementations for MandelHub Plugins.
 	
 */
 
 MandelModule {
 
 	
-	onStartup {|mc|
+	onStartup {|hub|
 		
 	}
 	
-	onBecomeLeader {|mc|
+	onBecomeLeader {|hub|
 		
 	}
 	
-	onBecomeFollower {|mc|
+	onBecomeFollower {|hub|
 		
 	}
 	
-	registerCmdPeriod {|mc|
+	registerCmdPeriod {|hub|
 		
 	}
 	
-	onClear {|mc|
+	onClear {|hub|
 		
 	}
 }

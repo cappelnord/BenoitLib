@@ -14,7 +14,7 @@
 
 MandelTap {
 	
-	var instance, clock, myClock;
+	var hub, clock, myClock;
 	var window;
 	var tempo, bpm, beat;
 	var origTempo;
@@ -37,15 +37,15 @@ MandelTap {
 	
 	var <>open = true;
 			
-	*new {|instance|
-		^super.new.init(instance);
+	*new {|hub|
+		^super.new.init(hub);
 	}
 	
-	init {|a_instance|
+	init {|a_hub|
 		
 		var dec;
-		instance = a_instance ? MandelClock.instance;
-		clock = instance.clock;
+		hub = a_hub ? MandelClock.instance;
+		clock = hub.clock;
 		myClock = TempoClock.new(clock.tempo);
 		
 		window = Window.new("MandelClockTap", Rect(400,400,288,45), false);
@@ -69,15 +69,15 @@ MandelTap {
 		dec.nextLine;
 
 		
-		this.setBPM(instance.clock.tempo * 60);
-		this.setBeat(instance.clock.beats);
+		this.setBPM(hub.clock.tempo * 60);
+		this.setBeat(hub.clock.beats);
 		
 		listeners = List.new;
 		
 		window.front;
 		
 		window.onClose_({
-			instance.tapInstance = nil;
+			hub.tapInstance = nil;
 			open = false;
 		});
 		
@@ -113,7 +113,7 @@ MandelTap {
 			};
 		
 			myClock.sched(1/8, {
-				instance.time.receiveTick(ser, b, tempo, true);
+				hub.time.receiveTick(ser, b, tempo, true);
 				this.progress;
 			});
 		};

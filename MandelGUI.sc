@@ -10,25 +10,25 @@
 
 MandelGUI
 {
-	var <window, bpmText, mesText, beatText, bpsText, beatArr, clock,mc;
+	var <window, bpmText, mesText, beatText, bpsText, beatArr, clock, hub;
 	var sj;
 	var stillOpen = true;
 	
 	classvar <>defaultPos;
 	
-	*new {|mc, pos|
-		^super.new.init(mc,pos);	
+	*new {|hub, pos|
+		^super.new.init(hub ,pos);	
 	}
 	
-	init {|a_mc, pos|
+	init {|a_hub, pos|
 		
-		mc = a_mc;		
-		clock = mc.clock;
+		hub = a_hub;		
+		clock = hub.clock;
 		
 		// well, 400@400 is quite random :-)
 		pos = pos ? defaultPos ? (400@400);
 		
-		window = Window.new("MandelClockGUI", Rect(pos.x,pos.y,288,65), false);
+		window = Window.new("MandelGUI", Rect(pos.x,pos.y,288,65), false);
 		window.addFlowLayout(10@10,5@5);
 		
 		bpmText = StaticText(window, 50@20);
@@ -40,7 +40,7 @@ MandelGUI
 
 		Button(window,45@20)
 			.states_([["Chat", Color.black, Color.clear]])
-			.action_({mc.chatWindow;});
+			.action_({hub.chatWindow;});
 		
 		window.view.decorator.nextLine;
 		
@@ -57,24 +57,24 @@ MandelGUI
 		
 		Button(window,45@20)
 			.states_([["Shout", Color.black, Color.clear]])
-			.action_({mc.shoutWindow;});
+			.action_({hub.shoutWindow;});
 		
 		this.prClearBeats;
 		
 		sj = SkipJack({
 			
-			var tempo = mc.externalTempo;
+			var tempo = hub.externalTempo;
 			var color = Color.black;
 			
-			MandelClock.debug.if {
-				tempo = mc.tempo;
+			MandelHub.debug.if {
+				tempo = hub.tempo;
 			};
 			
-			(mc.tempo > mc.externalTempo).if {
+			(hub.tempo > hub.externalTempo).if {
 				color = Color(0,0.4,0);
 			};
 			
-			(mc.tempo < mc.externalTempo).if {
+			(hub.tempo < hub.externalTempo).if {
 				color = Color(0.4,0,0);
 			};
 			

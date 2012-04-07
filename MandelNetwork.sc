@@ -14,7 +14,7 @@
 
 MandelNetwork : MandelModule {
 	
-	classvar <>oscPrefix = "/mc";
+	classvar <>oscPrefix = "/mh";
 	
 	var <>dumpTXOSC = false;
 	var <>dumpRXOSC = false;
@@ -28,23 +28,25 @@ MandelNetwork : MandelModule {
 	
 	var currentMessageID;
 	
-	var mc;
+	var hub;
 	
 	var oscQueue;
 	var oscQueueRoutine;
 	var oscQueueWaitTime = 0.01;
 	
 	var burstGuardDict;
+	
+	var ports;
 
-	*new {|maclock, ports|
-		^super.new.init(maclock);	
+	*new {|hub, ports|
+		^super.new.init(hub, ports);	
 	}
 	
-	init {|maclock, ports|
-		mc = maclock;
+	init {|a_hub, a_ports|
+		hub = a_hub;
 		
 		// start networking
-		ports = ports ? [57120];
+		ports = a_ports ? [57120];
 		
 		// this is a workaround, check if ports are publishhed correctly
 		ports.includes(57120).not.if {
@@ -67,7 +69,7 @@ MandelNetwork : MandelModule {
 		burstGuardDict = IdentityDictionary.new;
 	}
 	
-	onStartup {|mc|		
+	onStartup {|hub|		
 		this.addOSCResponder(\general, "/pingPort", {|header, payload|
 			this.sendPongPort;
 		}, \leaderOnly);
@@ -77,10 +79,10 @@ MandelNetwork : MandelModule {
 		}, \leaderOnly);
 	}
 	
-	onBecomeLeader {|mc|
+	onBecomeLeader {|hub|
 		this.addOSCResponder(\leader, "/requestPort", {|header, payload|
 			this.addPort(payload[0].asInteger);
-			mc.post(header.name ++ " requested port " ++ payload[0]);
+			hub.post(header.name ++ " requested port " ++ payload[0]);
 			this.sendPublishPorts;
 		});
 		
@@ -90,11 +92,11 @@ MandelNetwork : MandelModule {
 	}
 	
 	/*
-	onBecomeFollower {|mc|
+	onBecomeFollower {|hub|
 		
 	}
 	
-	registerCmdPeriod {|mc|
+	registerCmdPeriod {|hub|
 		
 	}
 	*/
@@ -164,7 +166,7 @@ MandelNetwork : MandelModule {
 		var messageID = 0; // no burst
 		args = args[1..];
 		
-		this.sendMsg(oscPrefix ++ cmd, mc.name, messageID, *args);
+		this.sendMsg(oscPrefix ++ cmd, hub.name, messageID, *args);
 	}
 	
 	// send a message without a burst ID
@@ -173,7 +175,7 @@ MandelNetwork : MandelModule {
 		var messageID = 0; // no burst
 		args = args[1..];
 		
-		this.dispatchMsg(oscPrefix ++ cmd, mc.name, messageID, *args);
+		this.dispatchMsg(oscPrefix ++ cmd, hub.name, messageID, *args);
 	}
 	
 	sendMsgBurst {|... args|
@@ -205,7 +207,7 @@ MandelNetwork : MandelModule {
 		
 		{
 			burstNum.do {
-				this.dispatchMsg(oscPrefix ++ cmd, mc.name, messageID, *args);
+				this.dispatchMsg(oscPrefix ++ cmd, hub.name, messageID, *args);
 				burstWait.wait;	
 			};
 		}.fork;
@@ -260,8 +262,8 @@ MandelNetwork : MandelModule {
 			// Discard by Strategy
 			doDispatch.if {
 				doDispatch = strategy.switch(
-					\leaderOnly, {(header.name == mc.leaderName.asString) && mc.leading.not},
-					\dropOwn, {(header.name != mc.name)},
+					\leaderOnly, {(header.name == hub.leaderName.asString) && hub.leading.not},
+					\dropOwn, {(header.name != hub.name)},
 					{true}
 				);
 			};
@@ -279,7 +281,7 @@ MandelNetwork : MandelModule {
 	
 	prFilterBurstMessages {|name, messageID|
 		var queue = burstGuardDict.at(name);
-		var curBeat = mc.clock.beats;
+		var curBeat = hub.clock.beats;
 		var checkList = true;
 		var last;
 		

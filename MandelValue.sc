@@ -54,8 +54,8 @@ MandelValue : AbstractFunction {
 	
 	prCreateBus {
 		this.freeBus;
-		space.mc.server.serverRunning.if ({
-			bus = Bus.control(space.mc.server, 1);
+		space.hub.server.serverRunning.if ({
+			bus = Bus.control(space.hub.server, 1);
 			bus.set(this.getValue());
 		
 			busDependant = {|changed, what, value| bus.set(value)};
@@ -63,7 +63,7 @@ MandelValue : AbstractFunction {
 		}, {
 			"Server is not running! You have to re-evaluate.".warn;
 			// dummy Bus to fail silently
-			^Bus.control(space.mc.server, 1);
+			^Bus.control(space.hub.server, 1);
 		});
 		
 		^bus;
@@ -121,13 +121,13 @@ MandelValue : AbstractFunction {
 	}
 	
 	setValue {|value, schedBeats, who, doSend=true, strategy=\time|
-		who = who ? space.mc.name;
+		who = who ? space.hub.name;
 				
 		schedBeats.isNil.if {
 			this.quant.isNil.if ({
 				schedBeats = 0.0;	
 			}, {
-				schedBeats = this.quant.nextTimeOnGrid(space.mc.clock);
+				schedBeats = this.quant.nextTimeOnGrid(space.hub.clock);
 			});
 		};
 		doSend.if {space.sendValue([key, value], schedBeats, strategy)};
@@ -212,6 +212,6 @@ MandelValue : AbstractFunction {
 	
 	canHeal {
 		bdl.isNil.if {^false};
-		^(doHeal && (bdl.setBy == space.mc.name) && ((bdl.setAtBeat) + 4 < space.mc.clock.beats) && (bdl.setAtBeat > 0));
+		^(doHeal && (bdl.setBy == space.hub.name) && ((bdl.setAtBeat) + 4 < space.hub.clock.beats) && (bdl.setAtBeat > 0));
 	}
 }

@@ -7,14 +7,14 @@
 	http://github.com/cappelnord/BenoitLib
 	http://www.the-mandelbrots.de
 	
-	Shared Variable Space used by MandelClock
+	Shared Variable Space used by MandelHub
 	
 */
 
 MandelSpace : MandelModule {
 	
 	var <objects;
-	var <mc;
+	var <hub;
 	
 	var <>allowRemoteCode = false;
 	
@@ -26,13 +26,13 @@ MandelSpace : MandelModule {
 	
 	var healSJ;
 	
-	*new {|maclock|
-		^super.new.init(maclock);	
+	*new {|hub|
+		^super.new.init(hub);	
 	}
 	
 	*getValueOrDefault {|key|
-		MandelClock.instance.notNil.if {
-			^MandelClock.instance.space.getValue(key);
+		MandelHub.instance.notNil.if {
+			^MandelHub.instance.space.getValue(key);
 		}Ê{
 			^MandelSpace.defaultDict.at(key);
 		}
@@ -87,8 +87,8 @@ MandelSpace : MandelModule {
 		quant = val.asQuant;	
 	}
 	
-	init {|maclock|
-		mc = maclock;	
+	init {|a_hub|
+		hub = a_hub;	
 					
 		objects = Dictionary.new;
 		
@@ -135,9 +135,9 @@ MandelSpace : MandelModule {
 			var strategy = \time;
 			var list = List.new;
 			~deltaSched = ~deltaSched ? 0.0;
-			schedBeats = mc.clock.beats + ~deltaSched;
+			schedBeats = hub.clock.beats + ~deltaSched;
 			
-			(schedBeats <= mc.clock.beats).if {
+			(schedBeats <= hub.clock.beats).if {
 				schedBeats = 0.0; // no scheduling
 			};
 			
@@ -204,7 +204,7 @@ MandelSpace : MandelModule {
 	}
 	
 	sendValue {|keyValueList, schedBeats=0.0, strategy=\time|
-		var delta = schedBeats - mc.clock.beats;
+		var delta = schedBeats - hub.clock.beats;
 		var burstNum = 2;
 		var origList = keyValueList;
 		var oi = 0;
@@ -224,17 +224,17 @@ MandelSpace : MandelModule {
 		
 		(delta < 0.25).if ({
 			(strategy == \stream).if {
-				mc.net.sendMsgCmd("/value", schedBeats, *keyValueList);
+				hub.net.sendMsgCmd("/value", schedBeats, *keyValueList);
 			};
 			#[\time, \critital, \timeCritical, \important, \relaxed].includes(strategy).if {
-				mc.net.sendMsgBurst("/value", strategy, schedBeats, *keyValueList);
+				hub.net.sendMsgBurst("/value", strategy, schedBeats, *keyValueList);
 			};
 		}, {
 			// burst, if there is time.
 			(delta > 8).if {delta = 8};
 			delta = delta * 0.75;
 			burstNum = burstNum + delta.round;
-			mc.net.sendMsgBurst("/value", [burstNum, delta], schedBeats, *keyValueList);
+			hub.net.sendMsgBurst("/value", [burstNum, delta], schedBeats, *keyValueList);
 		});
 	}
 	
@@ -243,7 +243,7 @@ MandelSpace : MandelModule {
 		var serSlots;
 		obj.canHeal.if {
 			serSlots = this.serialize(obj.value);
-			mc.net.sendMsgBurst("/healValue", \relaxed, obj.bdl.setAtBeat.asFloat, key.asString, serSlots[0], serSlots[1]);
+			hub.net.sendMsgBurst("/healValue", \relaxed, obj.bdl.setAtBeat.asFloat, key.asString, serSlots[0], serSlots[1]);
 		};
 	}
 	
@@ -304,8 +304,8 @@ MandelSpace : MandelModule {
 		^value.asString;
 	}
 	
-	onBecomeLeader {|mc|
-		mc.net.addOSCResponder(\leader, "/requestValueSync", {|header, payload|
+	onBecomeLeader {|hub|
+		hub.net.addOSCResponder(\leader, "/requestValueSync", {|header, payload|
 			{
 			0.1.wait;
 			objects.keys.do {|key|
@@ -325,8 +325,8 @@ MandelSpace : MandelModule {
 		}, \dropOwn);	
 	}
 	
-	onStartup {|mc|
-		mc.net.addOSCResponder(\general, "/value", {|header, payload|
+	onStartup {|hub|
+		hub.net.addOSCResponder(\general, "/value", {|header, payload|
 			var name = header.name;
 			var schedBeats = payload[0].asFloat;
 			
@@ -337,15 +337,15 @@ MandelSpace : MandelModule {
 			};
 		}, \dropOwn);
 		
-		mc.net.addOSCResponder(\general, "/healValue", {|header, payload|
+		hub.net.addOSCResponder(\general, "/healValue", {|header, payload|
 			var schedBeats = payload[0].asFloat;
 			var key = payload[1].asSymbol;
 			var value = this.deserialize(payload[2], payload[3]);
 			this.getObject(key).tryHealValue(value, schedBeats, header.name);
 		}, \dropOwn);
 		
-		mc.leading.not.if {
-			mc.net.sendMsgCmd("/requestValueSync"); // request MandelSpace sync from the leader
+		hub.leading.not.if {
+			hub.net.sendMsgCmd("/requestValueSync"); // request MandelSpace sync from the leader
 		}
 	}
 	
@@ -409,7 +409,7 @@ MandelSpace : MandelModule {
 		};
 	}
 	
-	onClear {|mc|
+	onClear {|hub|
 		this.freeAllBuses;
 		healSJ.stop;
 	}

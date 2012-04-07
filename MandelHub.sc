@@ -1,5 +1,5 @@
 /*
-	MandelClock
+	MandelHub
 	(c) 2010-11 by Patrick Borgeat <patrick@borgeat.de>
 	http://www.cappel-nord.de
 	
@@ -7,15 +7,12 @@
 	http://github.com/cappelnord/BenoitLib
 	http://www.the-mandelbrots.de
 	
-	Synchronization System used by Benoit and the Mandelbrots
-	
-	This class is way to big. I'll refactor it later into a more
-	modular approach.
+	Performance system used by Benoit and the Mandelbrots
 	
 */
 
 
-MandelClock {
+MandelHub {
 	
 	/*
 		Each group needs a leader. At the moment nobody claims this
@@ -59,7 +56,7 @@ MandelClock {
 			
 	var <guiInstance;
 			
-	var <>postPrefix = "MandelClock: ";
+	var <>postPrefix = "MandelHub: ";
 					
 	var tempoBusInstance, tempoBusDependant;
 	
@@ -83,16 +80,16 @@ MandelClock {
 		server = server ? Server.default;
 		
 		instance.notNil.if {
-			"THERE IS ALREADY A MANDELCLOCK INSTANCE".postln;
+			"THERE IS ALREADY A MANDELHUB INSTANCE".postln;
 			^instance;	
 		};
 		^[timeClass, server];
 	}
 			
 	*start {|name, startTempo = 2.0, timeClass, server|
-		var general = MandelClock.startGeneral(timeClass, server);
+		var general = MandelHub.startGeneral(timeClass, server);
 		(general === instance).if {^instance};
-		general.isNil.if {"COULD NOT START A LEADER MANDELOCK".postln; ^nil;};
+		general.isNil.if {"COULD NOT START A LEADER MANDELHUB".postln; ^nil;};
 		timeClass = general[0];
 		server = general[1];
 		
@@ -104,7 +101,7 @@ MandelClock {
 			"".postln; 	
 		};
 		
-		instance = MandelClock.new(name, 0, startTempo, name, [NetAddr.langPort], leading:true, timeClass:timeClass, server:server);
+		instance = MandelHub.new(name, 0, startTempo, name, [NetAddr.langPort], leading:true, timeClass:timeClass, server:server);
 		^instance;
 	}
 	
@@ -112,7 +109,7 @@ MandelClock {
 		
 		var addr;
 		var followSkipJack;
-		var general = MandelClock.startGeneral(timeClass, server);
+		var general = MandelHub.startGeneral(timeClass, server);
 		general.isNil.if {"COULD NOT START A FOLLOWER MANDELOCK".postln; ^nil;};
 		timeClass = general[0];
 		server = general[1];
@@ -130,7 +127,7 @@ MandelClock {
 			bStrapResponder.remove;
 			followSkipJack.stop;
 			
-			instance = MandelClock.new(name, message[4], message[5], message[1].asString,[port], false, timeClass:timeClass, server:server);
+			instance = MandelHub.new(name, message[4], message[5], message[1].asString,[port], false, timeClass:timeClass, server:server);
 			("... you are now following " ++ message[1].asString ++ "!").postln;
 			
 			action.value(instance);			
@@ -448,13 +445,13 @@ MandelClock {
 			this.closeGUI;
 		};
 		
-		guiInstance = MandelClockGUI(this, pos);
+		guiInstance = MandelGUI(this, pos);
 		^guiInstance;
 	}
 	
 	tap {
 		tapInstance.isNil.if {
-			^tapInstance = MandelClockTap.new(this);
+			^tapInstance = MandelTap.new(this);
 		};
 	}
 	
@@ -469,7 +466,7 @@ MandelClock {
 	}
 	
 	classPath {|filename|
-		^MandelClock.filenameSymbol.asString.dirname ++ "/" ++ filename;
+		^MandelHub.filenameSymbol.asString.dirname ++ "/" ++ filename;
 	}
 	
 	displayShout {|name, message|
@@ -488,11 +485,11 @@ MandelClock {
 	}
 	
 	chatWindow {
-		this.prSendWindow("MandelClock Chat",  {|string| this.chat(string);});
+		this.prSendWindow("MandelHub Chat",  {|string| this.chat(string);});
 	}
 	
 	shoutWindow {
-		this.prSendWindow("MandelClock Shout", {|string| this.shout(string);});
+		this.prSendWindow("MandelHub Shout", {|string| this.shout(string);});
 	}
 	
 	prDoCmdPeriod {		
@@ -521,7 +518,7 @@ MandelClock {
 	// depr.
 	
 	metro {|pan=0.0, quant=4|
-		"metro is going to be removed from MandelClock instance. Use m.tools.metro instead".postln;
+		"metro is going to be removed from MandelHub instance. Use m.tools.metro instead".postln;
 		^tools.metro(pan, quant);
 	}
 	
