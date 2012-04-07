@@ -26,6 +26,8 @@ MandelSpace : MandelModule {
 	
 	var healSJ;
 	
+	var updateSink = nil;
+	
 	*new {|hub|
 		^super.new.init(hub);	
 	}
@@ -188,6 +190,8 @@ MandelSpace : MandelModule {
 	}
 	
 	setValueList {|keyValueList, schedBeats, strategy=\time|
+		
+		this.prStartUpdateSink;
 		(0,2..(keyValueList.size-1)).do {|i|
 			var key = keyValueList[i].asSymbol;
 			var value = keyValueList[i+1];
@@ -198,7 +202,8 @@ MandelSpace : MandelModule {
 			}, {
 				this.getObject(key).setValue(value, schedBeats, doSend: false);
 			});
-		};
+		};		
+		this.prFinishUpdateSink;
 		
 		this.sendValue(keyValueList, schedBeats, strategy);
 	}
@@ -330,11 +335,14 @@ MandelSpace : MandelModule {
 			var name = header.name;
 			var schedBeats = payload[0].asFloat;
 			
+			this.prStartUpdateSink;
 			(1,4..(payload.size-1)).do {|i|
 				var key = payload[i].asSymbol;
 				var value = this.deserialize(payload[i+1], payload[i+2]);
 				this.getObject(key).setValue(value, schedBeats, header.name, doSend:false);
 			};
+			this.prFinishUpdateSink;
+			
 		}, \dropOwn);
 		
 		hub.net.addOSCResponder(\general, "/healValue", {|header, payload|
@@ -416,5 +424,38 @@ MandelSpace : MandelModule {
 	
 	keys {
 		^objects.keys;	
+	}
+	
+	prStartUpdateSink {
+		updateSink = IdentityDictionary();	
+	}
+	
+	prScheduleUpdate {|key, func|
+		updateSink.isNil.if({
+			func.value();
+		}, {
+			updateSink[key].isNil.if {
+				updateSink[key] = func;	
+			};
+		});
+	}
+	
+	prFinishUpdateSink {
+		var oldSink = updateSink;
+		updateSink = IdentityDictionary.new;
+		
+		oldSink.keys.do {|key|
+			updateSink[key] = 0;	
+		};
+		
+		oldSink.values.do {|item|
+			item.value();	
+		};
+		
+		(updateSink.size > oldSink.size).if {
+			this.prFinishUpdateSink;	
+		};
+				
+		updateSink = nil;	
 	}
 }

@@ -18,6 +18,7 @@ MandelValue : AbstractFunction {
 	var <>sourcePullInterval = 0.05;
 	var sourceRoutine;
 	var <>doHeal = true;
+	var lastUpdateBeats;
 	
 	*new {|space, key|
 		^super.new.init(space, key);
@@ -158,7 +159,10 @@ MandelValue : AbstractFunction {
 	}
 	
 	update {|theChanger, what ... moreArgs|
-		this.changed(\value, this.getValue());
+		if(lastUpdateBeats != space.hub.clock.beats) {
+			space.prScheduleUpdate(key, {this.changed(\value, this.getValue())});
+			lastUpdateBeats = space.hub.clock.beats;
+		};
 	}
 	
 	<>> {|proxy, key=\in|
