@@ -11,7 +11,7 @@
   (interactive)
   (sclang-mhub-command "shout"))
 
-(defun sclang-mclock-chat ()
+(defun sclang-mhub-chat ()
   "Send a MandelHub chat message"
   (interactive)
   (sclang-mhub-command "chat"))
