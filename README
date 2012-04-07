@@ -12,7 +12,7 @@ the Mandelbrots. Most things aren't documented well and may be not stable, so
 use at your own risk.
 
 Contains:
-- MandelClock: A communication/tempo sync system.
+- MandelHub: Extension for collaborative and synchronized laptop performances.
 - MacroExpander: A Macro system for the Mac SuperCollider App
 - Plkr: Use the last retreived value from a kr NodeProxy as a value in a Pattern.
 - Phold, Pholda, Pholds, Pholdas: Time based sample-and-hold Patterns.

@@ -1,15 +1,15 @@
-MandelClock.el provides Emacs functions for interaction with the MandelClock. 
+MandelHub.el provides Emacs functions for interaction with the MandelHub. 
 
 Currently there are functions to send chat and shout messages using the minibuffer for input. Just load the file in your .emacs and define some bindings for the functions, e. g.:
 
 ;; load BenoitLib functions (Mac)
-(load-file "~/Library/Application Support/SuperCollider/Extensions/BenoitLib/Emacs/MandelClock.el")
+(load-file "~/Library/Application Support/SuperCollider/Extensions/BenoitLib/Emacs/MandelHub.el")
 
 ;; load BenoitLib functions (Linux)
-(load-file "~/share/SuperCollider/Extensions/BenoitLib/Emacs/MandelClock.el")
+(load-file "~/share/SuperCollider/Extensions/BenoitLib/Emacs/MandelHub.el")
 
-(define-key sclang-mode-map (kbd "C-c s") 'sclang-mclock-shout)
-(define-key sclang-mode-map (kbd "C-c c") 'sclang-mclock-chat)
+(define-key sclang-mode-map (kbd "C-c s") 'sclang-mhub-shout)
+(define-key sclang-mode-map (kbd "C-c c") 'sclang-mhub-chat)
 
 
 TODO:

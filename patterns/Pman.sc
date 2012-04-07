@@ -7,7 +7,7 @@
 	http://github.com/cappelnord/BenoitLib
 	http://www.the-mandelbrots.de
 	
-	A stream of shared MandelClock values.
+	A stream of shared MandelSpace values.
 	
 */
 
@@ -29,7 +29,7 @@ Pman : Pattern {
 
 PmanScale : Pattern {
 	
-	// this is a bad design decision but more practiable. As MandelClock and MandelSpace
+	// this is a bad design decision but more practiable. As MandelHub and MandelSpace
 	// can be seen as a Singleton every PmanScale instance should behave the same at a given time.
 	
 	// Saving this as a classvar doesn't reset the scale at instantiation.
