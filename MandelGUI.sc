@@ -1,5 +1,5 @@
 /*
-	MandelClockGUI
+	MandelGUI
 	(c) 2010 by Patrick Borgeat <patrick@borgeat.de>
 	http://www.cappel-nord.de
 	
@@ -8,7 +8,7 @@
 	http://www.the-mandelbrots.de
 */
 
-MandelClockGUI
+MandelGUI
 {
 	var <window, bpmText, mesText, beatText, bpsText, beatArr, clock,mc;
 	var sj;

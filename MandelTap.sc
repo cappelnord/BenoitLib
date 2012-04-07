@@ -1,5 +1,5 @@
 /*
-	MandelClockTap
+	MandelTap
 	(c) 2011 by Patrick Borgeat <patrick@borgeat.de>
 	http://www.cappel-nord.de
 	
@@ -7,12 +7,12 @@
 	http://github.com/cappelnord/BenoitLib
 	http://www.the-mandelbrots.de
 	
-	Experimental Tapping Interface for MandelClock
+	Experimental Tapping Interface for MandelHub
 	Does not work right quite yet :-)
 	
 */
 
-MandelClockTap {
+MandelTap {
 	
 	var instance, clock, myClock;
 	var window;

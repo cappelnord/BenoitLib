@@ -41,11 +41,11 @@ MandelPlatformLinux : MandelPlatform {
 MandelPlatformOSX : MandelPlatform {
 	
 	onStartup {
-		("osascript '" ++ mc.classPath("mcRegisterGrowl.scpt") ++ "'").unixCmd(postOutput:false);
+		("osascript '" ++ mc.classPath("mandelRegisterGrowl.scpt") ++ "'").unixCmd(postOutput:false);
 	}
 	
 	displayNotification {|title, message|
-		("osascript '" ++ mc.classPath("mcNotify.scpt") ++ "' '" ++ title ++ "' '" ++ message ++ "'").unixCmd(postOutput:false);
+		("osascript '" ++ mc.classPath("mandelNotify.scpt") ++ "' '" ++ title ++ "' '" ++ message ++ "'").unixCmd(postOutput:false);
 	}
 	
 	focusCurrentDocument {
