@@ -12,7 +12,7 @@
 */
 
 MandelValue : AbstractFunction {
-	var <key, <>bdl, <decorator, <relations, quant;
+	var <key, <>bdl, <decorator, quant;
 	var space;
 	var <bus, busDependant;
 	var <>sourcePullInterval = 0.05;
@@ -25,9 +25,7 @@ MandelValue : AbstractFunction {
 	
 	init {|aspace, akey|
 		space = aspace;
-		key = akey.asSymbol;
-		
-		relations = IdentitySet();
+		key = akey.asSymbol;		
 	}
 	
 	value {
@@ -147,7 +145,7 @@ MandelValue : AbstractFunction {
 	prSetBDL {|value, schedBeats, who|		
 		bdl.isNil.if ({
 			bdl = MandelBDL(value, who, schedBeats);
-			bdl.onChangeFunc = {this.prValueHasChanged;};
+			bdl.onChangeFunc = {this.update;};
 			^value;	
 		}, {
 			^bdl.schedule(value, schedBeats, who);
@@ -156,31 +154,11 @@ MandelValue : AbstractFunction {
 	
 	decorator_ {|func|
 		decorator = func;
-		this.prValueHasChanged();	
+		try {this.update;};
 	}
 	
-	addRelation {|father|
-		space.addRelation(father, key);
-	}
-	
-	prReceiveRelation {|son|
-		relations.add(son);
-	}
-	
-	clearRelations {
-		space.clearRelationsFor(key);	
-	}
-	
-	prRemoveRelationsFor {|son|
-		relations.remove(son);
-	}
-	
-	prValueHasChanged {	
-		relations.do {|son|
-			space.prCallSon(son);	
-		};
-		
-		this.changed(key, this.getValue());
+	update {|theChanger, what ... moreArgs|
+		this.changed(\value, this.getValue());
 	}
 	
 	<>> {|proxy, key=\in|

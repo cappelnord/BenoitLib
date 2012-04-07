@@ -304,22 +304,6 @@ MandelSpace : MandelModule {
 		^value.asString;
 	}
 	
-	addRelation {|father, son|
-		var obj = this.getObject(father);
-		obj.prReceiveRelation(son);
-	}
-	
-	clearRelationsFor {|son|
-		objects.do {|obj|
-			obj.prRemoveRelationsFor(son);	
-		}
-	}
-	
-	prCallSon {|key|
-		var obj = this.getObject(key);
-		obj.prValueHasChanged;
-	}
-	
 	onBecomeLeader {|mc|
 		mc.net.addOSCResponder(\leader, "/requestValueSync", {|header, payload|
 			{
@@ -391,13 +375,15 @@ MandelSpace : MandelModule {
 		};
 
 		relations.do {|item|
-			rootFreq.addRelation(item);
-			mtransposeFreq.addRelation(item);
-			ctransposeFreq.addRelation(item);
+			var obj = this.getObject(item);
+			obj.addDependant(rootFreq);
 		};
 		
-		mtransposeFreq.addRelation(\mtranspose);
-		ctransposeFreq.addRelation(\ctranspose);
+		rootFreq.addDependant(mtransposeFreq);
+		rootFreq.addDependant(ctransposeFreq);
+		
+		this.getObject(\mtranspose).addDependant(mtransposeFreq);
+		this.getObject(\ctranspose).addDependant(ctransposeFreq);
 		
 		rootFreq.decorator = {
 			var ev = stdEvent.value();

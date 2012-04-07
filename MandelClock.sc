@@ -89,7 +89,7 @@ MandelClock {
 		^[timeClass, server];
 	}
 			
-	*startLeader {|name, startTempo = 2.0, timeClass, server|
+	*start {|name, startTempo = 2.0, timeClass, server|
 		var general = MandelClock.startGeneral(timeClass, server);
 		(general === instance).if {^instance};
 		general.isNil.if {"COULD NOT START A LEADER MANDELOCK".postln; ^nil;};
@@ -100,7 +100,7 @@ MandelClock {
 			"*** Warning! ***".postln;
 			("Your sclang port is not 57120, it's " ++ NetAddr.langPort ++ "!").postln;
 			"This isn't a problem, but followers must use this port as".postln;
-			"second argument in the startFollower call.".postln;
+			"second argument in the join call.".postln;
 			"".postln; 	
 		};
 		
@@ -108,7 +108,7 @@ MandelClock {
 		^instance;
 	}
 	
-	*startFollower {|name, port=57120, action, timeClass, server|
+	*join {|name, port=57120, action, timeClass, server|
 		
 		var addr;
 		var followSkipJack;
