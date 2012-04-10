@@ -63,7 +63,7 @@ MandelTimeDriver : MandelModule {
 	
 		// only interpret a tick if it's a new one.
 		((ser > clockSerial) || force).if {
-			MandelClock.debug.if {
+			MandelHub.debug.if {
 				(((clockSerial + 1) != ser) && (force.not)).if {
 					this.post("A tick was lost or too late!");
 				};
@@ -102,7 +102,7 @@ MandelTimeDriver : MandelModule {
 								
 				((deviation.abs > thisDeviationTreshold) || tempoHasChanged) .if ({
 					
-					MandelClock.debug.if {
+					MandelHub.debug.if {
 						hub.post("Deviation: " ++ deviation);
 					};
 										
