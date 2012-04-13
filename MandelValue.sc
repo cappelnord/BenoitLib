@@ -218,4 +218,8 @@ MandelValue : AbstractFunction {
 		bdl.isNil.if {^false};
 		^(doHeal && (bdl.setBy == space.hub.name) && ((bdl.setAtBeat) + 4 < space.hub.clock.beats) && (bdl.setAtBeat > 0));
 	}
+	
+	freeRessources {
+		this.freeBus;	
+	}
 }

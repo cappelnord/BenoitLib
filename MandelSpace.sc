@@ -411,14 +411,14 @@ MandelSpace : MandelModule {
 		};
 	}
 	
-	freeAllBuses {
+	freeAllRessources {
 		objects.do {|item|
-			item.clearBus;
+			item.freeRessources;
 		};
 	}
 	
 	onClear {|hub|
-		this.freeAllBuses;
+		this.freeAllRessources;
 		healSJ.stop;
 	}
 	
