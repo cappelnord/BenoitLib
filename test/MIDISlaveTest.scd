@@ -19,8 +19,8 @@
 	MIDIIn.sysrt = {|src, index, data|
 	
 		(index == 10).if {
-			MandelClock.startLeader("MIDISlave");
-			m = MandelClock.instance;	
+			MandelHub.start("MIDISlave");
+			m = MandelHub.instance;	
 			beat = 0;
 			lastTick = Main.elapsedTime;
 			

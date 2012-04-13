@@ -1,13 +1,13 @@
 
 // MandelClock Tests
-MandelClock.debug = true
+MandelHub.debug = true
 
 // #1: Tempo Tests 
-a = MandelClock.new("Leader", 0, 2, "test", leading:true);
+a = MandelHub("Leader", 0, 2, "test", leading:true, timeClass: MandelTimeDriver);
 a.gui;
 a.metro(-1); // left
 
-m = MandelClock.startFollower("Follower", action: {m = MandelClock.instance;});
+m = MandelHub.join("Follower", action: {m = MandelHub.instance;});
 m.gui;
 m.metro(1); // right
 
@@ -15,11 +15,11 @@ m.metro(1); // right
 {
 	a.changeTempo(2);
 	0.5.wait;
-	m.listenToTicks = false;
+	m.time.listenToTicks = false;
 	a.changeTempo(4);
 	0.2.wait;
 	a.changeTempo(2);
-	m.listenToTicks = true; // now m should resync
+	m.time.listenToTicks = true; // now m should resync
 	
 }.fork;
 )
