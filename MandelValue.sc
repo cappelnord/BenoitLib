@@ -92,10 +92,6 @@ MandelValue : AbstractFunction {
 		^{InTrig.kr(this.asBus)};	
 	}
 	
-	ir {
-		^this.getValue();	
-	}
-	
 	quant {
 		quant.isNil.not.if({
 			^quant
@@ -155,7 +151,7 @@ MandelValue : AbstractFunction {
 	
 	decorator_ {|func|
 		decorator = func;
-		try {this.update;};
+		try {this.update;} {};
 	}
 	
 	update {|theChanger, what ... moreArgs|
@@ -221,5 +217,9 @@ MandelValue : AbstractFunction {
 	
 	freeRessources {
 		this.freeBus;	
+	}
+	
+	asString {
+		^("MandelValue: " ++  this.getValue().asString);	
 	}
 }
