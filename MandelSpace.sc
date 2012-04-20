@@ -154,7 +154,7 @@ MandelSpace : MandelModule {
 					list.add(currentEnvironment.at(key));
 				};
 			};
-			
+
 			(list.size >= 2).if {
 				this.setValueList(list, schedBeats, strategy:strategy);
 			};
@@ -190,22 +190,22 @@ MandelSpace : MandelModule {
 	}
 	
 	setValueList {|keyValueList, schedBeats, strategy=\time|
+		var cleanList = List.new;
 		
 		this.prStartUpdateSink;
 		(0,2..(keyValueList.size-1)).do {|i|
 			var key = keyValueList[i].asSymbol;
 			var value = keyValueList[i+1];
 				
-			key.isNil.if ({
-				("Invalid key: " ++ key).error;
-				^nil;
-			}, {
+			(key.isNil ||Ê(key == \nil)).if ({/* NOOP */}, {
 				this.getObject(key).setValue(value, schedBeats, doSend: false);
+				cleanList.add(key);
+				cleanList.add(value);
 			});
 		};		
 		this.prFinishUpdateSink;
 		
-		this.sendValue(keyValueList, schedBeats, strategy);
+		this.sendValue(cleanList, schedBeats, strategy);
 	}
 	
 	sendValue {|keyValueList, schedBeats=0.0, strategy=\time|
@@ -218,7 +218,7 @@ MandelSpace : MandelModule {
 		
 		// encode data
 		(0,3..(keyValueList.size-1)).do {|i|
-			keyValueList[i] = origList[i].asString;
+			keyValueList[i] = origList[oi].asString;
 			serSlots = this.serialize(origList[oi+1]);
 			keyValueList[i+1] = serSlots[0];
 			keyValueList[i+2] = serSlots[1];
@@ -334,11 +334,14 @@ MandelSpace : MandelModule {
 		hub.net.addOSCResponder(\general, "/value", {|header, payload|
 			var name = header.name;
 			var schedBeats = payload[0].asFloat;
+			payload.dump;
 			
 			this.prStartUpdateSink;
 			(1,4..(payload.size-1)).do {|i|
 				var key = payload[i].asSymbol;
 				var value = this.deserialize(payload[i+1], payload[i+2]);
+				("Key: " ++ key).postln;
+				("Value: " ++ value).postln; 
 				this.getObject(key).setValue(value, schedBeats, header.name, doSend:false);
 			};
 			this.prFinishUpdateSink;
