@@ -178,12 +178,13 @@ MandelSpace : MandelModule {
 	
 	setValue {|key, value, schedBeats, strategy=\time|
 		var obj;
-		key = key.asSymbol;
 		
 		key.isNil.if {
 			("Invalid key: " ++ key).error;
 			^nil;	
 		};
+		
+		key = key.asSymbol;
 		
 		obj = this.getObject(key);
 		obj.setValue(value, schedBeats, strategy:strategy);
@@ -194,10 +195,11 @@ MandelSpace : MandelModule {
 		
 		this.prStartUpdateSink;
 		(0,2..(keyValueList.size-1)).do {|i|
-			var key = keyValueList[i].asSymbol;
+			var key = keyValueList[i];
 			var value = keyValueList[i+1];
 				
-			(key.isNil ||Ê(key == \nil)).if ({/* NOOP */}, {
+			key.isNil.if ({/* NOOP */}, {
+				key = key.asSymbol;
 				this.getObject(key).setValue(value, schedBeats, doSend: false);
 				cleanList.add(key);
 				cleanList.add(value);
