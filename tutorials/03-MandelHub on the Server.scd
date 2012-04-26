@@ -2,9 +2,14 @@
 	BenoitLib Tutorial 03: MandelHub on the Server
 	
 	Ways of using MandelHub with scsynth and ProxySpace
+	
+	Execute each code of line seperately and observe the results.
+	If code is enclosed by parenthesis all code is meat to be
+	executed at the same time.
 */
 
-// MandelHub can also control stuff on the server side. So let's boot it up first.
+// MandelHub can also control stuff on the server side.
+// So let's boot it up first.
 s.boot;
 
 // Sometimes it's interessting to have the current tempo on the server. This can
@@ -14,7 +19,7 @@ s.boot;
 
 (
 SynthDef(\tempoBusTest, {
-	Out.ar(0, RLPF.ar(Impulse.ar(m.tempoBus.kr).dup, 8000, 0.1));
+    Out.ar(0, RLPF.ar(Impulse.ar(m.tempoBus.kr).dup, 8000, 0.1));
 }).add;
 )
 
@@ -27,9 +32,9 @@ a.free;
 
 (
 SynthDef(\tempoBusTest2, {
-	var sig = SinOsc.ar(400);
-	var env = EnvGen.kr(Env.perc(0.001, 0.25), Impulse.kr(m.tempoBus.kr));
-	Out.ar(0, sig.dup * env);
+    var sig = SinOsc.ar(400);
+    var env = EnvGen.kr(Env.perc(0.001, 0.25), Impulse.kr(m.tempoBus.kr));
+    Out.ar(0, sig.dup * env);
 }).add;
 )
 
@@ -38,22 +43,26 @@ m.changeTempo(3, 10);
 a.free;
 
 
+
 // *** Using MandelValues on the Server ***
 
-// Keep in mind, that in this tutorial the only one how can change the values is you
-// but that the key point of MandelSpace is collaboration. I hope you still have x
-// assigned to m.space, if not:
+// Keep in mind, that in this tutorial the only one how can change the values
+// is you, but that the key point of MandelSpace is collaboration. I hope you
+// still have x assigned to m.space, if not:
 x = m.space;
 
-// let's initialize a value:
+// Let's initialize a value:
 x[\busDemo] = 440
 
-// You can map a MandelValue to a control rate bus. This is also done automatically
-// everytime this kind of ressource is required, so it's not necessary to call this:
+// You can map a MandelValue to a control rate bus.
+// This is also done automatically everytime this kind of ressource is required,
+// so it's not necessary to call this:
 
 x[\busDemo].asBus
 
-// The MandelValue has different methods to access the bus. .kr creates an OutputProxy.
+// The MandelValue has different methods to access the bus.
+// .kr creates an OutputProxy.
+
 a = {SinOsc.ar(x[\busDemo].kr).dup * 0.1}.play
 x[\busDemo] = 660; // the frequency of the sine wave changed!
 // of course it can be lagged:
@@ -68,14 +77,14 @@ a.free;
 
 // *** Triggering on the Synth with MandelValues ***
 
-// Sometimes it's interessting to trigger events on the synth on each value
+// Sometimes it's interessting to trigger events on the synth at each value
 // change. For this you can use the .tr method.
 
 (
 a.free; a = {
-	var sig = SinOsc.ar(x[\busDemo].kr * 2).dup;
-	var env = EnvGen.ar(Env.perc(0.001, 0.5), x[\busDemo].tr);
-	sig * env * 0.1;
+    var sig = SinOsc.ar(x[\busDemo].kr * 2).dup;
+    var env = EnvGen.ar(Env.perc(0.001, 0.5), x[\busDemo].tr);
+    sig * env * 0.1;
 }.play;
 )
 
@@ -91,13 +100,14 @@ x[\busDemo] = 55.midicps;
 // if it might not be the best idea. But it works ;-)
 (
 Pdef(\busTest, Pbind(
-	\type, \mandelspace,
-	\busDemo, Pwhite(200, 2000),
-	\dur, 1/4
+    \type, \mandelspace,
+    \busDemo, Pwhite(200, 2000),
+    \dur, 1/4
 )).play;
 )
 
 Pdef(\busTest).stop;
+
 
 
 // *** Mapping MandelValues to Node Arguments ***
@@ -106,13 +116,14 @@ Pdef(\busTest).stop;
 
 (
 a.free; a = {|freq=440|
-	SinOsc.ar(freq).dup * 0.1;
+    SinOsc.ar(freq).dup * 0.1;
 }.play;
 )
 
 x[\busDemo] = 220;
 a.map(\freq, x[\busDemo])
 x[\busDemo] = 660;
+
 
 
 // *** Using ProxySpace along with MandelSpace ***
@@ -136,13 +147,14 @@ m.changeTempo(0.75, 10);
 ~snd.free;
 
 
-// There are some more experimental features:
+
+// *** Experimental Features ***
 
 // Sample and publish a kr NodeProxy to a MandelValue
 ~lfo = {SinOsc.kr(0.1)};
 ~lfo <>> x[\lfo];
 
-x[\lfo].value; // execute multiple times
+x[\lfo].value; // execute multiple times to observe
 
 // <>> operator also kind of works in the other direction.
 

@@ -1,14 +1,18 @@
 /*
 	BenoitLib Tutorial 02: Sharing Data with MandelSpace
+	
+	Execute each code of line seperately and observe the results.
+	If code is enclosed by parenthesis all code is meat to be
+	executed at the same time.
 */
 
 // *** What is MandelSpace? ***
 
-// MandelSpace is in essence a Dictionary-alike structure that is shared
+// MandelSpace is in essence a Dictionary-like structure that is shared
 // between all members of the MandelHub. Any member can set any value at any
-// time. Values can't only be set at instant but also can be scheduled. Values
+// time. Values can't only be set instantly but also can be scheduled. Values
 // are wrapped into MandelValues which know about the present and future of
-// the MandelValue and has othe features.
+// the MandelValue and has some other features.
 
 // Keys in the MandelSpace are restricted to symbols.
 
@@ -37,7 +41,8 @@ x[\tutorial] = 10;
 x[\tutorial]; // MandelValue: 10
 
 // You can retreive the value either with the getValue or the value method.
-// The value method is especially interessting, as MandelValues act like functions.
+// The value method is especially interessting, as MandelValues
+// act like functions.
 
 x[\tutorial].value; // 10
 
@@ -75,13 +80,15 @@ g.next; // 11
 x[\offset] = 11;
 g.next; // 16
 
+// Of course you can also use Pman and MandelValues inside Pbinds.
+
 
 
 // *** Scheduling Values ***
 
 // We can schedule value changes in the future. This is not only handy
-// but defies the problem of latency. The scheduling takes place on every
-// user and the message is sent immediately. If there is enough time
+// but defies the problem of latency. The scheduling takes place on the client
+// side and the message is sent immediately. If there is enough time
 // the message is sent multiple times to assure arrival. As all users share
 // a synchronized clock we can be sure, that a value change takes place e.g.
 // at the beginning of the next bar. This is vital for harmonic progressions.
@@ -91,8 +98,10 @@ g.next; // 16
 
 x[\sched].setValue(10);
 x[\sched].value; // OK, it's 10 now.
-x[\sched].setValue(100, m.clock.beats + 8); // the value changes 8 beats from now
-x[\sched].value; // If you're fast enough it's still 10. If you waited 8 beats it's 100.
+x[\sched].setValue(100, m.clock.beats + 8);
+// the value changes 8 beats from now
+x[\sched].value;
+// If you're fast enough it's still 10. If you waited 8 beats it's 100.
 
 // If you want value changes only to occur at the beginning of a bar you
 // can set a quant. Look in the Quant help file for more info.
@@ -102,8 +111,8 @@ x[\sched].value; // If you're fast enough it's still 10. If you waited 8 beats i
 x[\sched].quant = 4;
 x[\sched] = 200;
 x[\sched].value; // observe fast enough and it might be still 100.
-			   // will change to 200 at the start of the next bar.
-			   
+                 // will change to 200 at the start of the next bar.
+
 // You can clear the quant by assigning nil.
 
 x[\sched].quant = nil;
@@ -112,7 +121,7 @@ x[\sched].quant = nil;
 
 // *** Decorator Functions ***
 
-// Each MandelValue can have a local decorator function. The decorator
+// A MandelValue can have a local decorator function. The decorator
 // acts as a filter for the value.
 
 x[\dec] = 5;
@@ -122,13 +131,13 @@ x[\dec] = 2;
 x[\dec].value; // 200
 
 // Keep in mind: Decorator functions are local only.
-// You can override the Decorator function:
+// You can override the decorator function:
 
 x[\dec].getValue(false);
 
 
 
-// *** MandeValues as Models ***
+// *** MandeValues as Observables ***
 
 // MandelValues can act as models: You can add dependant objects
 // or functions to a MandelValue. The dependant is called on each
@@ -136,16 +145,16 @@ x[\dec].getValue(false);
 
 (
 x[\dep].addDependant({|obj, what, value|
-	"ACTION!".postln;
-	obj.postln;
-	what.postln;
-	value.postln;	
+    "ACTION!".postln;
+    obj.postln;
+    what.postln;
+    value.postln;
 });
 )
 
-x[\dep] = 100
+x[\dep] = 100;
 
-// Let's try it with a scheduled value change:
+// Let's try this with a scheduled value change:
 
 x[\dep].setValue(200, m.clock.beats + 8); // wait for it!
 
@@ -160,9 +169,9 @@ x[\dep].setValue(5000, m.clock.beats + 8); // wait for it
 
 // *** Synthesized Values ***
 
-// Combining dependencies and a decorator function you can create
+// By combining dependencies with a decorator function you can create
 // synthesized MandelValues. The decorator function hereby computes
-// a value by processing other MandelValues.
+// a value by processing other MandelValues (or generally other stuff).
 
 x[\one] = 10;
 x[\two] = 10;
@@ -195,47 +204,49 @@ x[\one] = 50; // now our function gets called when one of its components
 Pdef(\test).quant = 4;
 
 Pdef(\test, Pbind(
-	\type, \mandelspace,
-	\test, Pwhite(0,100,inf),
-	\dur, 1
+    \type, \mandelspace,
+    \test, Pwhite(0,100,inf),
+    \dur, 1
 ));
 )
 
 Pdef(\test).play;
 
-// x[\test] is now set to a random number from 0 to 100 on each beat.
+// x[\test] is now set to a random number ranging from 0 to 100 on each beat.
 
 x[\test].value; // execute multiple times!
 
 Pdef(\test).stop;
 
+
+
 // *** Schedule Values through Patterns ***
 
 // You can only guarantee, that values are transmitted in time if
-// they're scheduled for the future, as all users have received
+// they're scheduled to the future, as all users will have received
 // the transmission then.
 
 // In Events/Patterns you can add a deltaSched key that isn't transmitted
-// as a value but schedules the value for the <jeweiligen> time in beats
-// to the future. Together with a quant and a negative offset in quant, 
+// as a value but schedules the value for the given time in beats
+// to the future. Together with a negative offset in quant and a 
 // matching deltaSched, you can assure, that the everyone received the
-// value on the next bar.
+// value on the next downbeat.
 
 (
 Pdef(\test2).quant = [4, -1];
 
 Pdef(\test2, Pbind(
-	\type, \mandelspace,
-	\deltaSched, 1,
-	\myDeg, Pseq([0,1,2,3,4,4],inf),
-	\dur, 4
+    \type, \mandelspace,
+    \deltaSched, 1,
+    \myDeg, Pseq([0,1,2,3,4,4],inf),
+    \dur, 4
 ));
 
 Pdef(\test2Play).quant = 4;
 
 Pdef(\test2Play, Pbind(
-	\degree, Pman(\myDeg),
-	\dur, 1
+    \degree, Pman(\myDeg),
+    \dur, 1
 ));
 )
 

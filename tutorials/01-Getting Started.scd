@@ -1,5 +1,9 @@
 /*
 	BenoitLib Tutorial 01: Getting Started with MandelHub.
+	
+	Execute each code of line seperately and observe the results.
+	If code is enclosed by parenthesis all code is meat to be
+	executed at the same time.
 */
 
 // *** Starting your MandelHub Instance ***
@@ -7,9 +11,10 @@
 // Before using MandelHub the group has to decide whoever is
 // the leader (only one person) and who follows the leader (the rest).
 // Every user in MandelHub has the same privileges, but the leader's
-// machine carries out some tasks, like managing the network and keeping tempo.
+// machine is responsible for some tasks, like managing the network
+// and keeping tempo.
 
-// To start a MandelHub as a Leader you just call the MandelHub:start method
+// To start MandelHub as a Leader you just call the MandelHub:start method
 // with your name as an additional String argument.
 // By convention the MandelHub instance is assigned to m for easy access.
 
@@ -25,18 +30,16 @@ m = MandelHub.start("Tutorial-Leader");
 // (don't do this if you're already the leader)
 MandelHub.join("Tutorial-Follower", action: {m = MandelHub.instance});
 
-// MandelHub normally manages ports automatically. But if the current leader 
+// MandelHub manages different ports automatically. But if the current leader 
 // isn't listening either on 57120 or the followers NetAddr.langPort the leaders
 // listening port has to be specified.
 
-// (don't do this if you're already the leader)
+// (don't do this if you're already the leader or a follower)
 MandelHub.join("Tutorial-Follower", 57121, action: {m = MandelHub.instance});
 
-// Off course this is all code that should be prepared before a performance.
-
-// After MandelHub is started your Default TempoClock is replaced by a new
-// TempoClock under MandelHubs control. You and your fellows now should have
-// a synchronized clock.
+// After MandelHub is started your default TempoClock is replaced by a new
+// TempoClock under MandelHubs control. You and everyone else in the
+// MandelHub should now have a synchronized clock.
 
 
 
@@ -50,8 +53,8 @@ m.takeLead;
 
 // *** A GUI? Neat! ***
 
-// Some functions of MandelHub can be exposed by a GUI. It also helps as a 
-// visual cue for the timing and tempo.
+// Some functions of MandelHub are exposed by a GUI. It's also a nice visual
+// cue for timing and tempo.
 
 m.gui;
 
@@ -63,7 +66,7 @@ m.gui;
 // *** Chatting and Shouting ***
 
 // Chatting and Shouting differ in the visibility of the posted messages. Chat
-// messages are only posted, while Shouted messages are displayed more distinct.
+// messages are only posted, while Shouted messages are displayed more visible.
 // Currently this is done with Growl on Mac OS X and notify-send on Linux.
 // Install these tools if you want to have a nice visual cue for the messages.
 
@@ -81,7 +84,7 @@ m.shoutWindow;
 // *** Changing the tempo ***
 
 // Everybody can change the tempo (not only the leader). This can be done either
-// in an instant or with a linear transition over time. The tempo is set in BPS.
+// instantly or with a linear transition over time. The tempo is set in BPS.
 // (observe on GUI)
 
 m.changeTempo(90/60); // now 90 BPM
@@ -89,7 +92,7 @@ m.changeTempo(140/60, 30); // linear transition to 140BPM over 30 seconds
 
 
 
-// *** Cleanin up ***
+// *** Cleaning up ***
 
 // MandelHub is designed as a singleton. If you need to restart your MandelHub
 // you first need to clear the old one. Off course you don't want to do that 
