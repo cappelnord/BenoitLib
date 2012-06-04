@@ -336,7 +336,6 @@ MandelSpace : MandelModule {
 		hub.net.addOSCResponder(\general, "/value", {|header, payload|
 			var name = header.name;
 			var schedBeats = payload[0].asFloat;
-			payload.dump;
 			
 			this.prStartUpdateSink;
 			(1,4..(payload.size-1)).do {|i|
