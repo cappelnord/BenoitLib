@@ -44,11 +44,11 @@ MandelTap {
 	init {|a_hub|
 		
 		var dec;
-		hub = a_hub ? MandelClock.instance;
+		hub = a_hub ? MandelHub.instance;
 		clock = hub.clock;
 		myClock = TempoClock.new(clock.tempo);
 		
-		window = Window.new("MandelClockTap", Rect(400,400,288,45), false);
+		window = Window.new("MandelTap", Rect(400,400,288,45), false);
 		dec = window.addFlowLayout(10@10, 5@5);
 		
 		button = Button(window, 180@20).states_(
