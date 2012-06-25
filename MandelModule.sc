@@ -34,4 +34,8 @@ MandelModule {
 	onClear {|hub|
 		
 	}
+	
+	onSyncRequest {|hub|
+		
+	}
 }

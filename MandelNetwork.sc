@@ -85,10 +85,10 @@ MandelNetwork : MandelModule {
 			hub.post(header.name ++ " requested port " ++ payload[0]);
 			this.sendPublishPorts;
 		});
-		
-		this.addOSCResponder(\leader, "/publishPorts", {|header, payload|
-			this.sendSystemPorts;
-		});	
+	}
+	
+	onSyncRequest {|hub, header|
+		this.sendSystemPorts;		
 	}
 	
 	/*

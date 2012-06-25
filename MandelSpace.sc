@@ -311,9 +311,8 @@ MandelSpace : MandelModule {
 		^value.asString;
 	}
 	
-	onBecomeLeader {|hub|
-		hub.net.addOSCResponder(\leader, "/requestValueSync", {|header, payload|
-			{
+	onSyncRequest {|hub|
+		{
 			0.1.wait;
 			objects.keys.do {|key|
 				var value = objects.at(key).bdl;
@@ -328,8 +327,7 @@ MandelSpace : MandelModule {
 					};
 				};
 			};
-			}.fork; // delay a little bit and add wait times
-		}, \dropOwn);	
+		}.fork; // delay a little bit and add wait time
 	}
 	
 	onStartup {|hub|
@@ -355,10 +353,6 @@ MandelSpace : MandelModule {
 			var value = this.deserialize(payload[2], payload[3]);
 			this.getObject(key).tryHealValue(value, schedBeats, header.name);
 		}, \dropOwn);
-		
-		hub.leading.not.if {
-			hub.net.sendMsgCmd("/requestValueSync"); // request MandelSpace sync from the leader
-		}
 	}
 	
 	envir {

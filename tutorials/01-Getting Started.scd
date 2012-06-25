@@ -58,6 +58,11 @@ m.takeLead;
 
 m.gui;
 
+// There is a timer which shows how long the current MandelHub exists. 
+// You can also reset your timer, to know how long you've allready played
+
+m.timer.reset;
+
 // You see the Chat and Shout buttons? They make it easy to communicate with 
 // your fellow live coders.
 

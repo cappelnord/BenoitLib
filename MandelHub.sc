@@ -68,6 +68,7 @@ MandelHub {
 	var <tools;
 	var <platform;
 	var <time;
+	var <timer;
 	
 	var <>server;
 	
@@ -172,7 +173,8 @@ MandelHub {
 			this.prBecomeLeader;
 		},{
 			this.prBecomeFollower;	
-			{this.sendHello}.defer(1);
+			{this.sendRequestSync}.defer(1);
+			{this.sendHello}.defer(1.5);
 		});
 		
 		this.prDoCmdPeriod;
@@ -187,6 +189,8 @@ MandelHub {
 		modules.add(space);
 		tools = MandelTools(this);
 		modules.add(tools);
+		timer = MandelTimer(this);
+		modules.add(timer);
 		
 		// platform specific
 		Platform.case(
@@ -204,6 +208,10 @@ MandelHub {
 		modules.add(platform);
 		
 		modules.do {|module| module.onStartup(this) };	
+	}
+	
+	sendRequestSync {
+		this.net.sendMsgBurst("/requestSync", \critical);
 	}
 	
 	sendHello {
@@ -358,7 +366,6 @@ MandelHub {
 	
 	// responders only for leaders
 	prLeaderResponders {
-		
 		this.net.addOSCResponder(\leader, "/requestTempo", {|header, payload|
 			this.post(header.name ++ " requested a tempo change to " ++ payload[0].asFloat ++ " BPS");
 			
@@ -369,6 +376,10 @@ MandelHub {
 				this.post("Tempochange denied.");
 			});
 		});
+		
+		this.net.addOSCResponder(\leader, "/requestSync", {|header, payload|
+			modules.do {|module| module.onSyncRequest(this, header);};
+		}, \dropOwn);
 	}
 	
 	// responders for leaders and followers

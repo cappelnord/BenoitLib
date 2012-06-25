@@ -10,7 +10,7 @@
 
 MandelGUI
 {
-	var <window, bpmText, mesText, beatText, bpsText, beatArr, clock, hub;
+	var <window, bpmText, mesText, beatText, timerText, beatArr, clock, hub;
 	var sj;
 	var stillOpen = true;
 	
@@ -31,8 +31,8 @@ MandelGUI
 		window = Window.new("MandelGUI", Rect(pos.x,pos.y,288,65), false);
 		window.addFlowLayout(10@10,5@5);
 		
-		bpmText = StaticText(window, 50@20);
-		StaticText(window,45@20).string_("BPM");
+
+		timerText = StaticText(window, 100@20);
 		mesText = StaticText(window, 45@20);
 		beatText = StaticText(window, 45@20);
 		
@@ -44,8 +44,8 @@ MandelGUI
 		
 		window.view.decorator.nextLine;
 		
-		bpsText = StaticText(window, 50@20);
-		StaticText(window,45@20).string_("BPS");
+		bpmText = StaticText(window, 50@20);
+		StaticText(window,45@20).string_("BPM");
 		
 		beatArr = nil.dup(4);
 		
@@ -65,6 +65,7 @@ MandelGUI
 			
 			var tempo = hub.externalTempo;
 			var color = Color.black;
+			var minutes, seconds;
 			
 			MandelHub.debug.if {
 				tempo = hub.tempo;
@@ -79,10 +80,13 @@ MandelGUI
 			};
 			
 			bpmText.stringColor_(color);
-			bpsText.stringColor_(color);
 			
 			bpmText.string_((tempo * 60).asString[0..5]);
-			bpsText.string_(tempo.asString[0..5]);
+			
+			minutes = (hub.timer.elapsedTime / 60).floor.asString.padLeft(2, "0");
+			seconds = (hub.timer.elapsedTime % 60).floor.asString.padLeft(2, "0"); 
+			
+			timerText.string_(minutes ++ ":" ++ seconds);
 			
 			beatText.string_((clock.beats % 4 + 1).asString[0..4]);
 			
