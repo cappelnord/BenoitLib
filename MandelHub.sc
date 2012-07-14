@@ -152,7 +152,7 @@ MandelHub {
 		server = a_server;
 		
 		// start the clock
-		clock = TempoClock.new(startTempo, startBeat, queueSize:4096);
+		clock = MandelClock.new(startTempo, startBeat).hub_(this);
 		clock.permanent_(true);
 		
 		TempoClock.default = clock;		
@@ -352,7 +352,7 @@ MandelHub {
 		};
 		
 		tempo = newTempo;
-		clock.tempo_(newTempo);
+		clock.commitTempo(newTempo);
 		this.changed(\tempo, newTempo);
 		leading.if {externalTempo = newTempo;};
 	}

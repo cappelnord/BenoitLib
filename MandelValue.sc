@@ -50,7 +50,7 @@ MandelValue : AbstractFunction {
 	}
 	
 	asBusPlug {
-		^BusPlug.for(this.asBus)	;
+		^BusPlug.for(this.asBus);
 	}
 	
 	prCreateBus {
