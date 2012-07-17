@@ -300,7 +300,7 @@ MandelSpace : MandelModule {
 			(serType == \SM).if {^value.asSymbol;};
 			(serType == \CS).if {
 				allowRemoteCode.if({
-					^value.interpret;
+					^value.asString.interpret;
 				}, {
 					"MandelSpace received remote code but wasn't allowed to execute.\nSet allowRemoteCode to true if you know what you're doing!".warn;
 				});	
@@ -339,8 +339,8 @@ MandelSpace : MandelModule {
 			(1,4..(payload.size-1)).do {|i|
 				var key = payload[i].asSymbol;
 				var value = this.deserialize(payload[i+1], payload[i+2]);
-				("Key: " ++ key).postln;
-				("Value: " ++ value).postln; 
+				// ("Key: " ++ key).postln;
+				// ("Value: " ++ value).postln; 
 				this.getObject(key).setValue(value, schedBeats, header.name, doSend:false);
 			};
 			this.prFinishUpdateSink;
