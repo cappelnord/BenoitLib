@@ -201,22 +201,22 @@ x[\one] = 50; // now our function gets called when one of its components
 // and \deltaSched) is set in MandelSpace.
 
 (
-Pdef(\test).quant = 4;
+Pdef(\pdef).quant = 4;
 
-Pdef(\test, Pbind(
+Pdef(\pdef, Pbind(
     \type, \mandelspace,
     \test, Pwhite(0,100,inf),
     \dur, 1
 ));
 )
 
-Pdef(\test).play;
+Pdef(\pdef).play;
 
 // x[\test] is now set to a random number ranging from 0 to 100 on each beat.
 
 x[\test].value; // execute multiple times!
 
-Pdef(\test).stop;
+Pdef(\pdef).stop;
 
 
 
