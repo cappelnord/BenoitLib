@@ -145,22 +145,20 @@ MandelSpace : MandelModule {
 			var xs = x.asString;
 			var firstChar = xs[0];
 			var scale = \minor;
-			var root = 0;
+			var ct = 0;
 			firstChar.isUpper.if({scale = \major;});
 	
 			((firstChar == $m) || (firstChar == $M)).if({
-				root = xs[1..].asInteger;
+				ct = xs[1..].asInteger;
 			}, {
 				var acc = 0;
 				var lastChar = xs[xs.size - 1];
 				(lastChar == $s).if {acc = 1;};
 				(lastChar == $b).if {acc = -1;};
-				(acc != 0).if {
-					xs = xs[0..xs.size-2];
-				};
-				root = degreeDict[xs.toLower.asSymbol] + acc;
+				(acc != 0).if {xs = xs[0..xs.size-2];};
+				ct = degreeDict[xs.toLower.asSymbol] + acc;
 			});
-			[root, scale];
+			[ct, scale];
 		};
 		
 		Event.addEventType(\mandelspace, {
@@ -182,7 +180,7 @@ MandelSpace : MandelModule {
 			if(currentEnvironment[\harmony] != nil) {
 				var rs = decodeHarmony.value(currentEnvironment[\harmony]);
 				((rs[0] != nil) && (rs[1] != nil)).if ({
-					currentEnvironment[\root] = rs[0];
+					currentEnvironment[\ctranspose] = rs[0];
 					currentEnvironment[\scale] = rs[1];
 				}, {
 					("Could not decode harmony: " ++ currentEnvironment[\harmony]).error;
