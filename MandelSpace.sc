@@ -35,7 +35,7 @@ MandelSpace : MandelModule {
 	*getValueOrDefault {|key|
 		MandelHub.instance.notNil.if {
 			^MandelHub.instance.space.getValue(key);
-		}�{
+		} {
 			^MandelSpace.defaultDict.at(key);
 		}
 	}
