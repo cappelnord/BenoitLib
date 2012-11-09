@@ -66,6 +66,31 @@ Pdef(\hmTest).play;
 // now change some values in the harmonyMaster Pdef
 // (e.g. \major instead of \minor) and you can hear the harmonic changes.
 
+// To be even more musical there is a magic \harmony key in \mandelspace
+// events. It takes two kindes of notation and sets \root and \scale
+// accordingly.
+
+// Notation 1 takes Symbols from roman number analysis (based on c-major).
+// You can add a s or b at the end to add an accidential.
+// * \V    --> root: 7, scale: \major
+// * \iii  --> root: 4, scale: \minor
+// * \IIIb --> root: 3, scale: \major
+
+// Notation 2 just mixes the root number with a uppercase M for major
+// and a downcase m for minor:
+// * \M7   --> root: 7, scale: \major
+// * \m4   --> root: 4, scale: \minor
+// * \M3   --> root: 3, scale: \major
+
+( // is \harmonyMaster still running?
+Pdef(\harmonyMaster, Pbind(
+    \type, \mandelspace,
+    \deltaSched, 1,
+    \harmony, Pseq([\i, \iv, \V, \i], inf),
+    \dur, 4
+));
+)
+
 Pdef(\harmonyMaster).stop; Pdef(\hmTest).stop;
 
 
