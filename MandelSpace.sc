@@ -35,7 +35,7 @@ MandelSpace : MandelModule {
 	*getValueOrDefault {|key|
 		MandelHub.instance.notNil.if {
 			^MandelHub.instance.space.getValue(key);
-		}Ê{
+		}ï¿½{
 			^MandelSpace.defaultDict.at(key);
 		}
 	}
@@ -132,6 +132,30 @@ MandelSpace : MandelModule {
 	}
 	
 	prBuildEvents {
+		var degreeDict = (
+			\i: 0,
+			\ii: 2,
+			\iii: 4,
+			\iv: 5,
+			\v: 7,
+			\vi: 9,
+			\vii: 11	
+		);
+		var decodeHarmony = {|x|
+			var xs = x.asString;
+			var firstChar = xs[0];
+			var scale = \minor;
+			var root = 0;
+			firstChar.isUpper.if({scale = \major;});
+	
+			((firstChar == $m) ||Â (firstChar == $M)).if({
+				root = xs[1..].asInteger;
+			}, {
+				root = degreeDict[xs.toLower.asSymbol];
+			});
+			[root, scale];
+		};
+		
 		Event.addEventType(\mandelspace, {
 			var schedBeats;
 			var strategy = \time;
@@ -147,9 +171,19 @@ MandelSpace : MandelModule {
 			((~dur <= 0.1) && (schedBeats == 0.0)).if {
 				strategy = \stream;	
 			};
+
+			if(currentEnvironment[\harmony] != nil) {
+				var rs = decodeHarmony.value(currentEnvironment[\harmony]);
+				((rs[0] != nil) && (rs[1] != nil)).if ({
+					currentEnvironment[\root] = rs[0];
+					currentEnvironment[\scale] = rs[1];
+				}, {
+					("Could not decode harmony: " ++ currentEnvironment[\harmony]).error;
+				});
+			};
 			
 			currentEnvironment.keys.do {|key|
-				#[\type, \dur, \removeFromCleanup, \deltaSched].includes(key).not.if {
+				#[\type, \dur, \removeFromCleanup, \deltaSched, \harmony].includes(key).not.if {
 					list.add(key);
 					list.add(currentEnvironment.at(key));
 				};
