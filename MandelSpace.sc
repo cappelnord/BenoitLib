@@ -151,7 +151,14 @@ MandelSpace : MandelModule {
 			((firstChar == $m) || (firstChar == $M)).if({
 				root = xs[1..].asInteger;
 			}, {
-				root = degreeDict[xs.toLower.asSymbol];
+				var acc = 0;
+				var lastChar = xs[xs.size - 1];
+				(lastChar == $s).if {acc = 1;};
+				(lastChar == $b).if {acc = -1;};
+				(acc != 0).if {
+					xs = xs[0..xs.size-2];
+				};
+				root = degreeDict[xs.toLower.asSymbol] + acc;
 			});
 			[root, scale];
 		};
