@@ -148,7 +148,7 @@ MandelSpace : MandelModule {
 			var root = 0;
 			firstChar.isUpper.if({scale = \major;});
 	
-			((firstChar == $m) || (firstChar == $M)).if({
+			((firstChar == $m) || (firstChar == $M)).if({
 				root = xs[1..].asInteger;
 			}, {
 				root = degreeDict[xs.toLower.asSymbol];
