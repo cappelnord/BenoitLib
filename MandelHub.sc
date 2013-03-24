@@ -1,6 +1,6 @@
 /*
 	MandelHub
-	(c) 2010-11 by Patrick Borgeat <patrick@borgeat.de>
+	(c) 2010-13 by Patrick Borgeat <patrick@borgeat.de>
 	http://www.cappel-nord.de
 	
 	Part of BenoitLib
@@ -382,16 +382,22 @@ MandelHub {
 		}, \dropOwn);
 	}
 	
+	prPostChat {|name, text|
+		var time = Date.localtime.format("%H:%M:%S");
+		(time ++ " - " ++ name ++ ": " ++ text).postln;
+	}
+	
 	// responders for leaders and followers
 	prGeneralResponders {
 		
 		this.net.addOSCResponder(\general, "/chat", {|header, payload|
-			 (header.name ++ ":  " ++ payload[0].asString).postln;
+			this.prPostChat(header.name, payload[0].asString);
 		});
 		
 		this.net.addOSCResponder(\general, "/shout", {|header, payload|
-			 (header.name ++ " (shout):  " ++ payload[0].asString).postln;
-			 this.displayShout(header.name, payload[0].asString);
+			var string = payload[0].asString;
+			this.prPostChat(header.name ++ " (shout)", string);
+			this.displayShout(header.name, string);
 		});
 		
 		this.net.addOSCResponder(\general, "/hello", {|header, payload|
