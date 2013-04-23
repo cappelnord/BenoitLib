@@ -63,7 +63,7 @@ StringInputDialog {
 			.states_([[msg,Color.black,Color.clear]])
 			.action_({|button| this.doAction;});
 		
-		(GUI.scheme == CocoaGUI).not.if({	
+		(GUI.id == \cocoa).not.if({	
 			txt.keyDownAction_({ |b, char, modifiers, unicode, keycode|
 				
 				// return
