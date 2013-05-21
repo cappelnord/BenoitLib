@@ -20,6 +20,8 @@ MandelValue : AbstractFunction {
 	var <>doHeal = true;
 	var lastUpdateBeats;
 	
+	var dropFunction = nil;
+	
 	*new {|space, key|
 		^super.new.init(space, key);
 	}
@@ -139,14 +141,12 @@ MandelValue : AbstractFunction {
 	}
 	
 	// maybe remove this, move to setValue
-	prSetBDL {|value, schedBeats, who|		
-		bdl.isNil.if ({
-			bdl = MandelBDL(value, who, schedBeats);
+	prSetBDL {|value, schedBeats, who|			
+		bdl.isNil.if {
+			bdl = MandelBDL(nil, "Nobody", 0);
 			bdl.onChangeFunc = {this.update;};
-			^value;	
-		}, {
-			^bdl.schedule(value, schedBeats, who);
-		});		
+		};
+		^bdl.schedule(value, schedBeats, who);
 	}
 	
 	decorator_ {|func|
@@ -220,6 +220,35 @@ MandelValue : AbstractFunction {
 	}
 	
 	asString {
-		^("MandelValue: " ++  this.getValue().asString);	
+		^("MandelValue: " ++  this.getValue().asString);
+	}
+	
+	
+	
+	drop {|schedBeats|
+		this.setValue("Last drop issued by" + space.hub.name + "at" + space.hub.clock.beats, schedBeats);
+	}
+	
+	setDrop {|drop|
+		var fired = false;
+		
+		dropFunction.isNil.not.if {
+			this.clearDrop();	
+		};
+		
+		dropFunction = {
+			fired.not.if {
+				fired = true;
+				drop.value();
+				{this.clearDrop}.defer;
+			};
+		};
+		
+		this.addDependant(dropFunction);
+	}
+	
+	clearDrop {
+		this.removeDependant(dropFunction);
+		dropFunction = nil;	
 	}
 }

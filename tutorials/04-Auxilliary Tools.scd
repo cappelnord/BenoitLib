@@ -122,6 +122,38 @@ a.free;
 
 
 
+// *** Drops ***
+
+// Drops are One-Shot Dependants of MandelValues. MandelValues also only can
+// have one drop at a time (setting a new one will remove the old one).
+
+x[\meinDrop].setDrop({"No!".postln;});
+x[\meinDrop].setDrop({"DROP!".postln;}); // this will overwrite the No! drop.
+
+// To give the interface more meaning MandelValues have a drop method.
+
+x[\meinDrop].drop;
+
+// Execeute again, you'll see, that drops are only fired once!
+// In order to make sure, that drops are received in time you always should
+// schedule ahead of time. This can either be done with Quants or with an
+// absolute beat time as an argument to drop;
+
+x[\meinDrop].setDrop({"DROP!".postln;});
+x[\meinDrop].drop(m.clock.beats + 8); // drop 8 beats in the future
+
+// If drop receives no argument the Quant is used (if set). If not you're
+// responsible to quant yourself.
+
+// You can also clear your drop:
+
+x[\meinDrop].setDrop({"DRPO!".postln;});
+x[\meinDrop].clearDrop;
+
+x[\meinDrop].drop;
+
+
+
 // *** Metronome ***
 
 // It's sometimes handy to check the sync with a metronome.
