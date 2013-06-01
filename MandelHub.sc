@@ -231,11 +231,11 @@ MandelHub {
 	}
 	
 	chat {|message|
-		this.net.sendMsgBurst("/chat", \important, message);
+		this.net.sendMsgBurst("/chat", \important, message.asString);
 	}
 	
 	shout {|message|
-		this.net.sendMsgBurst("/shout", \important, message);
+		this.net.sendMsgBurst("/shout", \important, message.asString);
 	}
 	
 	changeTempo {|newTempo, dur=0|
