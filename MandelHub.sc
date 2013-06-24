@@ -230,12 +230,22 @@ MandelHub {
 		};
 	}
 	
+	prDispatchMessage {|message, cmd|
+		message = message.asString;
+		(message == "").if {
+			message = nil;	
+		};
+		(message != nil).if {
+			this.net.sendMsgBurst(cmd, \important, message);
+		};
+	}
+	
 	chat {|message|
-		this.net.sendMsgBurst("/chat", \important, message.asString);
+		this.prDispatchMessage(message, "/chat");
 	}
 	
 	shout {|message|
-		this.net.sendMsgBurst("/shout", \important, message.asString);
+		this.prDispatchMessage(message, "/shout");
 	}
 	
 	changeTempo {|newTempo, dur=0|
