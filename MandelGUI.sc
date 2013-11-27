@@ -112,8 +112,10 @@ MandelGUI
 	}
 	
 	prClearBeats {
-		beatArr.do {|item|
-			item.background = Color.grey;
+		stillOpen.if {
+			beatArr.do {|item|
+				item.background = Color.grey;
+			};
 		};
 	}
 	

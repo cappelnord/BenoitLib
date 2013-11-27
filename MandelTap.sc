@@ -77,8 +77,7 @@ MandelTap {
 		window.front;
 		
 		window.onClose_({
-			hub.tapInstance = nil;
-			open = false;
+			this.close();
 		});
 		
 		this.progress;	
@@ -92,6 +91,12 @@ MandelTap {
 		myClock.tempo_(tempo);
 		
 		{open.if{bpmText.string_(bpm.asString)};}.defer;
+	}
+	
+	close {
+		hub.tapInstance = nil;
+		open = false;
+		window.close;
 	}
 	
 	setBeat {|a_beat|

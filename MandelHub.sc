@@ -437,6 +437,12 @@ MandelHub {
 		
 		modules.do {|module| module.onClear(this)};
 		
+		// reinstate a std TempoClock and clear old TempoClock
+		TempoClock.default = TempoClock(clock.tempo, clock.beats, clock.seconds);
+		clock.clear;
+		
+		this.closeGUI;
+		
 		instance = nil;		
 	}
 	
@@ -485,7 +491,11 @@ MandelHub {
 	closeGUI {
 		guiInstance.notNil.if {
 			guiInstance.close;
-		}	
+		};
+		
+		tapInstance.notNil.if {
+			tapInstance.close;
+		};
 	}
 	
 	post {|message|
