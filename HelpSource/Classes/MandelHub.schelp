@@ -1,0 +1,141 @@
+TITLE:: MandelHub
+summary:: Network connection and syncrhonisation kit developed for Benoit and the Mandelbrots by Patrick Borgeat.
+categories:: Libraries>BenoitLib
+related:: Classes/TempoClock
+
+DESCRIPTION::
+The MandelHub was developed over the years, starting as the MandelClock, focused on TempoClock network synchronisation. Now it is a central hub for using MandelClock, MandelSpace and other features provided in BenoitLib.
+
+CLASSMETHODS::
+
+METHOD:: instance
+Returns the existing instance of MandelHub. There can only be one instance of MandelHub.
+
+returns:: MandelHub
+
+METHOD:: start
+Starts the MandelHub as a leader.
+
+ARGUMENT:: name
+A unique name (Symbol)
+
+ARGUMENT:: startTempo
+Starting tempo for the MandelClock in beats per second. Defaults to 2 (120 bpm).
+
+ARGUMENT:: timeClass
+Timing agent. Defaults to MandelTimeDriver.
+
+ARGUMENT:: server
+Server where the buses and control proxies will be allocated. Defaults to Server.default.
+
+returns:: MandelHub instance
+
+METHOD:: join
+Starts the MandelHub as a follower.
+
+ARGUMENT:: name
+A unique name (Symbol)
+
+ARGUMENT:: port
+The port of your sclang (defaults to 57120). This should be changed in case your NetAddr.langPort is not 57120, so the leader alo broadcasts to that port.
+
+ARGUMENT:: action
+A function that will be evaluated on a successful connection (i.e. following the leader). The first argument of the function returns the created instance of MandelHub (i.e. MandelHub.istance).
+
+ARGUMENT:: timeClass
+Timing agent. Defaults to MandelTimeDriver.
+
+ARGUMENT:: server
+Server where the buses and control proxies will be allocated. Defaults to Server.default.
+
+returns:: a MandelHub (not an instance!). It is recommended to use the action argument to get the instance when it's created.
+METHOD:: clear
+Clears the MandelHub instance and all it's dependencies, and restores the TempoClock.default.
+
+
+
+INSTANCEMETHODS::
+
+METHOD:: changeTempo
+Changes the tempo if you are the leader. As follower, it requests a tempo change from the leader.
+
+ARGUMENT:: newTempo
+New tempo in bps.
+
+ARGUMENT:: dur
+Duration in seconds for a linear tempo change, from the current to the newTempo. If dur is omitted or 0 the tempo change is instantaneous.
+
+METHOD:: tempoBus
+Returns a Bus which value is the current tempo as bps. This is useful for using the tempo value in synths, e.g. for effects dependant on timing, like delay, etc. This method will reuse an old tempo bus if it's already allocated.
+
+returns:: Bus
+
+METHOD:: buildTempoBus
+Like tempoBus but it will create a new Bus on each call. Old Busses aren't updated anymore.
+
+returns:: Bus
+
+METHOD:: takeLead
+Become the leader. This is useful in case the leader crashes or is out of the network.
+
+METHOD:: tools
+Returns the instance of the MandelTools module.
+
+returns:: MandelTools
+
+METHOD:: shout
+Sends a message and executes a script (if possible) for displaying the message as a notification in growl.
+
+ARGUMENT:: message
+A message as String
+
+METHOD:: gui
+Creates a Window whis displays: the current tempo, the elapsed time (since the creation of the MandelHub.instance), a visual metronome (4/4), current measure, current beat, and a chat and shout buttons (prompt for the message and sends on return)
+
+ARGUMENT:: pos
+A Point (x, y) for the position of the Window.
+
+returns:: MandelGUI
+
+METHOD:: chat
+Sends the message to all other MandelHub members.
+
+ARGUMENT:: message
+A String
+
+METHOD:: shoutWindow
+Opens a windows with a text field. On pressing enter, it shouts the content of the TextField.
+
+METHOD:: space
+Retruns the instance of the MandelSpace. This is used to share values with other members. Refer to the guide for more examples and information.
+
+returns:: MandelSpace
+
+
+EXAMPLES::
+
+code::
+// as a leader:
+m = MandelHub.start(\benoit, 135/60);
+
+// as a follower:
+MandelHub.join(\benoit, action:{ |instance| m = instance });
+
+// communicating:
+m.chat("hi there");
+m.shout("I said HELLO!");
+
+// gui tools
+m.gui;
+m.shoutWindow;
+
+// changing tempo:
+m.changeTempo(80/60);       // instant change
+m.changeTempo(120/60, 30); // changes to 2 bps in 30 seconds
+
+// use the MandelSpace
+x = m.space;
+
+// Finish!
+MandelHub.clear;
+::
