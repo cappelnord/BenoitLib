@@ -1,0 +1,79 @@
+title:: 05. MacroExpander
+summary:: 	MacroExpander is a way of saving and expanding snippets in a SC Document.
+categories:: Libraries>BenoitLib
+
+WARNING:: This is only for SuperCollider.app on Mac OS X. ::
+
+NOTE::This class works only with non-IDE versions of SuperCollider, since it relies on the code::Document.current:: which as SuperCollider 3.6.5 still returns STRONG::nil::. We hope the Document class will be added and supported for the IDE so the MacroExpander can be used again in current versions.::
+
+MacroExpander is a neat tool to prepare your live coding sessions. It allows for quick retreival of code snippets by the means of code. You should add all your code snippets in your startup file, so they're loaded automatically.
+
+section::Storing a code snippet
+
+All code snippets are stored with a String keyword.
+
+code::
+MacroExpander.put("sine", "{SinOsc.ar(440)}.play;");
+::
+
+
+section::Expanding a snippet
+
+You can now expand a short command to your stored code anywhere in your code document:
+
+code::
+"sine".xx
+::
+
+Neat, ey? Keep in mind that you have to escape some characters in the String. You also have to escape the escape character!
+
+code::
+MacroExpander.put("escape", "(instrument: \\default, string: \"OK!\").play;");
+
+"escape".xx
+::
+
+section:: Placing a cursor
+
+Sometimes it's useful to store a cursor position in your snippet (because you know, that you want to continue from this position). You can do this with STRONG::%::. Sorry, this also means you currently can't use modulo in your snippets.
+EMPHASIS::(bad design decision.)::
+
+code::
+MacroExpander.put("cursor", "{SinOsc.ar(%).dup}.play;");
+
+"cursor".xx
+::
+
+
+section:: Snippet arguments
+
+You can add placeholders in your snippet that can be filled with values specified in your expand call.
+
+code::
+MacroExpander.put("args", "{SinOsc.ar(#0#).dup * #1#}.play;");
+::
+
+The STRONG::#:: character is the delimiter for the arguments
+
+code::
+"args#440#0.1".xx
+::
+
+
+section::Functions as snippets
+
+You can also use a Function instead of a String. The function gets evaluated with a list of the specified arguments and the return value is inserted into the document.
+
+code::
+(
+MacroExpander.put("func", {|args|
+    var ret = "// Whadup?\n";
+    args[1].asInteger.do {
+        ret = ret ++ (args[0] ++ "\n");
+    };
+    ret;
+});
+)
+
+"func#{SinOsc.ar(440)}.play;#10".xx
+::

@@ -1,0 +1,174 @@
+title:: 04. Auxiliary Tools
+summary:: 	Auxiliary tools and functions of the MandeHub
+categories:: Libraries>BenoitLib
+
+section::Dumping MandelSpace Values
+
+NOTE::I hope you still have x assigned to m.space::
+
+code::
+x.dumpValues;
+::
+
+You now see all values you set in this tutorial yet but also others, quite familliar to Pattern users.
+
+code::\scale, \octaveRatio, \ctranspose, \tuning,  \root, \mtranspose, \stepsPerOctave::
+
+All these values are set to Events default. But what are they for?
+
+section::The Harmony Master
+
+The initial reason for developing MandelSpace was to find a way for the band to play with a common harmonic progression. When we decide to do this, one of the band takes the roll of the Harmony Master and uses a Pdef like this to control the harmonic progression.
+
+code::
+(
+Pdef(\harmonyMaster).quant = [4, -1];
+
+Pdef(\harmonyMaster, Pbind(
+    \type, \mandelspace,
+    \deltaSched, 1,
+    \mtranspose, 0,
+    \scale, \minor,
+    \tuning, \et12,
+    \root, 0,
+    \dur, 4
+));
+
+Pdef(\harmonyMaster).play;
+)
+::
+
+You see, that he now sets values like \root and \scale, which are used in events and patterns to calculate the frequency of a note. If all players use these values in their patterns they are synced harmonically.
+
+code::
+(
+Pdef(\hmTest).quant = 4;
+
+Pdef(\hmTest, Pbind(
+    \dur, 1,
+    \root, Pman(\root),
+    \scale,  PmanScale(),
+    \degree, Pseq([0,2,4,7],inf)
+));
+
+Pdef(\hmTest).play;
+)
+::
+
+Now change some values in the harmonyMaster Pdef (e.g. \major instead of \minor) and you can hear the harmonic changes.
+
+To be even more musical there is a magic code::\harmony:: key in code::\mandelspace:: events. It takes two kinds of notation and sets code::\ctranspose:: and code::\scale:: accordingly.
+
+Notation 1 takes Symbols from roman number analysis (based on c-major). You can add a STRONG::s:: or STRONG::b:: at the end to add an accidential.
+
+LIST::
+## STRONG::\V::    --> ctranspose: 7, scale: \major
+## STRONG::\iii::  --> ctranspose: 4, scale: \minor
+## STRONG::\IIIb:: --> ctranspose: 3, scale: \major
+::
+
+Notation 2 just mixes the root number with a uppercase M for major and a downcase m for minor:
+
+LIST::
+## STRONG::\M7::   --> ctranspose: 7, scale: \major
+## STRONG::\m4::   --> ctranspose: 4, scale: \minor
+## STRONG::\M3::   --> ctranspose: 3, scale: \major
+::
+
+code::
+(
+// is \harmonyMaster still running?
+Pdef(\harmonyMaster, Pbind(
+    \type, \mandelspace,
+    \deltaSched, 1,
+    \harmony, Pseq([\i, \iv, \V, \i], inf),
+    \dur, 4
+));
+)
+
+Pdef(\harmonyMaster).stop; Pdef(\hmTest).stop;
+::
+
+
+section::rootFreq, mtransposeFreq, ctransposeFreq
+
+It's easy to use Harmony Master with Patterns. But what about plain NodeProxies? How can all the Event magic for calculating a frequency be used with them?
+
+MandelSpace has 3 synthesized MandelValues by default which depend on the Harmony Master values. With the .kr function they can be used easily within a Synth or NodeProxy.
+
+code::
+a = { SinOsc.ar( x[\rootFreq].kr ).dup * 0.1 }.play;
+
+x[\root] = 5; // the pitch should be higher now
+
+x[\root] = 0; // back to the start
+
+a.free;
+::
+
+The 3 values depend on different values. STRONG::rootFreq:: just takes the EMPHASIS::root:: note in account, while STRONG::mtransposeFreq:: and STRONG::ctransposeFreq:: take the EMPHASIS::root:: and EMPHASIS::m/ctranspose:: values into account too. So with these synthesized values it's easy to use a common root note even with plain NodeProxies or Synths.
+
+section::Drops
+
+Drops are One-Shot Dependants of MandelValues. MandelValues also only can have one drop at a time (setting a new one will remove the old one).
+
+code::
+x[\meinDrop].setDrop({ "No bass, no fun!".postln; });
+x[\meinDrop].setDrop({ "BASS WAS DROPPED!".postln; }); // this will overwrite the "No bass, no fun!" drop.
+::
+
+To give the interface more meaning MandelValues have a drop method.
+
+code::
+x[\meinDrop].drop;
+::
+
+Execeute again, you'll see, that drops are only fired once! In order to make sure, that drops are received in time you always should schedule ahead of time. This can either be done with Quants or with an absolute beat time as an argument to drop:
+
+code::
+x[\meinDrop].setDrop({"DROP!".postln;});
+x[\meinDrop].drop(m.clock.beats + 8); // drop 8 beats in the future
+::
+
+If drop receives no argument the Quant is used (if set). If not you're responsible to quant yourself.
+
+You can also clear your drop:
+
+code::
+x[\meinDrop].setDrop({"DRPO!".postln;});
+x[\meinDrop].clearDrop;
+
+x[\meinDrop].drop;
+::
+
+
+
+section::Metronome
+
+It's sometimes handy to check the sync with a metronome. MandelHub has one built in:
+
+code::
+m.tools.metro;
+::
+
+Of course you can stop it too:
+
+code::
+m.tools.stopMetro;
+::
+
+
+
+section::ID3v1 genres
+
+Because it's the most important feature for any laptop band we integrated the ID3v1 genre table.
+
+code::
+m.tools.genres;
+::
+
+If you don't know what style you want to play in your rehearsal let MandelHub decide for you:
+
+code::
+m.tools.genres.choose;
+::
