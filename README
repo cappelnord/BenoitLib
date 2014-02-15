@@ -23,3 +23,7 @@ Bonus:
 
 Extra bonus for Emacs users:
 - see Emacs/README
+
+TODO:
+- Move m.quant to m.time.quant
+- Example for absolute beat scheduling with \mandelspace Events

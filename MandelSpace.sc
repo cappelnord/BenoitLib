@@ -166,6 +166,8 @@ MandelSpace : MandelModule {
 			var strategy = \time;
 			var list = List.new;
 			~deltaSched = ~deltaSched ? 0.0;
+			~beats = ~beats ? hub.clock.beats;
+			
 			schedBeats = hub.clock.beats + ~deltaSched;
 			
 			(schedBeats <= hub.clock.beats).if {
