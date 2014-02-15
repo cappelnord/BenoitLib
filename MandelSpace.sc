@@ -190,7 +190,7 @@ MandelSpace : MandelModule {
 			};
 			
 			currentEnvironment.keys.do {|key|
-				#[\type, \dur, \removeFromCleanup, \deltaSched, \harmony].includes(key).not.if {
+				#[\type, \dur, \removeFromCleanup, \deltaSched, \beats, \harmony].includes(key).not.if {
 					list.add(key);
 					list.add(currentEnvironment.at(key));
 				};
