@@ -168,7 +168,7 @@ MandelSpace : MandelModule {
 			~deltaSched = ~deltaSched ? 0.0;
 			~beats = ~beats ? hub.clock.beats;
 			
-			schedBeats = hub.clock.beats + ~deltaSched;
+			schedBeats = ~beats + ~deltaSched;
 			
 			(schedBeats <= hub.clock.beats).if {
 				schedBeats = 0.0; // no scheduling
