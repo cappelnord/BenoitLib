@@ -40,8 +40,12 @@ PmanScale : Pattern {
 		while {true} {
 			scaleKey = MandelSpace.getValueOrDefault(\scale).asSymbol;
 			tuningKey  = MandelSpace.getValueOrDefault(\tuning).asSymbol;
-			
-			TuningInfo.tunings.at(tuningKey).isNil.if {
+
+			Main.versionAtLeast(3,7).if({
+				Tuning.names.includes(tuningKey).not;
+			}, {
+				TuningInfo.tunings.at(tuningKey).isNil;
+			}).if {
 				("Unknown Tuning " ++ tuningKey.asString).warn;
 				"PmanScale: Falling back to default tuning ...".postln;
 				tuningKey = nil;
