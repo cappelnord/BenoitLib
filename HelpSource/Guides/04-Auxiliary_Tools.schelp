@@ -28,7 +28,7 @@ Pdef(\harmonyMaster, Pbind(
     \type, \mandelspace,
     \deltaSched, 1,
     \mtranspose, 0,
-    \scale, \minor,
+    \scale, Scale.minor,
     \tuning, \et12,
     \root, 0,
     \dur, 4
@@ -55,24 +55,24 @@ Pdef(\hmTest).play;
 )
 ::
 
-Now change some values in the harmonyMaster Pdef (e.g. \major instead of \minor) and you can hear the harmonic changes.
+Now change some values in the harmonyMaster Pdef (e.g. Scale.major instead of Scale.minor) and you can hear the harmonic changes.
 
 To be even more musical there is a magic code::\harmony:: key in code::\mandelspace:: events. It takes two kinds of notation and sets code::\ctranspose:: and code::\scale:: accordingly.
 
 Notation 1 takes Symbols from roman number analysis (based on c-major). You can add a STRONG::s:: or STRONG::b:: at the end to add an accidential.
 
 LIST::
-## STRONG::\V::    --> ctranspose: 7, scale: \major
-## STRONG::\iii::  --> ctranspose: 4, scale: \minor
-## STRONG::\IIIb:: --> ctranspose: 3, scale: \major
+## STRONG::\V::    --> ctranspose: 7, scale: Scale.major
+## STRONG::\iii::  --> ctranspose: 4, scale: Scale.minor
+## STRONG::\IIIb:: --> ctranspose: 3, scale: Scale.major
 ::
 
 Notation 2 just mixes the root number with a uppercase M for major and a downcase m for minor:
 
 LIST::
-## STRONG::\M7::   --> ctranspose: 7, scale: \major
-## STRONG::\m4::   --> ctranspose: 4, scale: \minor
-## STRONG::\M3::   --> ctranspose: 3, scale: \major
+## STRONG::\M7::   --> ctranspose: 7, scale: Scale.major
+## STRONG::\m4::   --> ctranspose: 4, scale: Scale.minor
+## STRONG::\M3::   --> ctranspose: 3, scale: Scale.major
 ::
 
 code::
