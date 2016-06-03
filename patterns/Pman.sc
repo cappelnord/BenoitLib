@@ -33,7 +33,7 @@ PmanScale : Pattern {
 	// can be seen as a Singleton every PmanScale instance should behave the same at a given time.
 
 	// Saving this as a classvar doesn't reset the scale at instantiation.
-	classvar lastScaleKey = Scale.minor;
+	classvar lastScaleKey = \minor;
 
 	embedInStream {|event|
 		var scaleKey, tuningKey, scale;
