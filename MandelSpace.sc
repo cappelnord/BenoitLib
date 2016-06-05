@@ -23,6 +23,7 @@ MandelSpace : MandelModule {
 	var <quant;
 
 	classvar defaultDictInstance;
+	classvar scaleNameToKey;
 
 	var healSJ;
 
@@ -53,6 +54,13 @@ MandelSpace : MandelModule {
 			);
 		};
 		^defaultDictInstance;
+	}
+
+	*scaleNameToKey {
+		scaleNameToKey.isNil.if {
+			scaleNameToKey = Dictionary.with(*(Scale.names.collect{|key| Scale.all[key].name -> key}));
+		};
+		^scaleNameToKey
 	}
 
 	asDict {
@@ -314,7 +322,7 @@ MandelSpace : MandelModule {
 		value.isFloat.if {^[0, value]};
 		value.isString.if {^[0, value]};
 		value.isKindOf(Symbol).if {^["SM", value.asString]};
-		value.isKindOf(Scale).if {^["SC", value.asCompileString]};
+		value.isKindOf(Scale).if {^["SC", MandelSpace.scaleNameToKey.at(value.name).asString]};
 		value.isNil.if {^["NL", ""]};
 
 		value.isFunction.if {
@@ -340,7 +348,7 @@ MandelSpace : MandelModule {
 		value.isKindOf(Symbol).if {
 			((serType == 0) || (serType == '')).if {^value.asString;};
 			(serType == \SM).if {^value.asSymbol;};
-			(serType == \SC).if {^value.asString.interpret;};
+			(serType == \SC).if {^Scale.at(value.asSymbol).copy;};
 			(serType == \CS).if {
 				allowRemoteCode.if({
 					^value.asString.interpret;
