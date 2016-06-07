@@ -1,0 +1,11 @@
+(
+	\name: 			"BenoitLib",
+	\path: 			"BenoitLib",
+	\summary:		"Extensions used by the laptop band Benoît and the Mandelbrots, e.g., MandelHub shared clock and value space, MacroExpander snippet system",
+	\author: 		"Patrick Borgeat and the Mandelbrots",
+	\helpdoc:		"MandelHub",
+	\since: 		"2010",
+	\version:		"0.1",
+	\status:	"beta",
+  \url: "http://the-mandelbrots.de/"
+)
