@@ -2,14 +2,14 @@
 // MandelClock Tests
 MandelHub.debug = true
 
-// #1: Tempo Tests 
+// #1: Tempo Tests
 a = MandelHub("Leader", 0, 2, "test", leading:true, timeClass: MandelTimeDriver);
 a.gui;
-a.metro(-1); // left
+a.tools.metro(-1); // left
 
-m = MandelHub.join("Follower", action: {m = MandelHub.instance;});
+MandelHub.join("Follower", action: {m = MandelHub.instance;});
 m.gui;
-m.metro(1); // right
+m.tools.metro(1); // right
 
 ( // This simulates out-of-sync clocks, this should never happen to this extent!
 {
@@ -20,9 +20,9 @@ m.metro(1); // right
 	0.2.wait;
 	a.changeTempo(2);
 	m.time.listenToTicks = true; // now m should resync
-	
+
 }.fork;
 )
 
 // accelerando
-a.changeTempo(2);
+a.changeTempo(3, 20);
