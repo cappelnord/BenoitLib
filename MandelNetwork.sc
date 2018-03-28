@@ -2,83 +2,83 @@
 	MandelNetwork
 	(c) 2012 by Patrick Borgeat <patrick@borgeat.de>
 	http://www.cappel-nord.de
-	
+
 	Part of BenoitLib
 	http://github.com/cappelnord/BenoitLib
 	http://www.the-mandelbrots.de
-	
+
 	MandelNetwork manages incoming and outgoing
 	OSC traffic and ports.
-	
+
 */
 
 MandelNetwork : MandelModule {
-	
+
 	classvar <>oscPrefix = "/mh";
-	
+
 	var <>dumpTXOSC = false;
 	var <>dumpRXOSC = false;
-	
+
 	// OSCresponders
 	var oscGeneralResponders;
 	var oscLeaderResponders;
 	var oscFollowerResponders;
-	
+
 	var <addrDict;
-	
+
 	var currentMessageID;
-	
+
 	var hub;
-	
+
 	var oscQueue;
 	var oscQueueRoutine;
 	var oscQueueWaitTime = 0.01;
-	
+
 	var burstGuardDict;
-	
+
 	var ports;
 
 	*new {|hub, ports|
-		^super.new.init(hub, ports);	
+		^super.new.init(hub, ports);
 	}
-	
+
 	init {|a_hub, a_ports|
 		hub = a_hub;
-		
+
 		// start networking
 		ports = a_ports ? [57120];
-		
+
 		// this is a workaround, check if ports are publishhed correctly
 		ports.includes(57120).not.if {
 			ports = ports ++ 57120;
 		};
-		
+
 		addrDict = IdentityDictionary.new;
 		this.prManagePorts(ports);
-		
+
 		// bookkeeping for responders
 		oscGeneralResponders = Dictionary.new;
 		oscLeaderResponders = Dictionary.new;
 		oscFollowerResponders = Dictionary.new;
-		
+
 		currentMessageID = 5000.rand;
-		
+
 		oscQueue = LinkedList.new;
 		oscQueueRoutine = Routine({}); // dummy
-		
+
 		burstGuardDict = IdentityDictionary.new;
 	}
-	
-	onStartup {|hub|		
+
+	onStartup {|hub|
 		this.addOSCResponder(\general, "/pingPort", {|header, payload|
 			this.sendPongPort;
 		}, \leaderOnly);
-		
+
 		this.addOSCResponder(\general, "/systemPorts", {|header, payload|
 			this.prManagePorts(payload);
 		}, \leaderOnly);
 	}
-	
+
 	onBecomeLeader {|hub|
 		this.addOSCResponder(\leader, "/requestPort", {|header, payload|
 			this.addPort(payload[0].asInteger);
@@ -86,34 +86,34 @@ MandelNetwork : MandelModule {
 			this.sendPublishPorts;
 		});
 	}
-	
+
 	onSyncRequest {|hub, header|
-		this.sendSystemPorts;		
+		this.sendSystemPorts;
 	}
-	
+
 	/*
 	onBecomeFollower {|hub|
-		
+
 	}
-	
+
 	registerCmdPeriod {|hub|
-		
+
 	}
 	*/
-	
+
 	sendPongPort {
 		this.sendMsgCmd("/pongPort", NetAddr.langPort);
 	}
-	
+
 	sendSystemPorts {
 		var intKeys = (addrDict.keys.collect{|i| i.asInteger}).asArray;
 		this.sendMsgBurst("/systemPorts", \critical, *intKeys);
 	}
-	
+
 	sendPublishPorts {
 		this.sendMsgBurst("/publishPorts", \critical);
 	}
-	
+
 	prRespondersForKey {|key|
 		^key.switch (
 			\general,  {oscGeneralResponders},
@@ -121,63 +121,63 @@ MandelNetwork : MandelModule {
 			\follower, {oscFollowerResponders}
 		);
 	}
-	
+
 	prManagePorts {|ports|
 		var addList = List.new;
-				
+
 		ports.do {|item|
 			item = item.asInteger;
-			
+
 			addrDict.includesKey(item).not.if {
 				addList = addList.add((item -> NetAddr("255.255.255.255", item)));
-			};	
+			};
 		};
-		
+
 		addList.do {|item|
-			addrDict.add(item);	
+			addrDict.add(item);
 		};
 	}
-	
+
 	addPort {|port|
 		port = port.asInteger;
-		
+
 		addrDict.includesKey(port).not.if {
 			addrDict = addrDict.add(port -> NetAddr("255.255.255.255", port));
 		};
 	}
-	
+
 	clearAllResponders {
 		[\leader, \follower, \general].do {|key|
 			this.clearResponders(key);
 		};
 	}
-	
+
 	clearResponders {|key|
 		var list = this.prRespondersForKey(key);
 		list.do {|item| item.remove;};
-		list.clear;	
+		list.clear;
 	}
-	
+
 	// this is all slightly off  ...
-	
+
 	// send a message without defering
 	sendMsgDirect {|... args|
 		var cmd = args[0];
 		var messageID = 0; // no burst
 		args = args[1..];
-		
+
 		this.sendMsg(oscPrefix ++ cmd, hub.name, messageID, *args);
 	}
-	
+
 	// send a message without a burst ID
 	sendMsgCmd {|... args|
 		var cmd = args[0];
 		var messageID = 0; // no burst
 		args = args[1..];
-		
+
 		this.dispatchMsg(oscPrefix ++ cmd, hub.name, messageID, *args);
 	}
-	
+
 	sendMsgBurst {|... args|
 		var cmd = args[0];
 		var burstNum = 1; // in case no burst strategy is found
@@ -186,7 +186,7 @@ MandelNetwork : MandelModule {
 		var messageID = this.nextMessageID;
 		var burstWait;
 		args = args[2..];
-		
+
 		burst.isKindOf(Symbol).if {
 			burst = (
 				time: #[2, 0.25],
@@ -196,26 +196,26 @@ MandelNetwork : MandelModule {
 				relaxed: #[4,8]
 			).at(burst);
 		};
-		
+
 		burst.isKindOf(Collection).if {
 			burstNum = burst[0];
-			burstSpan = burst[1];	
+			burstSpan = burst[1];
 		};
-		
-		
+
+
 		burstWait = burstSpan / burstNum;
-		
+
 		{
 			burstNum.do {
 				this.dispatchMsg(oscPrefix ++ cmd, hub.name, messageID, *args);
-				burstWait.wait;	
+				burstWait.wait;
 			};
 		}.fork;
 	}
-	
+
 	dispatchMsg {|... args|
 		oscQueue.add(args);
-		
+
 		// start a new Routine - could be solved better probably
 		oscQueueRoutine.isPlaying.not.if {
 			oscQueueRoutine = {
@@ -226,39 +226,39 @@ MandelNetwork : MandelModule {
 			}.fork;
 		};
 	}
-	
+
 	// sendMessage delivers to NetAddr
 	sendMsg {|... args|
 		dumpTXOSC.if {
 			("OSC TX: " ++ args.asCompileString)	.postln;
 		};
-		
+
 		addrDict.do {|addr|
 				addr.sendMsg(*args);
 		};
 	}
-	
+
 	addOSCResponder {|dictKey, cmdName, action, strategy=\no|
 		var dict = this.prRespondersForKey(dictKey);
-		var responder = OSCresponder(nil, oscPrefix ++ cmdName, {|ti, tR, message, addr|
-			
+		var responder = OSCFunc({|message, time, addr, recvPort|
+
 			var doDispatch = true;
-			
+
 			// Seperate Header from Payload
 			var header = ();
 			var payload = message[3..];
-			
+
 			dumpRXOSC.if {
 				("OSC RX: " ++ message.asCompileString).postln;
 			};
-			
+
 			header[\cmdName] = message[0].asString;
 			header[\name] = message[1].asString;
 			header[\messageID] = message[2];
-			
+
 			// Register Message and/or discard
 			doDispatch = doDispatch && this.prFilterBurstMessages(message[1].asSymbol, message[2]);
-			
+
 			// Discard by Strategy
 			doDispatch.if {
 				doDispatch = strategy.switch(
@@ -267,33 +267,33 @@ MandelNetwork : MandelModule {
 					{true}
 				);
 			};
-			
+
 			// Dispatch
 			doDispatch.if ({
 				action.value(header, payload);
 			}, {
 				dumpRXOSC.if {"OSC RX: Message discarded.".postln;};
-			});	
-		}).add;
-		
+			});
+		}, oscPrefix ++ cmdName);
+
 		dict.add(cmdName -> responder);
 	}
-	
+
 	prFilterBurstMessages {|name, messageID|
 		var queue = burstGuardDict.at(name);
 		var curBeat = hub.clock.beats;
 		var checkList = true;
 		var last;
-		
+
 		// early out
 		(messageID == 0).if {^true;};
-		
+
 		// build queue if necessary
 		queue.isNil.if {
 			queue = LinkedList.new;
-			burstGuardDict.put(name, queue);	
+			burstGuardDict.put(name, queue);
 		};
-		
+
 		// drop old messageIDs
 		while({checkList}, {
 			last = queue.last;
@@ -307,20 +307,20 @@ MandelNetwork : MandelModule {
 				});
 			});
 		});
-		
+
 		// linear search, exit if found
 		queue.do {|item|
-			(item[1] == messageID).if {^false};	
+			(item[1] == messageID).if {^false};
 		};
-		
+
 		// if not found add to list, exit with true
 		queue.add([curBeat+32, messageID]);
 		^true;
 	}
-	
+
 	nextMessageID {
 		var ret = currentMessageID;
 		currentMessageID = currentMessageID + 1;
-		^ret;	
+		^ret;
 	}
 }

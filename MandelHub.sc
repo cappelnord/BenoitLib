@@ -124,7 +124,7 @@ MandelHub {
 		"Waiting for a signal from the Leader ...".postln;
 
 		// ATTENTION: THIS NEEDS MANUAL UPDATE IF NETWORK CODE CHANGES
-		bStrapResponder = OSCresponder(nil, MandelNetwork.oscPrefix ++ "/clock", {|ti, tR, message, addr|
+		bStrapResponder = OSCFunc({|message, time, addr, recvPort|
 			bStrapResponder.remove;
 			followSkipJack.stop;
 
@@ -132,7 +132,7 @@ MandelHub {
 			("... you are now following " ++ message[1].asString ++ "!").postln;
 
 			action.value(instance);
-		}).add;
+		}, MandelNetwork.oscPrefix ++ "/clock");
 	}
 
 	*new {|name, startBeat, startTempo, leaderName, ports, leading=false, timeClass, server|
