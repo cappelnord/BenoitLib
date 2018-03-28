@@ -125,7 +125,7 @@ MandelHub {
 
 		// ATTENTION: THIS NEEDS MANUAL UPDATE IF NETWORK CODE CHANGES
 		bStrapResponder = OSCFunc({|message, time, addr, recvPort|
-			bStrapResponder.remove;
+			bStrapResponder.free;
 			followSkipJack.stop;
 
 			instance = MandelHub.new(name, message[4], message[5], message[1].asString,[port], false, timeClass:timeClass, server:server);

@@ -154,7 +154,7 @@ MandelNetwork : MandelModule {
 
 	clearResponders {|key|
 		var list = this.prRespondersForKey(key);
-		list.do {|item| item.remove;};
+		list.do {|item| item.free;};
 		list.clear;
 	}
 
