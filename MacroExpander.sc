@@ -66,13 +66,14 @@ MacroExpander
 	 	string = string.reject({|x| x.ascii < 0}); // zap non ascii chars
 
 		Document.current.text_(string);
-		{Document.current.syntaxColorize}.try;
 
-/*		cursorPos.isNil.if({
-			Document.current.selectRange(pos, replacement.size);
+		// {Document.current.syntaxColorize}.try;
+
+		cursorPos.isNil.if({
+			Document.current.selectRange(pos + replacement.size, 0);
 		},{
-			Document.current.selectRange(pos + cursorPos,0);
-		});*/
+			Document.current.selectRange(pos + cursorPos, 0);
+		});
 	}
 
 	parseAndProcess {|cmd|
