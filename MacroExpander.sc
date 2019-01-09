@@ -63,7 +63,7 @@ MacroExpander
 		var pos = string.find(cmd);
 
 		string = string.replace(cmd, replacement);
-	 	string = string.reject({|x| x.ascii < 0}); // zap non ascii chars
+	 	// string = string.reject({|x| x.ascii < 0}); // zap non ascii chars
 
 		Document.current.text_(string);
 
