@@ -2,9 +2,8 @@ title:: 05. MacroExpander
 summary:: 	MacroExpander is a way of saving and expanding snippets in a SC Document.
 categories:: Libraries>BenoitLib
 
-WARNING:: This is only for SuperCollider.app on Mac OS X. ::
 
-NOTE::This class works only with non-IDE versions of SuperCollider, since it relies on the code::Document.current:: which as SuperCollider 3.6.5 still returns STRONG::nil::. We hope the Document class will be added and supported for the IDE so the MacroExpander can be used again in current versions.::
+NOTE::MacroExpander should now work with SuperCollider 3.10 IDE::
 
 MacroExpander is a neat tool to prepare your live coding sessions. It allows for quick retreival of code snippets by the means of code. You should add all your code snippets in your startup file, so they're loaded automatically.
 
